@@ -8,6 +8,7 @@
 .card {
   min-width: max-content;
   width: 40rem;
+  padding: 0 1rem;
 }
 
 .login-header {
@@ -23,6 +24,46 @@
   padding: 1.5rem;
   font-size: 1rem;
   color: rgb(0, 0, 0);
+}
+.custom-form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.custom-input {
+  height: 4rem;
+  width: 100%;
+  border-radius: 0.25rem;
+  border: none;
+  background-color: rgb(245, 245, 245);
+  padding-left: 0.5rem;
+  padding-top: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  z-index: 1;
+}
+.custom-input:hover {
+  background-color: rgb(235, 235, 235);
+}
+.custom-input:focus {
+  background-color: rgb(255, 255, 255);
+}
+.custom-form-group label {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  font-weight: 1000;
+  color: rgb(75, 75, 75);
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+  z-index: 2;
+}
+.custom-input:focus + label,
+.custom-input:not(:placeholder-shown) + label {
+  top: 20%;
+  transform: translateY(-50%) translateX(-0.75rem) scale(0.9);
+  color: rgb(120, 120, 120);
 }
 #btn-login {
   display: block;

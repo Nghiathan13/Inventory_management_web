@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views as user_view
 from django.contrib.auth import views as auth_views
+from.views import CustomLoginView
+from django.contrib.auth.views import LogoutView
 
 urlpatterns = [
     # URLs cho việc đăng ký và quản lý profile
@@ -9,7 +11,7 @@ urlpatterns = [
     path('profile/update/', user_view.profile_update, name='user-profile-update'),
 
     # URLs cho việc đăng nhập và đăng xuất
-    path('login/', auth_views.LoginView.as_view(template_name='user/login.html'), name='user-login'),
+    path('login/', CustomLoginView.as_view(template_name='user/login.html'), name='user-login'),
     path('logout/', auth_views.LogoutView.as_view(template_name='user/logout.html'), name='user-logout'),
     
     # URLs cho việc reset mật khẩu

@@ -35,7 +35,15 @@
     <!-- Body -->
     <div class="login-body">
       <form method="POST">
-        {% csrf_token %} {{ form|crispy }}
+        {% csrf_token %}
+        <div class="custom-form-group">
+          {{ form.username }}
+          <label for="{{ form.username.id_for_label }}">USERNAME</label>
+        </div>
+        <div class="custom-form-group">
+          {{ form.password }}
+          <label for="{{ form.password.id_for_label }}">PASSWORD</label>
+        </div>
         <button class="btn" type="submit" id="btn-login">
           <i class="fa-solid fa-arrow-right"></i>
         </button>

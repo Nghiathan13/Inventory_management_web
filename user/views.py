@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from .forms import CreateUserForm, UserUpdateForm, ProfileUpdateForm
+from django.contrib.auth.views import LoginView
+from .forms import CreateUserForm, UserUpdateForm, ProfileUpdateForm, UserLoginForm
 from django.contrib import messages
+
+class CustomLoginView(LoginView):
+    authentication_form = UserLoginForm
 
 # Create your views here.
 def register(request):

@@ -1,0 +1,135 @@
+{% extends 'partials/base.html' %}
+<!---->
+{% load static %}
+<!---->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/components/modules.css' %}" />
+{% endblock %}
+<!---->
+{% block title %} Bảng Điều Khiển {% endblock %}
+<!---->
+{% block content %}
+<!---->
+{%if user.is_authenticated and user.is_staff and user.is_superuser %}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col-12 text-center">
+      <h3 class="display-7">Chào mừng đến với Adoo Medicine!</h3>
+    </div>
+  </div>
+
+  <!-- Các module chính -->
+  <div class="row align-items-center">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h3>Modules</h3>
+        </div>
+        <div class="card-body">
+          <div class="row justify-content-center">
+            <!-- Module Staff -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dashboard-staff' %}"
+              >
+                <div
+                  class="card my-card-custom card-staff h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-users fa-2x mb-2"></i>
+                  <h4>Nhân Viên</h4>
+                  <h5>{{ workers_count }}</h5>
+                </div>
+              </a>
+            </div>
+
+            <!-- Module Products -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dashboard-product' %}"
+              >
+                <div
+                  class="card my-card-custom card-products h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-box fa-2x mb-2"></i>
+                  <h4>Sản Phẩm</h4>
+                  <h5>{{ products_count }}</h5>
+                </div>
+              </a>
+            </div>
+
+            <!-- Module Orders -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dashboard-order' %}"
+              >
+                <div
+                  class="card my-card-custom card-orders h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-history fa-2x mb-2"></i>
+                  <h4>Lịch Sử</h4>
+                  <h5>{{ orders_count }}</h5>
+                </div>
+              </a>
+            </div>
+
+            <!-- Module Lấy Thuốc -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dispense-list' %}"
+              >
+                <div
+                  class="card my-card-custom card-dispense h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-prescription-bottle-alt fa-2x mb-2"></i>
+                  <h4>Lấy Thuốc</h4>
+                  <h5>
+                    <span class="badge bg-warning"
+                      >{{ pending_prescriptions_count }}</span
+                    >
+                  </h5>
+                </div>
+              </a>
+            </div>
+
+            <!-- Module Báo Cáo -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dashboard-report' %}"
+              >
+                <div
+                  class="card my-card-custom card-report h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
+                  <h4>Báo Cáo</h4>
+                  <small class="text-muted">Xem thống kê</small>
+                </div>
+              </a>
+            </div>
+
+            <!-- Module Bệnh Nhân -->
+            <div class="col-lg-4 col-md-6 mb-4">
+              <a
+                class="text-decoration-none text-dark"
+                href="{% url 'dashboard-patient-list' %}"
+              >
+                <div
+                  class="card my-card-custom card-patient h-100 text-center p-4"
+                >
+                  <i class="fa-solid fa-id-card fa-2x mb-2"></i>
+                  <h4>Bệnh Nhân</h4>
+                  <small class="text-muted">Quản lý hồ sơ</small>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %} {% endblock %}

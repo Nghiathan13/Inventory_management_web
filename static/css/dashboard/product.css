@@ -1,0 +1,53 @@
+/* Style cho header của card trên trang Products */
+.card-header h4 {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-header h4 i {
+    margin-right: 10px;
+}
+
+/* Container cho bảng sản phẩm, có thanh cuộn */
+.table-container {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Header của bảng, "dính" lại ở trên cùng khi cuộn */
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
+    z-index: 10;
+    vertical-align: middle;
+    text-align: center;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+
+/* Các ô trong thân bảng */
+.table tbody td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Hiệu ứng khi di chuột qua các dòng */
+.table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Các nút hành động (Sửa, Xóa) */
+.action-buttons a {
+    margin: 0 5px;
+}
+
+/* Đánh dấu các dòng sản phẩm có số lượng tồn kho đặc biệt */
+.table-danger, .table-danger > th, .table-danger > td {
+    background-color: #f8d7da !important; 
+}
+.table-warning, .table-warning > th, .table-warning > td {
+    background-color: #fff3cd !important; 
+}

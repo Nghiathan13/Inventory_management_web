@@ -1,0 +1,95 @@
+{% load static %}
+<nav class="navbar navbar-expand navbar-dark bg-info shadow-sm sticky-top">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand" href="{% url 'dashboard-index' %}">
+      Adoo Medicine
+    </a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      {% if user.is_authenticated %}
+      <!-- Function -->
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item active">
+          <a
+            class="nav-link nav-link-custom {% if request.resolver_match.url_name == 'dashboard-index' %}active{% endif %}"
+            href="{% url 'dashboard-index' %}"
+          >
+            <i class="fa-solid fa-home me-1"></i>Home
+          </a>
+        </li>
+      </ul>
+
+      <!-- Phần menu user dropdown -->
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+          <a
+            class="nav-link nav-link-custom active"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          >
+            <span>{{ user.username }}</span>
+            <img
+              src="{{ user.profile.image.url | default:'/static/images/default_avatar.png' }}"
+              class="navbar-avatar"
+              alt="Avatar"
+            />
+          </a>
+          <!-- Khung dropdown -->
+          <div
+            class="dropdown-menu dropdown-menu-end dropdown-menu-custom"
+            aria-labelledby="navbarDropdown"
+          >
+            <a class="dropdown-item" href="{% url 'user-profile' %}">
+              <i class="fa-solid fa-id-card me-2"></i>Xem Hồ Sơ
+            </a>
+            <div class="dropdown-divider"></div>
+            <form
+              action="{% url 'user-logout' %}"
+              method="POST"
+              class="dropdown-item-form"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger btn-logout">
+                <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng Xuất
+              </button>
+            </form>
+          </div>
+        </li>
+      </ul>
+
+      {% else %}
+      <!-- Menu cho khách -->
+      <ul class="navbar-nav ms-auto">
+        <a
+          class="btn btn-outline-light btn-sm me-3"
+          id="register-btn"
+          href="{% url 'user-register' %}"
+        >
+          <i class="fa-solid fa-user-plus me-1"></i>Register
+        </a>
+        <a
+          class="btn btn-light btn-sm"
+          id="login-btn"
+          href="{% url 'user-login' %}"
+        >
+          <i class="fa-solid fa-right-to-bracket me-1"></i>Login
+        </a>
+      </ul>
+      {% endif %}
+    </div>
+  </div>
+</nav>

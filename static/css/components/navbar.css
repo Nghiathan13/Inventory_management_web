@@ -1,0 +1,85 @@
+.navbar {
+  min-width: 100%;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* ===================================================================
+          FUNCTION
+=================================================================== */
+.nav-link-custom {
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.nav-link-custom:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ===================================================================
+          DROPDOWN PROFILE
+=================================================================== */
+.nav-link-custom.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- AVATAR USER --- */
+.navbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  margin-left: 8px;
+}
+
+/* --- KHUNG DROPDOWN --- */
+.dropdown-menu-custom {
+  background-color: rgba(52, 73, 94, 0.8);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* --- CÁC MỤC BÊN TRONG DROPDOWN --- */
+.dropdown-menu-custom .dropdown-item {
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 6px;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.dropdown-menu-custom .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgb(255, 255, 255);
+}
+
+/* --- LOGOUT --- */
+.dropdown-menu-custom .dropdown-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-logout {
+  width: 100%;
+  border-radius: 6px !important;
+}
+
+/* ===================================================================
+          MENU LOGIN
+=================================================================== */
+#register-btn,
+#login-btn {
+  width: 8rem;
+  font-size: 1rem;
+}

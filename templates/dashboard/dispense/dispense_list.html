@@ -1,0 +1,50 @@
+{% extends 'partials/base.html' %}
+<!---->
+{% block title %} Toa Thuốc Chờ Lấy {% endblock %}
+<!---->
+{% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-warning">
+      <h4><i class="fa-solid fa-hourglass-half"></i> Toa Thuốc Chờ Cấp Phát</h4>
+    </div>
+    <div class="card-body">
+      {% if messages %}{% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}{% endif %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="thead-light">
+            <tr>
+              <th>ID Toa</th>
+              <th>Bệnh Nhân</th>
+              <th>Bác Sĩ Kê Đơn</th>
+              <th>Ngày Kê Đơn</th>
+              <th>Hành Động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in prescriptions %}
+            <tr>
+              <td>{{ p.id }}</td>
+              <td>{{ p.patient.full_name|default:"N/A" }}</td>
+              <td>{{ p.doctor.username }}</td>
+              <td>{{ p.created_at|date:"d/m/Y H:i" }}</td>
+              <td>
+                <a href="{% url 'dispense-process' p.id %}" class="btn btn-primary btn-sm"
+                  ><i class="fa-solid fa-arrow-right"></i> Xử Lý</a
+                >
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">Không có toa thuốc nào đang chờ.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

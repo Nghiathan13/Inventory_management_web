@@ -1,0 +1,63 @@
+{% extends 'partials/base.html' %} {% block title %} Order Page {% endblock %}
+{% load crispy_forms_tags %} {% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-info text-white">
+          <h4><i class="fa-solid fa-clipboard-list"></i> Lịch Sử Xuất Kho</h4>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">Tên thuốc</th>
+                  <th scope="col">Số lượng</th>
+                  <th scope="col">Người tạo (Bác sĩ)</th>
+                  <th scope="col">Bệnh nhân</th>
+                  <!-- CỘT MỚI -->
+                  <th scope="col">Nguồn</th>
+                  <th scope="col">Ngày hoàn tất</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                <tr>
+                  <td>{{ order.product.name|default:"N/A" }}</td>
+                  <td>{{ order.order_quantity|default:"N/A" }}</td>
+                  <td>{{ order.staff.username|default:"N/A" }}</td>
+                  <!-- Hiển thị tên bệnh nhân nếu order đến từ toa thuốc -->
+                  <td>
+                    {% if order.prescription and order.prescription.patient %}
+                    {{ order.prescription.patient.full_name }} {% else %}
+                    <span class="text-muted">--</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.prescription %}
+                    <span class="badge bg-primary"
+                      >Toa thuốc #{{ order.prescription.id }}</span
+                    >
+                    {% else %}
+                    <span class="badge bg-secondary">Đơn thủ công</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ order.date|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center p-4">
+                    Chưa có đơn hàng nào.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

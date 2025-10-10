@@ -1,0 +1,14 @@
+{% extends 'partials/base.html' %} {% load crispy_forms_tags %}
+<!---->
+{% block title %} Register Page {% endblock %}
+<!---->
+{% block content %}
+<div class="container bg-white mt-5 p-4" style="width: 35rem">
+  <h3>Registration Page</h3>
+  <hr />
+  <form method="POST">
+    {% csrf_token %} {{ form|crispy }}
+    <input type="submit" class="btn btn-success" value="Register" />
+  </form>
+</div>
+{% endblock %}

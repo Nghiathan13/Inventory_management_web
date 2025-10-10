@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Bootstrap, FontAwesome CDN & Google Font-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    />
+
+    <!-- CSS chung cho toàn bộ trang -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+
+    <!-- CSS cho các component tái sử dụng như Navbar -->
+    <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}" />
+
+    <!-- Block này sẽ được các trang con (như index.html) chèn file CSS riêng vào -->
+    {% block extracss %}{% endblock %}
+
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <!-- Navbar -->
+    {% include 'partials/navbar.html' %}
+
+    <!-- Body -->
+    {% block content %} {% endblock %}
+
+    <!-- Bootstrap & Chart -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      defer
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+
+    <!-- Script chung cho toàn bộ trang -->
+    <script src="{% static 'js/main.js' %}" defer></script>
+
+    <!-- Block này sẽ được các trang con chèn file JS riêng vào -->
+    {% block javascript %} {% endblock %}
+  </body>
+</html>

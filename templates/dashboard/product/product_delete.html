@@ -1,0 +1,36 @@
+{% extends 'partials/base.html' %}
+{% block title %} Delete Page {% endblock %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h4><i class="fa-solid fa-exclamation-triangle"></i> Xác Nhận Xóa Sản Phẩm</h4>
+                </div>
+                <div class="card-body">
+                    <p>Bạn có chắc chắn muốn xóa vĩnh viễn sản phẩm sau không?</p>
+                    <h5 class="text-center my-3">
+                        <strong>{{ item.name }}</strong>
+                        <br>
+                        <small class="text-muted">Mã thuốc: {{ item.code }}</small>
+                    </h5>
+                    <div class="alert alert-warning text-center" role="alert">
+                        Hành động này không thể hoàn tác.
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <form method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <a class="btn btn-secondary" href="{% url 'dashboard-product' %}">Hủy Bỏ</a>
+                        <button class="btn btn-danger" type="submit">Xác Nhận Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

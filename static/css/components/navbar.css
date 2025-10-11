@@ -1,9 +1,15 @@
 .navbar {
+  margin-bottom: 3rem;
   min-width: 100%;
-  background-color: rgb(53, 170, 224);
+  background-color: rgb(138, 43, 226);
+  padding: 0;
 }
 
+/* ===================================================================
+          BRAND
+=================================================================== */
 .navbar-brand {
+  margin: 0 0.75rem;
   font-size: 2rem;
   font-weight: bold;
   color: rgb(255, 255, 255);
@@ -13,26 +19,76 @@
 }
 
 /* ===================================================================
-          FUNCTION
+          MENU
+=================================================================== */
+.navbar-nav {
+  margin: 0 1rem 0 4.75rem;
+  align-items: center;
+}
+.nav-icon-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  position: relative;
+  height: 3rem;
+  width: 5rem;
+  border-radius: 0.5rem;
+}
+.icon-regular,
+.icon-solid {
+  font-size: 1.75rem;
+  position: absolute;
+  color: rgb(255, 255, 255);
+}
+.icon-solid {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.nav-icon-text .nav-text {
+  background: rgb(60, 60, 60);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  position: absolute;
+  bottom: -2.7rem;
+  opacity: 0;
+  pointer-events: none;
+}
+.nav-icon-text:hover {
+  background-color: rgba(200, 200, 200, 0.3);
+}
+.nav-icon-text:hover .nav-text {
+  opacity: 1;
+}
+
+.nav-icon-text.active {
+  background-color: transparent;
+}
+.nav-icon-text.active .icon-solid {
+  opacity: 1;
+}
+.nav-icon-text.active .icon-regular {
+  opacity: 0;
+}
+.nav-icon-text.active .nav-text {
+  opacity: 0;
+}
+
+/* ===================================================================
+          DROPDOWN PROFILE
 =================================================================== */
 .nav-link-custom {
+  background-color: rgba(255, 255, 255, 0.2);
   padding: 0.5rem 1rem !important;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   font-size: 1rem;
   transition: background-color 0.2s ease-in-out;
-}
-
-.nav-link-custom:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* ===================================================================
-          DROPDOWN PROFILE
-=================================================================== */
-.nav-link-custom.active {
-  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* --- AVATAR USER --- */
@@ -47,44 +103,37 @@
 
 /* --- KHUNG DROPDOWN --- */
 .dropdown-menu-custom {
-  background-color: rgba(52, 73, 94, 0.8);
+  margin-top: 0.5rem !important;
+  background-color: rgb(255, 255, 255);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   padding: 8px;
-  text-align: center;
   font-size: 1rem;
 }
 
 /* --- CÁC MỤC BÊN TRONG DROPDOWN --- */
 .dropdown-menu-custom .dropdown-item {
   border-radius: 6px;
-  color: rgba(255, 255, 255, 0.8);
-  padding: 6px;
-  text-align: center;
+  padding: 6px 1rem;
+  background-color: rgba(235, 235, 235, 0.8);
+  color: rgba(0, 0, 0, 0.8);
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .dropdown-menu-custom .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: rgb(255, 255, 255);
+  background-color: rgba(220, 220, 220, 0.8);
+  color: rgb(0, 0, 0);
 }
 
 /* --- LOGOUT --- */
 .dropdown-menu-custom .dropdown-divider {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .btn-logout {
   width: 100%;
   border-radius: 6px !important;
-}
-
-/* ===================================================================
-          MENU LOGIN
-=================================================================== */
-#register-btn,
-#login-btn {
-  width: 8rem;
-  font-size: 1rem;
+  text-align: left !important;
+  padding: 6px 1rem;
 }

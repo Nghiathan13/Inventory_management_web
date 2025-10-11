@@ -94,10 +94,16 @@ def prescription(request):
                         return redirect('dashboard-prescription')
 
                     details_to_process = []
+                    processed_products = set()
                     for i in range(form_count):
                         product_id = request.POST.get(f'details-{i}-product')
                         quantity_str = request.POST.get(f'details-{i}-quantity')
                         if product_id and quantity_str and int(quantity_str) > 0:
+                            if product_id in processed_products:
+                                messages.error(request, f"Thuốc '{Product.objects.get(id=product_id).name}' đã được thêm. Vui lòng chỉnh sửa số lượng thay vì thêm dòng mới.")
+                                return redirect('dashboard-prescription')
+                            processed_products.add(product_id)
+                            
                             product = Product.objects.get(id=int(product_id))
                             quantity = int(quantity_str)
                             if product.quantity < quantity:

@@ -7,6 +7,35 @@ function initializePrescriptionForm(products) {
   // Đếm số lượng form chi tiết đã có sẵn trên trang (nếu có)
   let formIndex = container.children.length;
 
+
+/**
+     * Cập nhật tất cả các dropdown để vô hiệu hóa các thuốc đã được chọn.
+     */
+    function updateDropdowns() {
+        const selectedIds = new Set();
+        const allSelects = container.querySelectorAll('select[name*="-product"]');
+        allSelects.forEach(select => {
+            if (select.value) {
+                selectedIds.add(select.value);
+            }
+        });
+
+        allSelects.forEach(select => {
+            const currentSelectedValue = select.value;
+            const options = select.querySelectorAll('option');
+
+            options.forEach(option => {
+                if (option.value) {
+                    if (selectedIds.has(option.value) && option.value !== currentSelectedValue) {
+                        option.disabled = true;
+                    } else {
+                        option.disabled = false;
+                    }
+                }
+            });
+        });
+    }
+
   /**
    * Hàm để tạo và thêm một dòng form chi tiết thuốc mới.
    */
@@ -34,6 +63,7 @@ function initializePrescriptionForm(products) {
     container.insertAdjacentHTML("beforeend", newFormHtml);
     formIndex++;
     formCountInput.value = formIndex;
+    updateDropdowns();
   }
 
   // Nếu không có form nào, thêm một form mặc định khi tải trang
@@ -46,12 +76,21 @@ function initializePrescriptionForm(products) {
     addButton.addEventListener("click", addDetailForm);
   }
 
-  // Gắn sự kiện click cho các nút "Xóa" (sử dụng event delegation)
-  if (container) {
-    container.addEventListener("click", function (e) {
-      if (e.target && e.target.classList.contains("remove-form")) {
-        e.target.closest(".detail-form").remove();
-      }
-    });
+  // Gắn sự kiện cho toàn bộ container
+    if (container) {
+        container.addEventListener('click', function(e) {
+            // Khi nút "Xóa" được nhấn
+            if (e.target && e.target.classList.contains('remove-form')) {
+                e.target.closest('.detail-form').remove();
+                updateDropdowns(); // Cập nhật lại các dropdown sau khi xóa
+            }
+        });
+
+        // Khi một lựa chọn trong dropdown thay đổi
+        container.addEventListener('change', function(e) {
+            if (e.target && e.target.tagName === 'SELECT') {
+                updateDropdowns(); // Cập nhật lại tất cả các dropdown
+            }
+        });
   }
 }

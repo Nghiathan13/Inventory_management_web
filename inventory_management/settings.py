@@ -83,9 +83,9 @@ WSGI_APPLICATION = 'inventory_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'inventory_db',  # Tên database bạn tạo trong MySQL
+        'NAME': 'my_db',  # Tên database bạn tạo trong MySQL
         'USER': 'root',      # Tên người dùng MySQL
-        'PASSWORD': 'hailong1909',  # Mật khẩu của người dùng MySQL
+        'PASSWORD': 'Nhainh1m@',  # Mật khẩu của người dùng MySQL
         'HOST': '127.0.0.1',          # Địa chỉ host (thường là localhost)
         'PORT': '3306',
     }

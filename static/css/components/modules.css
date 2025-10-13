@@ -1,3 +1,37 @@
+.brand-text {
+  color: rgb(138, 43, 226);
+  border-right: 2px solid;
+  animation: blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: black;
+  }
+}
+.typing-text {
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+.card {
+  padding: 0;
+}
+.card-header {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-header h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+}
 /* ===================================================================
         GIAO DIỆN CHUNG CHO CÁC CARD MODULES TRÊN DASHBOARD
 =================================================================== */

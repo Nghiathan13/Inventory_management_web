@@ -17,7 +17,7 @@
           <thead class="thead-light">
             <tr>
               <th>ID Toa</th>
-              <th>Bệnh Nhân</th>
+              <th>Patient</th>
               <th>Bác Sĩ Kê Đơn</th>
               <th>Ngày Kê Đơn</th>
               <th>Hành Động</th>
@@ -31,14 +31,18 @@
               <td>{{ p.doctor.username }}</td>
               <td>{{ p.created_at|date:"d/m/Y H:i" }}</td>
               <td>
-                <a href="{% url 'dispense-process' p.id %}" class="btn btn-primary btn-sm"
+                <a
+                  href="{% url 'dispense-process' p.id %}"
+                  class="btn btn-primary btn-sm"
                   ><i class="fa-solid fa-arrow-right"></i> Xử Lý</a
                 >
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5" class="text-center">Không có toa thuốc nào đang chờ.</td>
+              <td colspan="5" class="text-center">
+                Không có toa thuốc nào đang chờ.
+              </td>
             </tr>
             {% endfor %}
           </tbody>

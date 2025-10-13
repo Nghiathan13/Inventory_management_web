@@ -128,7 +128,7 @@ class Product(models.Model):
 # =======================================================
 class Prescription(models.Model):
     patient = models.ForeignKey(
-        Patient, on_delete=models.SET_NULL, null=True, verbose_name="Bệnh nhân")
+        Patient, on_delete=models.SET_NULL, null=True, verbose_name="Full Name ")
     doctor = models.ForeignKey(
         User, on_delete=models.CASCADE, null=True, verbose_name="Bác sĩ")
     
@@ -183,8 +183,8 @@ class PrescriptionDetail(models.Model):
     prescription = models.ForeignKey(
         Prescription, on_delete=models.CASCADE, related_name='details', verbose_name="Toa thuốc")
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, null=True, verbose_name="Tên thuốc")
-    quantity = models.PositiveIntegerField(null=True, verbose_name="Số lượng")
+        Product, on_delete=models.CASCADE, null=True, verbose_name="Name")
+    quantity = models.PositiveIntegerField(null=True, verbose_name="Quantity")
     is_collected = models.BooleanField(
         default=False, verbose_name="Đã lấy thuốc")
 

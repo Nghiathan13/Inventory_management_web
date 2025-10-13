@@ -1,3 +1,48 @@
-.card-header h4 {
-  margin: 4px;
+/* === FORM CHUNG === */
+.row {
+  margin-bottom: 2rem;
+}
+
+/* === ALERT === */
+.col {
+  padding: 0;
+}
+
+/* === FORM KÊ ĐƠN === */
+.card {
+  padding: 0;
+}
+/* --- header --- */
+.card-header p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+.btn {
+  font-size: 1rem;
+  font-weight: bold;
+}
+/* --- body --- */
+.card-body p {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+.required {
+  margin-left: 2px;
+  color: red;
+}
+/* patient */
+.form-label {
+  font-size: 1rem;
+  font-style: italic;
+}
+.asteriskField {
+  display: none;
+}
+/* medicine detail */
+.detail-form label {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  font-style: italic;
 }

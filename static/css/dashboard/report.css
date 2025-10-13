@@ -1,0 +1,49 @@
+/* ===============================================
+   GIAO DIỆN CHUNG CHO TRANG BÁO CÁO
+================================================ */
+
+.chart-card .card-body {
+    padding: 1.5rem;
+}
+
+/* ===============================================
+   NÂNG CẤP THANH ĐIỀU HƯỚNG BÁO CÁO (DẠNG TAB)
+================================================ */
+
+/* Loại bỏ style mặc định của card */
+.report-nav-card {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* Biến ul thành một thanh tab */
+.report-nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+/* Tùy chỉnh từng mục tab (link) */
+.report-nav-tabs .nav-link {
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #6c757d;
+    font-weight: 500;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: -2px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hiệu ứng khi di chuột qua các tab chưa active */
+.report-nav-tabs .nav-link:not(.active):hover {
+    color: #0d6efd; 
+    border-bottom-color: #a7c9f8; 
+}
+
+/* Tùy chỉnh cho tab đang được chọn (active) */
+.report-nav-tabs .nav-link.active {
+    color: #0d6efd; 
+    background-color: transparent; 
+    border-bottom-color: #0d6efd; 
+    font-weight: 700;
+}

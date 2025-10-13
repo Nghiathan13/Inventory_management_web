@@ -32,7 +32,9 @@ urlpatterns = [
     path('dispense/process/<int:pk>/', views.dispense_process, name='dispense-process'),
     
     # Report URL
-    path('report/', views.report, name='dashboard-report'),
+    path('report/', views.report_overview, name='dashboard-report-overview'),
+    path('report/dispense-analysis/', views.report_dispense_analysis, name='dashboard-report-dispense'),
+    path('report/inventory-status/', views.report_inventory_status, name='dashboard-report-status'),
 
     path('username-reset/', views.UsernameResetView.as_view(), name='username-reset'),
     path('password-reset/', views.CustomPasswordResetView.as_view(
@@ -40,4 +42,7 @@ urlpatterns = [
             email_template_name='user/password_reset_email.html',
             success_url=reverse_lazy('password_reset_done')
         ), name='password_reset'),
+
+
+    
 ]

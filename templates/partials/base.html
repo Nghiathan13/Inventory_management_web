@@ -35,7 +35,10 @@
     {% block navbar %} {% include 'partials/navbar.html' %} {% endblock %}
 
     <!-- Body -->
-    {% block content %} {% endblock %}
+    <div class="container my-4">
+        {% block content %}
+        {% endblock %}
+    </div>
 
     <!-- Bootstrap & Chart -->
     <script

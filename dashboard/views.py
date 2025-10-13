@@ -32,6 +32,9 @@ from django.core.exceptions import ObjectDoesNotExist
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
+from django.db.models import Count, Sum
+from datetime import datetime, timedelta
+
 
 # =======================================================
 #               CÁC VIEW CHÍNH & DASHBOARD
@@ -146,47 +149,76 @@ def prescription(request):
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: TRANG BÁO CÁO TỒN KHO VÀ SỬ DỤNG
-#   - Cung cấp dữ liệu cho các biểu đồ phân tích.
+#   VIEW 1: BÁO CÁO TỔNG QUAN TỒN KHO
 # -------------------------------------------------------
 @login_required
-def report(request):
-    # Chỉ Admin/Staff mới được xem báo cáo
+def report_overview(request):
     if not (request.user.is_staff or request.user.is_superuser):
         return redirect('dashboard-index')
 
-    # Thu thập dữ liệu cho các biểu đồ
-    products = Product.objects.all().order_by('-quantity') # Sắp xếp sản phẩm theo số lượng tồn kho
-    orders = Order.objects.all()
+    # Dữ liệu cho biểu đồ Bar: Tồn kho
+    products = Product.objects.order_by('-quantity')[:15]
+    category_data = list(Product.objects.values('category').annotate(count=Count('id')).order_by('-count'))
 
     context = {
-        'products': products,
-        'orders': orders,
+        'products': products, # Truyền trực tiếp QuerySet, xử lý trong template
+        'category_json': json.dumps(category_data),
+        'active_report': 'overview'
     }
-    return render(request, 'dashboard/report/report.html', context)
+    return render(request, 'dashboard/report/report_overview.html', context)
+
+# -------------------------------------------------------
+#   VIEW 2: BÁO CÁO PHÂN TÍCH XUẤT KHO
+# -------------------------------------------------------
 @login_required
-def report(request):
-    # Chỉ Admin/Staff mới được xem báo cáo
+def report_dispense_analysis(request):
     if not (request.user.is_staff or request.user.is_superuser):
         return redirect('dashboard-index')
 
-    # --- Dữ liệu cho biểu đồ Bar (Tồn kho sản phẩm) ---
-    products = Product.objects.all().order_by('-quantity')
-    products_data = list(products.values('name', 'quantity'))
+    # Dữ liệu cho biểu đồ Pie: Tỉ lệ sản phẩm đã bán
+    dispense_data = list(
+        Order.objects.values('product__name')
+        .annotate(total_sold=Sum('order_quantity'))
+        .order_by('-total_sold')[:10] # 10 sản phẩm bán chạy nhất
+    )
 
-    # --- Dữ liệu cho biểu đồ Pie (Phân bố xuất kho) ---
-    orders = Order.objects.all()
-    orders_data = list(orders.values('product__name', 'order_quantity'))
-    for order in orders_data:
-        order['product_name'] = order.pop('product__name')
-        order['quantity'] = order.pop('order_quantity')
+    # Dữ liệu cho biểu đồ Line: Xu hướng bán hàng 7 ngày qua
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    sales_trend = (
+        Order.objects.filter(date__gte=seven_days_ago)
+        .extra({'date_sold': "date(date)"})
+        .values('date_sold')
+        .annotate(count=Count('id'))
+        .order_by('date_sold')
+    )
+    
+    context = {
+        'dispense_json': json.dumps(dispense_data),
+        'trend_json': json.dumps(list(sales_trend), cls=DjangoJSONEncoder),
+        'active_report': 'dispense'
+    }
+    return render(request, 'dashboard/report/report_dispense_analysis.html', context)
+
+# -------------------------------------------------------
+#   VIEW 3: BÁO CÁO TRẠNG THÁI (Hết hàng/Hết hạn)
+# -------------------------------------------------------
+@login_required
+def report_inventory_status(request):
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect('dashboard-index')
+
+    out_of_stock = Product.objects.filter(quantity__lte=10).order_by('quantity')
+    expiring_soon = Product.objects.filter(
+        expiry_date__lte=datetime.now() + timedelta(days=30),
+        expiry_date__gte=datetime.now()
+    ).order_by('expiry_date')
 
     context = {
-        'products_json': json.dumps(products_data, cls=DjangoJSONEncoder),
-        'orders_json': json.dumps(orders_data, cls=DjangoJSONEncoder),
+        'out_of_stock': out_of_stock,
+        'expiring_soon': expiring_soon,
+        'active_report': 'status'
     }
-    return render(request, 'dashboard/report/report.html', context)
-
+    return render(request, 'dashboard/report/report_inventory_status.html', context)
 
 
 

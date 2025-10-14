@@ -1,55 +1,98 @@
 {% extends 'partials/base.html' %}
-{% block title %} Danh Sách Bệnh Nhân {% endblock %}
-{% load static %} {# <-- Thêm dòng này để sử dụng {% static %} #}
-
+<!--  -->
+{% block title %} Patient List {% endblock %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/dashboard/patient.css' %}" />
+{% endblock %}
+<!--  -->
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h4><i class="fa-solid fa-user-injured me-2"></i> Danh Sách Bệnh Nhân</h4>
-            <a href="{% url 'dashboard-patient-add' %}" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Thêm Hồ Sơ</a>
-        </div>
-        <div class="card-body">
-            {% if messages %}{% for message in messages %}<div class="alert alert-{{ message.tags }}">{{ message }}</div>{% endfor %}{% endif %}
-            <form method="GET" class="mb-4">
-                <div class="input-group"><input type="text" name="search" class="form-control" placeholder="Tìm theo tên bệnh nhân..." value="{{ search_query }}"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i></button></div>
-            </form>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Họ Tên</th>
-                            <th>Tuổi</th>
-                            <th>Giới Tính</th>
-                            <th>Số Điện Thoại</th>
-                            <th class="text-center">Hành Động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for patient in patients %}
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="{% if patient.avatar %}{{ patient.avatar.url }}{% else %}{% static 'images/default_image.jpg' %}{% endif %}" class="rounded-circle me-3" width="40" height="40" alt="Avatar" style="object-fit: cover;">
-                                    <strong>{{ patient.full_name }}</strong>
-                                </div>
-                            </td>
-                            <td>{{ patient.age|default:"N/A" }}</td>
-                            <td>{{ patient.gender }}</td>
-                            <td>{{ patient.phone_number|default:"N/A" }}</td>
-                            <td class="text-center">
-                                <a href="{% url 'dashboard-patient-detail' patient.id %}" class="btn btn-info btn-sm"><i class="fa-solid fa-eye"></i></a>
-                                <a href="{% url 'dashboard-patient-update' patient.id %}" class="btn btn-primary btn-sm"><i class="fa-solid fa-pen"></i></a>
-                                <a href="{% url 'dashboard-patient-delete' patient.id %}" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i></a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="5" class="text-center p-4">Chưa có hồ sơ bệnh nhân nào.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+<div class="container">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4><i class="fa-solid fa-user-injured"></i> Patient List</h4>
+      <a href="{% url 'dashboard-patient-add' %}" class="btn btn-success"
+        ><i class="fa-solid fa-plus me-1"></i> Add Record</a
+      >
     </div>
+    <div class="card-body">
+      {% if messages %}{% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}{% endif %}
+      <form method="GET" class="mb-4">
+        <div class="input-group">
+          <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Search by patient name..."
+            value="{{ search_query }}"
+          /><button class="btn btn-primary" type="submit">
+            <i class="fa-solid fa-search"></i>
+          </button>
+        </div>
+      </form>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="thead-light">
+            <tr>
+              <th>Full Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Phone Number</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for patient in patients %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <img
+                    src="{% if patient.avatar %}{{ patient.avatar.url }}{% else %}{% static 'images/default_image.jpg' %}{% endif %}"
+                    class="rounded-circle me-3"
+                    width="40"
+                    height="40"
+                    alt="Avatar"
+                    style="object-fit: cover"
+                  />
+                  <strong>{{ patient.full_name }}</strong>
+                </div>
+              </td>
+              <td>{{ patient.age|default:"N/A" }}</td>
+              <td>{{ patient.gender }}</td>
+              <td>{{ patient.phone_number|default:"N/A" }}</td>
+              <td class="text-center">
+                <a
+                  href="{% url 'dashboard-patient-detail' patient.id %}"
+                  class="btn btn-info btn-sm"
+                  ><i class="fa-solid fa-eye"></i
+                ></a>
+                <a
+                  href="{% url 'dashboard-patient-update' patient.id %}"
+                  class="btn btn-primary btn-sm"
+                  ><i class="fa-solid fa-pen"></i
+                ></a>
+                <a
+                  href="{% url 'dashboard-patient-delete' patient.id %}"
+                  class="btn btn-danger btn-sm"
+                  ><i class="fa-solid fa-trash"></i
+                ></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center p-4">
+                No patient records available.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}

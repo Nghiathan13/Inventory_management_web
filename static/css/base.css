@@ -2,3 +2,7 @@ body {
   background-color: rgb(255, 255, 255);
   font-family: arial, "Montserrat", sans-serif;
 }
+
+html {
+    overflow-y: scroll;
+}

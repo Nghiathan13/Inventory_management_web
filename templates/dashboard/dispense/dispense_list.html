@@ -1,12 +1,20 @@
 {% extends 'partials/base.html' %}
-<!---->
-{% block title %} Toa Thuốc Chờ Lấy {% endblock %}
-<!---->
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/dashboard/dispense.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Prescriptions Awaiting Pickup {% endblock %}
+<!--  -->
 {% block content %}
-<div class="container mt-4">
+<div class="container">
   <div class="card shadow-sm">
-    <div class="card-header bg-warning">
-      <h4><i class="fa-solid fa-hourglass-half"></i> Toa Thuốc Chờ Cấp Phát</h4>
+    <div class="card-header">
+      <h4>
+        <i class="fa-solid fa-hourglass-half"></i> Prescriptions Awaiting Pickup
+      </h4>
     </div>
     <div class="card-body">
       {% if messages %}{% for message in messages %}
@@ -16,11 +24,11 @@
         <table class="table table-hover">
           <thead class="thead-light">
             <tr>
-              <th>ID Toa</th>
+              <th>ID</th>
               <th>Patient</th>
-              <th>Bác Sĩ Kê Đơn</th>
-              <th>Ngày Kê Đơn</th>
-              <th>Hành Động</th>
+              <th>Prescribing Doctor</th>
+              <th>Prescription Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>

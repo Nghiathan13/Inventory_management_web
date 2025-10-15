@@ -54,7 +54,7 @@ def index(request):
             'orders': orders,
             'products': products,
         }
-        return render(request, 'dashboard/index.html', context)
+        return render(request, 'dashboard/modules.html', context)
     else:
         return redirect('dashboard-prescription')
 

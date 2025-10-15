@@ -22,6 +22,11 @@
   font-size: 1rem;
   font-weight: bold;
 }
+.card-header {
+  background-color: rgb(100, 55, 195);
+  color: rgb(255, 255, 255);
+}
+
 /* --- body --- */
 .card-body p {
   margin-bottom: 0.5rem;
@@ -30,7 +35,7 @@
 }
 .required {
   margin-left: 2px;
-  color: red;
+  color: rgb(200, 0, 0);
 }
 /* patient */
 .form-label {
@@ -45,4 +50,20 @@
   margin-bottom: 0.5rem;
   font-size: 1rem;
   font-style: italic;
+}
+/* button */
+.btn-add {
+  background-color: rgb(225, 225, 225);
+  color: rgb(0, 0, 0);
+}
+.btn-add:hover {
+  background-color: rgb(205, 205, 205);
+}
+.btn-complete {
+  background-color: rgb(100, 55, 195);
+  color: rgb(255, 255, 255);
+}
+.btn-complete:hover {
+  background-color: rgb(80, 35, 175);
+  color: rgb(255, 255, 255);
 }

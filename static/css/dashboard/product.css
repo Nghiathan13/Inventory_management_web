@@ -1,61 +1,93 @@
-/* Style cho header của card trên trang Products */
+/* === CARD === */
+.card {
+  min-width: 20rem;
+}
+/* === Header === */
+.card-header {
+  background-color: rgb(255, 255, 255);
+}
 .card-header h4 {
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
+  margin-bottom: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: rgb(0, 0, 0);
+}
+.card-header a {
+  background-color: rgb(100, 55, 195);
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgb(255, 255, 255);
+}
+.card-header a:hover {
+  background-color: rgb(80, 35, 175);
+  color: rgb(235, 235, 235);
 }
 
-.card-header h4 i {
-    margin-right: 10px;
+/* === Body === */
+/* Search */
+.search-wrapper {
+  position: relative;
+}
+.search-wrapper .form-control {
+  padding-right: 2.75rem;
+}
+.search-wrapper .btn-search {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  pointer-events: none;
+}
+.btn-search i {
+  pointer-events: auto;
 }
 
-/* Container cho bảng sản phẩm, có thanh cuộn */
+/* Table */
 .table-container {
-    max-height: 60vh;
-    overflow-y: auto;
+  max-height: 60vh;
+  overflow-y: auto;
 }
-
-/* Header của bảng, "dính" lại ở trên cùng khi cuộn */
+/* Header */
 .table thead th {
-    position: sticky;
-    top: 0;
-    background-color: #f8f9fa;
-    color: #343a40;
-    z-index: 10;
-    vertical-align: middle;
-    text-align: center;
-    border-bottom: 2px solid #dee2e6;
-    white-space: nowrap;
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  vertical-align: middle;
+  text-align: center;
+  border-bottom: 1px solid rgb(0, 0, 0);
+  white-space: nowrap;
 }
-
-/* Các ô trong thân bảng */
+/* Body */
 .table tbody td {
-    vertical-align: middle;
-    text-align: center;
+  vertical-align: middle;
+  text-align: center;
 }
-
-/* Hiệu ứng khi di chuột qua các dòng */
 .table tbody tr:hover {
-    background-color: #e9ecef;
+  background-color: #e9ecef;
 }
-
-/* Các nút hành động (Sửa, Xóa) */
 .action-buttons a {
-    margin: 0 5px;
+  margin: 0 5px;
+}
+.table-danger,
+.table-danger > th,
+.table-danger > td {
+  background-color: rgb(248, 215, 218) !important;
+}
+.table-warning,
+.table-warning > th,
+.table-warning > td {
+  background-color: rgb(255, 245, 205) !important;
 }
 
-/* Đánh dấu các dòng sản phẩm có số lượng tồn kho đặc biệt */
-.table-danger, .table-danger > th, .table-danger > td {
-    background-color: #f8d7da !important; 
+.table-warning,
+.table-warning > th,
+.table-warning > td {
+  background-color: #fff3cd !important;
 }
-.table-warning, .table-warning > th, .table-warning > td {
-    background-color: #fff3cd !important; 
-}
-
-
 
 .col-actions {
-    white-space: nowrap;
+  white-space: nowrap;
 }
 /* ===============================================
    TÙY CHỈNH KÍCH THƯỚC CÁC CỘT TRONG BẢNG SẢN PHẨM
@@ -63,46 +95,64 @@
 
 /* Thiết lập layout cố định cho bảng */
 .table-bordered {
-    table-layout: fixed;
+  table-layout: fixed;
 }
 
 /* Định nghĩa chiều rộng cho từng cột */
-.col-code { width: 18%; }
-.col-name { width: 20%; } 
-.col-category { width: 12%; }
-.col-quantity { width: 10%; }
-.col-unit { width: 8%; }
-.col-price { width: 12%; }
-.col-date { width: 12%; }
-.col-supplier { width: 12%; }
-.col-actions { width: 20%; }
+.col-code {
+  width: 18%;
+}
+.col-name {
+  width: 20%;
+}
+.col-category {
+  width: 12%;
+}
+.col-quantity {
+  width: 10%;
+}
+.col-unit {
+  width: 8%;
+}
+.col-price {
+  width: 12%;
+}
+.col-date {
+  width: 12%;
+}
+.col-supplier {
+  width: 12%;
+}
+.col-actions {
+  width: 20%;
+}
 
 /* ===============================================
 GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
 ================================================ */
 .product-nav-tabs {
-border-bottom: 1px solid #dee2e6;
-margin-bottom: 1.5rem;
-display: flex;
-justify-content: flex-start;
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
 }
 .product-nav-tabs .nav-link {
-border: none;
-color: #6c757d;
-font-weight: 500;
-padding: 0.75rem 1.25rem;
-transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-border-bottom: 2px solid transparent;
-background-color: transparent;
-margin-bottom: -1px;
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  margin-bottom: -1px;
 }
 .product-nav-tabs .nav-link:hover {
-color: #0d6efd;
-border-bottom-color: #e9ecef;
+  color: #0d6efd;
+  border-bottom-color: #e9ecef;
 }
 .product-nav-tabs .nav-link.active {
-color: #0d6efd;
-background-color: transparent;
-font-weight: 500; 
-border-bottom: 2px solid #0d6efd;
+  color: #0d6efd;
+  background-color: transparent;
+  font-weight: 500;
+  border-bottom: 2px solid #0d6efd;
 }

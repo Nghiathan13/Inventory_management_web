@@ -35,10 +35,7 @@
     {% block navbar %} {% include 'partials/navbar.html' %} {% endblock %}
 
     <!-- Body -->
-    <div class="container my-4">
-        {% block content %}
-        {% endblock %}
-    </div>
+    {% block content %} {% endblock %}
 
     <!-- Bootstrap & Chart -->
     <script
@@ -46,11 +43,11 @@
       defer
     ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-
     <!-- Script chung cho toàn bộ trang -->
     <script src="{% static 'js/main.js' %}" defer></script>
-
     <!-- Block này sẽ được các trang con chèn file JS riêng vào -->
-    {% block javascript %} {% endblock %}
+    {% block javascript %}
+    <!--  -->
+    {% endblock %}
   </body>
 </html>

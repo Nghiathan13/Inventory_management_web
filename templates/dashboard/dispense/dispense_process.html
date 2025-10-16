@@ -1,5 +1,8 @@
-{% extends 'partials/base.html' %} {% block title %} Xử Lý Toa Thuốc #{{
-prescription.id }} {% endblock %} {% block content %}
+{% extends 'partials/base.html' %}
+<!--  -->
+{% block title %} Xử Lý Toa Thuốc {{ prescription.id }} {% endblock %}
+<!--  -->
+{% block content %}
 <div class="container mt-5">
   <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -40,10 +43,9 @@ prescription.id }} {% endblock %} {% block content %}
                     id="detail{{ detail.id }}"
                     name="details"
                     value="{{ detail.id }}"
-                    checked
                   />
                   <label class="form-check-label" for="detail{{ detail.id }}">
-                    <strong>{{ detail.product.name }}</strong> - Số lượng:
+                    <strong>{{ detail.product.name }}</strong> - Quantity:
                     <!---->
                     {{ detail.quantity }}
                     <small class="text-muted"

@@ -1,0 +1,26 @@
+<ul class="nav product-nav-tabs">
+    <!-- Sản Phẩm -->
+    <li class="nav-item">
+        <a class="nav-link {% if 'product' in request.resolver_match.url_name and 'category' not in request.resolver_match.url_name and 'bom' not in request.resolver_match.url_name %}active{% endif %}" href="{% url 'dashboard-product' %}">
+            <i class="fas fa-pills me-2"></i>Sản Phẩm
+        </a>
+    </li>
+    <!-- Nhóm Sản Phẩm -->
+    <li class="nav-item">
+        <a class="nav-link {% if 'category' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'dashboard-category-list' %}">
+            <i class="fas fa-sitemap me-2"></i>Nhóm Sản Phẩm
+        </a>
+    </li>
+    <!-- Đơn Vị Tính -->
+    <li class="nav-item">
+        <a class="nav-link {% if 'uom' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'dashboard-uom-list' %}">
+            <i class="fas fa-balance-scale me-2"></i>Đơn Vị Tính
+        </a>
+    </li>
+    <!-- BOM -->
+    <li class="nav-item">
+        <a class="nav-link {% if 'bom' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'dashboard-bom-list' %}">
+            <i class="fas fa-cogs me-2"></i>BOM
+        </a>
+    </li>
+</ul>

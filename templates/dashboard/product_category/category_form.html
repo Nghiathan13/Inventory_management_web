@@ -1,0 +1,47 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% block extracss %}
+    <link rel="stylesheet" href="{% static 'css/dashboard/product.css' %}">
+{% endblock %}
+<!--  -->
+{% block title %} {{ title }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4 odoo-form-view">
+    <!-- Thanh hành động (Lưu, Hủy) -->
+    <div class="odoo-form-header">
+        <button type="submit" form="category-form" class="btn btn-primary">LƯU</button>
+        <a href="{% url 'dashboard-category-list' %}" class="btn btn-secondary">HỦY BỎ</a>
+    </div>
+
+    <!-- Tiêu đề và breadcrumb -->
+    <div class="odoo-form-title">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard-category-list' %}">Nhóm sản phẩm</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ instance.name|default:"Mới" }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Form chính -->
+    <div class="odoo-form-sheet">
+        <form method="POST" id="category-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_name" class="form-label">Tên nhóm sản phẩm</label>
+                {{ form.name }}
+            </div>
+            <div class="mb-3">
+                <label for="id_parent" class="form-label">Danh mục cha</label>
+                {{ form.parent }}
+            </div>
+            <!-- (Thêm các trường khác theo bố cục 2 cột ở đây) -->
+        </form>
+    </div>
+</div>
+{% endblock %}

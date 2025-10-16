@@ -1,0 +1,31 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% block title %} Đơn Vị Tính {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-balance-scale me-2"></i>{% if form.instance.pk %}Sửa Đơn Vị Tính{% else %}Tạo Đơn Vị Tính Mới{% endif %}</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="mt-4 text-end">
+                            <a href="{% url 'dashboard-uom-list' %}" class="btn btn-secondary">Hủy Bỏ</a>
+                            <button class="btn btn-success" type="submit">
+                                <i class="fas fa-save me-1"></i> Lưu Lại
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

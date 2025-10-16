@@ -1,0 +1,61 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% block title %} {{ title }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4><i class="fas fa-edit me-2"></i>{{ title }}</h4>
+        </div>
+        <div class="card-body p-4">
+            <!-- enctype is CRITICAL for file uploads if you add an image field later -->
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Bố cục 2 cột -->
+                <div class="row">
+                    <!-- Cột bên trái -->
+                    <div class="col-md-6">
+                        <h5>Thông Tin Cơ Bản</h5>
+                        <hr>
+                        {{ form.name|as_crispy_field }}
+                        {{ form.code|as_crispy_field }}
+                        {{ form.category|as_crispy_field }}
+                        <div class="row">
+                            <div class="col-md-6">{{ form.quantity|as_crispy_field }}</div>
+                            <div class="col-md-6">{{ form.uom|as_crispy_field }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Cột bên phải -->
+                    <div class="col-md-6">
+                        <h5>Thông Tin Thương Mại & Tồn Kho</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">{{ form.import_price|as_crispy_field }}</div>
+                            <div class="col-md-6">{{ form.sale_price|as_crispy_field }}</div>
+                        </div>
+                        {{ form.expiry_date|as_crispy_field }}
+                        {{ form.supplier|as_crispy_field }}
+                    </div>
+                </div>
+
+                <!-- Nút bấm -->
+                <div class="mt-4 text-end">
+                    <a href="{% url 'dashboard-product' %}" class="btn btn-secondary">Quay Lại</a>
+                    <button class="btn btn-success" type="submit"><i class="fas fa-save me-1"></i> Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+    <script src="{% static 'js/dashboard/product_form.js' %}"></script>
+{% endblock %}

@@ -51,3 +51,58 @@
 .table-warning, .table-warning > th, .table-warning > td {
     background-color: #fff3cd !important; 
 }
+
+
+
+.col-actions {
+    white-space: nowrap;
+}
+/* ===============================================
+   TÙY CHỈNH KÍCH THƯỚC CÁC CỘT TRONG BẢNG SẢN PHẨM
+================================================ */
+
+/* Thiết lập layout cố định cho bảng */
+.table-bordered {
+    table-layout: fixed;
+}
+
+/* Định nghĩa chiều rộng cho từng cột */
+.col-code { width: 18%; }
+.col-name { width: 20%; } 
+.col-category { width: 12%; }
+.col-quantity { width: 10%; }
+.col-unit { width: 8%; }
+.col-price { width: 12%; }
+.col-date { width: 12%; }
+.col-supplier { width: 12%; }
+.col-actions { width: 20%; }
+
+/* ===============================================
+GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
+================================================ */
+.product-nav-tabs {
+border-bottom: 1px solid #dee2e6;
+margin-bottom: 1.5rem;
+display: flex;
+justify-content: flex-start;
+}
+.product-nav-tabs .nav-link {
+border: none;
+color: #6c757d;
+font-weight: 500;
+padding: 0.75rem 1.25rem;
+transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+border-bottom: 2px solid transparent;
+background-color: transparent;
+margin-bottom: -1px;
+}
+.product-nav-tabs .nav-link:hover {
+color: #0d6efd;
+border-bottom-color: #e9ecef;
+}
+.product-nav-tabs .nav-link.active {
+color: #0d6efd;
+background-color: transparent;
+font-weight: 500; 
+border-bottom: 2px solid #0d6efd;
+}

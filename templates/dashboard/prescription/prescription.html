@@ -160,6 +160,7 @@
   </div>
 </div>
 {% endblock %}
+
 <!---->
 {% block javascript %}
 <script src="{% static 'js/dashboard/prescription.js' %}"></script>
@@ -170,7 +171,13 @@
       { id: '{{ product.id }}', name: '{{ product.name|escapejs }} (Còn: {{product.quantity}})' },
       {% endfor %}
   ];
+
+  const uomsData = [
+            {% for uom in uoms %}
+            { id: '{{ uom.id }}', name: '{{ uom.name|escapejs }}' },
+            {% endfor %}
+  ];
   // Gọi hàm khởi tạo với dữ liệu
-  initializePrescriptionForm(productsData);
+  initializePrescriptionForm(productsData, uomsData);
 </script>
 {% endblock %}

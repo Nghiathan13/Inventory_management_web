@@ -1,7 +1,7 @@
 # =======================================================
 #               KHAI BÁO THƯ VIỆN (IMPORTS)
 # =======================================================
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.views import View
 from django import forms
@@ -13,10 +13,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import PasswordResetView as BasePasswordResetView
 
 # Models & Forms
-from .models import Product, Order, Prescription, PrescriptionDetail, Patient
+from .models import Product, Order, Prescription, PrescriptionDetail, Patient, ProductCategory
 from .forms import (
     ProductForm, OrderForm, PrescriptionForm,
-    PrescriptionDetailForm, PatientForm
+    PrescriptionDetailForm, PatientForm, ProductCategoryForm
 )
 
 # Utilities
@@ -34,6 +34,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 from django.db.models import Count, Sum
 from datetime import datetime, timedelta
+
+#Import BOM
+from .models import BillOfMaterials, UnitOfMeasure
+from .forms import BillOfMaterialsForm, UnitOfMeasureForm
 
 
 # =======================================================
@@ -61,7 +65,6 @@ def index(request):
 
 # -------------------------------------------------------
 #   VIEW: TRANG LỊCH SỬ ĐƠN HÀNG (DÀNH CHO ADMIN)
-#   - Đã xóa bỏ các biến *_count không cần thiết.
 # -------------------------------------------------------
 @login_required
 def order(request):
@@ -73,12 +76,116 @@ def order(request):
 
 
 # =======================================================
+#               QUẢN LÝ ĐƠN VỊ TÍNH (UoM CRUD)
+# =======================================================
+@login_required
+def uom_list(request):
+    uoms = UnitOfMeasure.objects.all()
+    return render(request, 'dashboard/uom/uom_list.html', {'uoms': uoms})
+
+@login_required
+def uom_form(request, pk=None):
+    instance = get_object_or_404(UnitOfMeasure, pk=pk) if pk else None
+    form = UnitOfMeasureForm(request.POST or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Unit of Measure saved successfully.')
+        return redirect('dashboard-uom-list')
+    title = 'Edit Unit of Measure' if instance else 'Create New Unit of Measure'
+    context = {
+        'form': form,
+        'title': title,
+    }
+    return render(request, 'dashboard/uom/uom_form.html', context)
+
+@login_required
+def uom_delete(request, pk):
+    uom = get_object_or_404(UnitOfMeasure, pk=pk)
+    if request.method == 'POST':
+        uom.delete()
+        messages.success(request, f'Unit "{uom.name}" has been deleted.')
+        return redirect('dashboard-uom-list')
+    context = {
+        'item': uom
+    }
+    return render(request, 'dashboard/uom/uom_confirm_delete.html', context)
+
+# =======================================================
+#               QUẢN LÝ BOM (BOM CRUD)
+# =======================================================
+@login_required
+def bom_list(request):
+    boms = BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to').all()
+    context = {
+        'boms': boms
+    }
+    return render(request, 'dashboard/bom/bom_list.html', context)
+
+@login_required
+def bom_form(request, pk=None):
+    instance = get_object_or_404(BillOfMaterials, pk=pk) if pk else None
+    form = BillOfMaterialsForm(request.POST or None, instance=instance)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Bill of Materials rule saved successfully.')
+        return redirect('dashboard-bom-list')
+    title = 'Edit BOM Rule' if instance else 'Create New BOM Rule'
+    context = {
+        'form': form,
+        'title': title,
+    }
+    return render(request, 'dashboard/bom/bom_form.html', context)
+
+@login_required
+def bom_delete(request, pk):
+    bom = get_object_or_404(BillOfMaterials, pk=pk)
+    if request.method == 'POST':
+        bom.delete()
+        messages.success(request, 'BOM rule has been deleted.')
+        return redirect('dashboard-bom-list')
+    context =  {
+        'item': bom
+    }
+    return render(request, 'dashboard/bom/bom_confirm_delete.html', context)
+
+# =======================================================
+#           QUẢN LÝ NHÓM SẢN PHẨM (CATEGORY CRUD)
+# =======================================================
+@login_required
+def category_list(request):
+    categories = ProductCategory.objects.all()
+    context = {'categories': categories}
+    return render(request, 'dashboard/product_category/category_list.html', context)
+
+@login_required
+def category_form(request, pk=None):
+    if pk:
+        instance = ProductCategory.objects.get(id=pk)
+        title = "Sửa Nhóm Sản Phẩm"
+    else:
+        instance = None
+        title = "Tạo Nhóm Sản Phẩm Mới"
+
+    if request.method == 'POST':
+        form = ProductCategoryForm(request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Đã lưu nhóm sản phẩm "{form.cleaned_data.get("name")}" thành công.')
+            return redirect('dashboard-category-list')
+    else:
+        form = ProductCategoryForm(instance=instance)
+
+    context = {'form': form, 'title': title, 'instance': instance}
+    return render(request, 'dashboard/product_category/category_form.html', context)
+
+
+
+# =======================================================
 #               QUẢN LÝ KÊ ĐƠN (PRESCRIPTION)
 # =======================================================
 
 # -------------------------------------------------------
 #   VIEW: TRANG KÊ ĐƠN THUỐC
-#   - Logic chính giữ nguyên.
 # -------------------------------------------------------
 @login_required
 def prescription(request):
@@ -101,6 +208,8 @@ def prescription(request):
                     for i in range(form_count):
                         product_id = request.POST.get(f'details-{i}-product')
                         quantity_str = request.POST.get(f'details-{i}-quantity')
+                        uom_id = request.POST.get(f'details-{i}-uom')
+
                         if product_id and quantity_str and int(quantity_str) > 0:
                             if product_id in processed_products:
                                 messages.error(request, f"Thuốc '{Product.objects.get(id=product_id).name}' đã được thêm. Vui lòng chỉnh sửa số lượng thay vì thêm dòng mới.")
@@ -109,10 +218,40 @@ def prescription(request):
                             
                             product = Product.objects.get(id=int(product_id))
                             quantity = int(quantity_str)
-                            if product.quantity < quantity:
-                                messages.error(request, f"Không đủ thuốc '{product.name}'. Tồn kho: {product.quantity}.")
+                            uom_selected = UnitOfMeasure.objects.get(id=uom_id)
+
+                            # =======================================================
+                            #               LOGIC XỬ LÝ BOM
+                            # =======================================================
+                            quantity_to_deduct = quantity # Mặc định số lượng cần trừ
+
+                            # Nếu đơn vị được chọn khác với đơn vị cơ bản của sản phẩm
+                            if uom_selected != product.uom:
+                                try:
+                                    # Tìm quy tắc quy đổi trong BOM
+                                    bom = BillOfMaterials.objects.get(
+                                        product=product,
+                                        uom_from=uom_selected,
+                                        uom_to=product.uom # Đảm bảo quy đổi về đơn vị cơ bản
+                                    )
+                                    quantity_to_deduct = quantity * bom.conversion_factor
+                                except BillOfMaterials.DoesNotExist:
+                                    # Nếu không có quy tắc, báo lỗi
+                                    messages.error(request, f"Không tìm thấy quy tắc quy đổi từ '{uom_selected.name}' sang '{product.uom.name}' cho sản phẩm '{product.name}'.")
+                                    return redirect('dashboard-prescription')
+                                
+                            
+                            # KIỂM TRA TỒN KHO VỚI SỐ LƯỢNG ĐÃ QUY ĐỔI
+                            if product.quantity < quantity_to_deduct:
+                                messages.error(request, f"Không đủ thuốc '{product.name}'. Cần {quantity_to_deduct} {product.uom.name} nhưng chỉ còn {product.quantity}.")
                                 return redirect('dashboard-prescription')
-                            details_to_process.append({'product': product, 'quantity': quantity})
+                            
+
+                            details_to_process.append({
+                                'product': product,
+                                'quantity': quantity,
+                                'uom': uom_selected 
+                            })
                     
                     # Logic lưu đã được sửa lại cho đúng quy trình mới
                     new_prescription.save()
@@ -120,7 +259,9 @@ def prescription(request):
                         PrescriptionDetail.objects.create(
                             prescription=new_prescription,
                             product=item['product'],
-                            quantity=item['quantity'])
+                            quantity=item['quantity'],
+                            uom=item['uom']
+                        )
                     
                     messages.success(request, f'Đã gửi toa thuốc cho bệnh nhân {new_prescription.patient.full_name} thành công.')
                     return redirect('dashboard-prescription')
@@ -139,6 +280,7 @@ def prescription(request):
         'prescription_form': prescription_form,
         'prescriptions': prescriptions,
         'products': Product.objects.all(),
+        'uoms': UnitOfMeasure.objects.all(),
     }
     return render(request, 'dashboard/prescription/prescription.html', context)
 
@@ -269,23 +411,48 @@ def dispense_process(request, pk):
                 for detail_id in details_to_dispense:
                     detail = PrescriptionDetail.objects.get(id=detail_id, prescription=prescription)
                     product = detail.product
-                    if product.quantity < detail.quantity:
-                        raise Exception(f"Không đủ thuốc '{product.name}'. Tồn kho: {product.quantity}.")
+                    prescribed_uom = detail.uom
+                    prescribed_quantity = detail.quantity
+
+                    quantity_to_deduct = prescribed_quantity # Mặc định
                     
+                    # Nếu đơn vị kê đơn khác đơn vị cơ bản trong kho
+                    if prescribed_uom and prescribed_uom != product.uom:
+                        try:
+                            bom_rule = BillOfMaterials.objects.get(
+                                product=product,
+                                uom_from=prescribed_uom,
+                                uom_to=product.uom
+                            )
+                            quantity_to_deduct = prescribed_quantity * bom_rule.conversion_factor
+                        except BillOfMaterials.DoesNotExist:
+                            raise Exception(f"Không tìm thấy quy tắc quy đổi từ '{prescribed_uom.name}' sang '{product.uom.name}' cho '{product.name}'.")
+
+                     # Kiểm tra tồn kho với số lượng ĐÃ QUY ĐỔI
+                    if product.quantity < quantity_to_deduct:
+                        raise Exception(f"Không đủ '{product.name}'. Cần {quantity_to_deduct} {product.uom.name} nhưng chỉ còn {product.quantity}.")
+                    
+                    #Trừ kho
                     product.quantity -= detail.quantity
                     product.save()
+
+                    #Cập nhật trạng thái
                     detail.is_collected = True
                     detail.save()
+
+                    #Tạo Order (lịch sử)
                     Order.objects.create(
                         product=product,
-                        order_quantity=detail.quantity,
+                        order_quantity=quantity_to_deduct,
                         staff=request.user,
                         prescription=prescription
                     )
                 
+                # Cập nhật trạng thái toa thuốc chính
                 prescription.status = 'Dispensed'
                 prescription.completed_at = timezone.now()
                 prescription.save()
+                
                 messages.success(request, f'Đã cấp phát thuốc thành công cho toa #{prescription.id}.')
                 return redirect('dispense-list')
 
@@ -308,14 +475,13 @@ def dispense_process(request, pk):
 @login_required
 def product(request):
     search_query = request.GET.get('search', '')
+    items = Product.objects.select_related('category').all()
     if search_query:
-        items = Product.objects.filter(
+        items = items.filter(
             Q(name__icontains=search_query) | 
-            Q(category__icontains=search_query) | 
+            Q(category__name__icontains=search_query) | 
             Q(code__icontains=search_query)
         )
-    else:
-        items = Product.objects.all()
     context = {
         'items': items,
         'search_query': search_query,
@@ -329,7 +495,7 @@ def product(request):
 @login_required
 def product_add(request):
     if request.method == 'POST':
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             product_name = form.cleaned_data.get('name')
@@ -337,8 +503,11 @@ def product_add(request):
             return redirect('dashboard-product')
     else:
         form = ProductForm()
-    context = {'form': form}
-    return render(request, 'dashboard/product/product_add.html', context)
+    context = {
+        'form': form,
+        'title': 'New Medication'
+    }
+    return render(request, 'dashboard/product/product_form.html', context)
 
 
 # -------------------------------------------------------
@@ -346,17 +515,20 @@ def product_add(request):
 # -------------------------------------------------------
 @login_required
 def product_update(request, pk):
-    item = Product.objects.get(id=pk)
+    item = get_object_or_404(Product, id=pk)
     if request.method == 'POST':
-        form = ProductForm(request.POST, instance=item)
+        form = ProductForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             form.save()
             messages.success(request, f'Cập nhật thuốc "{item.name}" thành công!')
             return redirect('dashboard-product')
     else:
         form = ProductForm(instance=item)
-    context = {'form': form}
-    return render(request, 'dashboard/product/product_update.html', context)
+        context = {
+            'form': form,
+            'title': f'Chỉnh Sửa: {item.name}'
+        }
+    return render(request, 'dashboard/product/product_form.html', context)
 
 
 # -------------------------------------------------------
@@ -372,6 +544,23 @@ def product_delete(request, pk):
     context = {'item': item}
     return render(request, 'dashboard/product/product_delete.html', context)
 
+
+# -------------------------------------------------------
+#   VIEW: CHI TIẾT SẢN PHẨM (READ DETAIL)
+# -------------------------------------------------------
+@login_required
+def product_detail(request, pk):
+    # Sử dụng get_object_or_404 để xử lý trường hợp không tìm thấy sản phẩm
+    product = get_object_or_404(Product.objects.select_related('category'), pk=pk)
+    
+    # (Tùy chọn) Lấy lịch sử xuất kho của riêng sản phẩm này
+    order_history = Order.objects.filter(product=product).select_related('staff', 'prescription__patient').order_by('-date')[:10]
+    
+    context = {
+        'product': product,
+        'order_history': order_history,
+    }
+    return render(request, 'dashboard/product/product_detail.html', context)
 
 # =======================================================
 #               QUẢN LÝ BỆNH NHÂN (PATIENT CRUD)
@@ -469,7 +658,6 @@ def patient_detail(request, pk):
 
 # -------------------------------------------------------
 #   VIEW: DANH SÁCH NHÂN VIÊN
-#   - Đã xóa bỏ các biến *_count không cần thiết.
 # -------------------------------------------------------
 @login_required
 def staff(request):

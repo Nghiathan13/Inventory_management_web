@@ -1,60 +1,59 @@
 {% extends 'partials/base.html' %}
-<!---->
+<!--  -->
 {% load static %}
-<!---->
+
 {% load humanize %}
-<!---->
+<!--  -->
 {% block extracss %}
-<link rel="stylesheet" href="{% static 'css/dashboard/product.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/dashboard/product.css' %}" />
 {% endblock %}
-<!---->
-{% block title %} Quản Lý Thuốc {% endblock %}
-<!---->
+<!--  -->
+{% block title %} Product Management {% endblock %}
+<!--  -->
 {% block content %}
 <div class="container mt-4">
+  
+  <!-- Nạp thanh điều hướng phụ (Product, Product Category, BOM) -->
+  {% include 'dashboard/product/_product_nav.html' %}
+  
   <div class="row">
     <div class="col-12">
-      {% if messages %} {% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show"
-        role="alert"
-      >
-        {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-      {% endfor %} {% endif %}
+      
+      <!-- Vùng hiển thị thông báo (success, error...) từ Django messages framework -->
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %} 
+      {% endif %}
 
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <div class="d-flex justify-content-between align-items-center">
-            <h4><i class="fa-solid fa-pills"></i> Danh Sách Thuốc</h4>
+            <!-- Tiêu đề chính của trang -->
+            <h4><i class="fas fa-pills me-2"></i>Product List</h4>
+            <!-- Nút điều hướng đến trang thêm sản phẩm mới -->
             <a href="{% url 'dashboard-product-add' %}" class="btn btn-success">
-              <i class="fa-solid fa-plus"></i> Thêm Thuốc Mới
+              <i class="fas fa-plus me-1"></i> Add New Product
             </a>
           </div>
         </div>
         <div class="card-body">
+          
           <!-- Form tìm kiếm -->
-          <form
-            method="GET"
-            action="{% url 'dashboard-product' %}"
-            class="mb-4"
-          >
+          <form method="GET" action="{% url 'dashboard-product' %}" class="mb-4">
             <div class="input-group">
               <input
                 type="text"
                 name="search"
                 class="form-control"
-                placeholder="Tìm theo mã, tên hoặc danh mục thuốc..."
+                placeholder="Search by code, name, or category..."
                 value="{{ search_query }}"
               />
               <button class="btn btn-primary" type="submit">
-                <i class="fa-solid fa-search"></i> Tìm Kiếm
+                <i class="fas fa-search me-1"></i> Search
               </button>
             </div>
           </form>
@@ -64,65 +63,81 @@
             <table class="table table-hover table-bordered">
               <thead>
                 <tr>
-                  <th scope="col">Mã thuốc</th>
-                  <th scope="col">Tên thuốc</th>
-                  <th scope="col">Danh mục</th>
-                  <th scope="col">Số lượng</th>
-                  <th scope="col">Đơn vị</th>
-                  <th scope="col">Giá nhập (VNĐ)</th>
-                  <th scope="col">Giá bán (VNĐ)</th>
-                  <th scope="col">Ngày hết hạn</th>
-                  <th scope="col">Nhà cung cấp</th>
-                  <th scope="col">Hành động</th>
+                  <th scope="col" class="col-code">Product Code</th>
+                  <th scope="col" class="col-name">Product Name</th>
+                  <th scope="col" class="col-category">Category</th>
+                  <th scope="col" class="col-quantity">Quantity</th>
+                  <th scope="col" class="col-unit">Unit</th>
+                  <th scope="col" class="col-price">Import Price</th>
+                  <th scope="col" class="col-price">Sale Price</th>
+                  <th scope="col" class="col-date">Expiry Date</th>
+                  <th scope="col" class="col-supplier">Supplier</th>
+                  <th scope="col" class="col-actions">Actions</th>
                 </tr>
               </thead>
               <tbody>
+                <!-- Vòng lặp để hiển thị từng sản phẩm trong danh sách 'items' từ view -->
                 {% for item in items %}
-                <tr
-                  class="{% if item.quantity == 0 %}table-danger{% elif item.quantity < 10 %}table-warning{% endif %}"
-                >
-                  <td><strong>{{ item.code }}</strong></td>
-                  <td class="text-start">{{ item.name }}</td>
-                  <td>{{ item.category }}</td>
-                  <td>
-                    <span
-                      class="badge {% if item.quantity == 0 %}bg-danger{% elif item.quantity < 10 %}bg-warning{% else %}bg-info{% endif %} p-2"
-                    >
+                
+                <!-- Đặt class cho dòng dựa trên số lượng để cảnh báo tồn kho -->
+                <tr class="{% if item.quantity == 0 %}table-danger{% elif item.quantity < 10 %}table-warning{% endif %}">
+                  
+                  <!-- Hiển thị mã sản phẩm -->
+                  <td class="col-code"><strong>{{ item.code|default:"N/A" }}</strong></td>
+                  
+                  <!-- Hiển thị tên sản phẩm -->
+                  <td class="col-name text-start">{{ item.name|default:"N/A" }}</td>
+                  
+                  <!-- Hiển thị tên của nhóm sản phẩm (truy cập qua ForeignKey) -->
+                  <td class="col-category">{{ item.category.name|default:"N/A" }}</td>
+                  
+                  <!-- Hiển thị số lượng tồn kho với badge màu tương ứng -->
+                  <td class="col-quantity">
+                    <span class="badge {% if item.quantity == 0 %}bg-danger{% elif item.quantity < 10 %}bg-warning{% else %}bg-info{% endif %} p-2">
                       {{ item.quantity|default:"N/A" }}
                     </span>
                   </td>
-                  <td>{{ item.unit|default:"N/A" }}</td>
-                  <td class="text-end">
-                    {{ item.import_price|floatformat:"0"|intcomma }}
-                  </td>
-                  <td class="text-end">
-                    {{ item.sale_price|floatformat:"0"|intcomma }}
-                  </td>
-                  <td>{{ item.expiry_date|date:"d/m/Y"|default:"N/A"}}</td>
-                  <td class="text-start">{{ item.supplier|default:"N/A" }}</td>
-                  <td class="action-buttons">
-                    <a
-                      href="{% url 'dashboard-product-update' item.id %}"
-                      class="btn btn-primary btn-sm"
-                      data-bs-toggle="tooltip"
-                      title="Chỉnh sửa"
-                    >
-                      <i class="fa-solid fa-pen"></i>
+                  
+                  <!-- Hiển thị tên của đơn vị tính cơ bản (truy cập qua ForeignKey) -->
+                  <td class="col-unit">{{ item.uom.name|default:"N/A" }}</td>
+                  
+                  <!-- Hiển thị giá nhập, định dạng lại số cho dễ đọc -->
+                  <td class="col-price text-end">{{ item.import_price|floatformat:"0"|intcomma }}</td>
+                  
+                  <!-- Hiển thị giá bán, định dạng lại số cho dễ đọc -->
+                  <td class="col-price text-end">{{ item.sale_price|floatformat:"0"|intcomma }}</td>
+                  
+                  <!-- Hiển thị ngày hết hạn, định dạng lại ngày tháng -->
+                  <td class="col-date">{{ item.expiry_date|date:"d/m/Y"|default:"N/A"}}</td>
+                  
+                  <!-- Hiển thị tên nhà cung cấp -->
+                  <td class="col-supplier text-start">{{ item.supplier|default:"N/A" }}</td>
+                  
+                  <!-- Cột chứa các nút hành động (Xem, Sửa, Xóa) -->
+                  <td class="col-actions action-buttons">
+                    
+                    <!-- Nút xem chi tiết -->
+                    <a href="{% url 'dashboard-product-detail' item.id %}" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View Details">
+                      <i class="fas fa-eye"></i>
                     </a>
-                    <a
-                      href="{% url 'dashboard-product-delete' item.id %}"
-                      class="btn btn-danger btn-sm"
-                      data-bs-toggle="tooltip"
-                      title="Xóa"
-                    >
-                      <i class="fa-solid fa-trash"></i>
+                    
+                    <!-- Nút chỉnh sửa -->
+                    <a href="{% url 'dashboard-product-update' item.id %}" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" title="Edit">
+                      <i class="fas fa-pen"></i>
                     </a>
+                    
+                    <!-- Nút xóa -->
+                    <a href="{% url 'dashboard-product-delete' item.id %}" class="btn btn-danger btn-sm" data-bs-toggle="tooltip" title="Delete">
+                      <i class="fas fa-trash"></i>
+                    </a>
+
                   </td>
                 </tr>
                 {% empty %}
+                <!-- Hiển thị khi không có sản phẩm nào trong danh sách -->
                 <tr>
                   <td colspan="10" class="text-center p-4">
-                    Không tìm thấy sản phẩm nào.
+                    No products found.
                   </td>
                 </tr>
                 {% endfor %}
@@ -135,7 +150,7 @@
   </div>
 </div>
 {% endblock %}
-<!---->
+
 {% block javascript %}
-<script src="{% static 'js/dashboard/product.js' %}"></script>
-{% endblock %}
+    <script src="{% static 'js/dashboard/product.js' %}"></script>
+{% endblock %}```

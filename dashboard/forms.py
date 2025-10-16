@@ -4,68 +4,140 @@
 from django import forms
 from .models import (
     Product, Order, Prescription,
-    PrescriptionDetail, Patient
+    PrescriptionDetail, Patient, ProductCategory,
+    UnitOfMeasure, BillOfMaterials
 )
 from decimal import Decimal, InvalidOperation
 
 
+# =======================================================
+#               FORM QUẢN LÝ ĐƠN VỊ TÍNH (UoM)
+# =======================================================
+class UnitOfMeasureForm(forms.ModelForm):
+    class Meta:
+        model = UnitOfMeasure
+        fields = ['name']
+        labels = {'name': 'Unit Name'}
+        widgets = {'name': forms.TextInput(attrs={'placeholder': 'e.g., Pill, Blister, Box'})}
 
+# =======================================================
+#               FORM QUẢN LÝ BOM
+# =======================================================
+class BillOfMaterialsForm(forms.ModelForm):
+    class Meta:
+        model = BillOfMaterials
+        fields = ['product', 'uom_from', 'uom_to', 'conversion_factor']
+        labels = {
+            'product': 'Product',
+            'uom_from': 'From Unit (e.g., Box)',
+            'uom_to': 'To Unit (Base Unit, e.g., Pill)',
+            'conversion_factor': 'Conversion Factor'
+        }
 
 # =======================================================
 #               FORM QUẢN LÝ SẢN PHẨM (PRODUCT)
-#   Xử lý việc thêm và cập nhật thông tin sản phẩm.
-#   Bao gồm logic tùy chỉnh để xử lý giá tiền có dấu chấm.
 # =======================================================
 class ProductForm(forms.ModelForm):
     import_price = forms.CharField(
-        label="Giá nhập",
+        label="Import Price",
         required=False, 
-        widget=forms.TextInput(attrs={'placeholder': 'Ví dụ: 1.200.000', 'class': 'form-control'})
     )
     sale_price = forms.CharField(
-        label="Giá bán",
+        label="Sale Price",
         required=False, 
-        widget=forms.TextInput(attrs={'placeholder': 'Ví dụ: 1.500.000', 'class': 'form-control'})
+    )
+    category = forms.ModelChoiceField(
+        queryset=ProductCategory.objects.all(),
+        required=False,
+        label="Nhóm sản phẩm"
     )
 
     class Meta:
         model = Product
         fields = [
-            'code', 'name', 'category', 'quantity', 'unit',
+            'name', 'code', 'category', 'uom', 'quantity',
             'import_price', 'sale_price', 'expiry_date', 'supplier'
         ]
+
+        labels = {
+            'name': 'Product Name',
+            'code': 'Product Code',
+            'category': 'Product Category', 
+            'uom': 'Base Unit of Measure',
+            'quantity': 'Quantity',
+            'expiry_date': 'Expiry Date',
+            'supplier': 'Supplier',
+        }
+
         widgets = {
-            'expiry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'name': forms.TextInput(attrs={'placeholder': 'Enter product name'}),
+            'code': forms.TextInput(attrs={'placeholder': 'Enter product code'}),
+            'supplier': forms.TextInput(attrs={'placeholder': 'Enter supplier name'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+            
+            # Ghi đè widget cho các trường giá tiền đã được định nghĩa ở trên
+            'import_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,200,000'}),
+            'sale_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,500,000'}),
         }
 
     def clean_import_price(self):
-        """
-        Làm sạch và chuyển đổi giá nhập từ chuỗi thành số Decimal.
-        """
         price_str = self.cleaned_data.get('import_price')
         if not price_str:
             return None 
-        cleaned_price_str = price_str.replace('.', '').strip()
+        cleaned_price_str = price_str.replace('.', '').replace('.', '').strip()
         try:
             return Decimal(cleaned_price_str)
         except (InvalidOperation, ValueError):
-            raise forms.ValidationError("Giá nhập không hợp lệ. Vui lòng chỉ nhập số.")
+            raise forms.ValidationError("Invalid import price. Please enter numbers only.")
 
     def clean_sale_price(self):
-        """
-        Làm sạch và chuyển đổi giá bán từ chuỗi thành số Decimal.
-        """
         price_str = self.cleaned_data.get('sale_price')
         if not price_str:
             return None
             
-        cleaned_price_str = price_str.replace('.', '').strip()
+        cleaned_price_str = price_str.replace('.', '').replace('.', '').strip()
         try:
             return Decimal(cleaned_price_str)
         except (InvalidOperation, ValueError):
-            raise forms.ValidationError("Giá bán không hợp lệ. Vui lòng chỉ nhập số.")
+            raise forms.ValidationError("Invalid sale price. Please enter numbers only.")
 
 
+# =======================================================
+#               FORM QUẢN LÝ NHÓM SẢN PHẨM
+#   Xử lý việc thêm và cập nhật các nhóm/danh mục sản phẩm.
+# =======================================================
+class ProductCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ProductCategory
+        
+        # Các trường sẽ hiển thị trong form
+        fields = ['name', 'parent']
+        
+        # Tùy chỉnh nhãn (label) cho các trường
+        labels = {
+            'name': 'Category Name',
+            'parent': 'Parent Category',
+        }
+        
+        # Thêm placeholder và các thuộc tính khác cho widget
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'e.g., Painkillers, Vitamins'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        """
+        Ghi đè hàm khởi tạo để tùy chỉnh thêm cho trường 'parent'.
+        """
+        super().__init__(*args, **kwargs)
+        
+        # Làm cho trường 'parent' không bắt buộc (optional)
+        self.fields['parent'].required = False
+        
+        # Thêm một lựa chọn "rỗng" vào đầu danh sách Parent Category
+        self.fields['parent'].empty_label = "--------- (No Parent Category) ---------"
+        
+        # Sắp xếp danh sách các danh mục cha theo tên cho dễ tìm
+        self.fields['parent'].queryset = ProductCategory.objects.all().order_by('name')
 
 
 
@@ -120,9 +192,15 @@ class PrescriptionForm(forms.ModelForm):
 #   FORM CHI TIẾT: Lấy thông tin từng loại thuốc trong toa.
 # -------------------------------------------------------
 class PrescriptionDetailForm(forms.ModelForm):
+    uom = forms.ModelChoiceField(
+        queryset=UnitOfMeasure.objects.all(),
+        label="Đơn vị",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = PrescriptionDetail
-        fields = ['product', 'quantity']
+        fields = ['product', 'uom', 'quantity']
         widgets = {
             'product': forms.Select(attrs={'class': 'form-control'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),

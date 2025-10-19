@@ -1,4 +1,6 @@
-{% extends 'partials/base.html' %} {% load crispy_forms_tags %}
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load crispy_forms_tags %}
 <!---->
 {% block title %} Logout Page {% endblock %}
 <!---->
@@ -13,7 +15,9 @@
           <h4>You have been logged out</h4>
         </div>
         <p>
-          <a href="{% url 'user-login' %}" class="btn btn-primary">Return to Login</a>
+          <a href="{% url 'user-login' %}" class="btn btn-primary"
+            >Return to Login</a
+          >
         </p>
       </div>
     </div>

@@ -10,11 +10,37 @@ urlpatterns = [
     
     # Product URLs
     path('product/', views.product, name='dashboard-product'),
-    path('product/add/', views.product_add, name='dashboard-product-add'),
+    path('product/new/', views.product_add, name='dashboard-product-add'),
     path('product/delete/<int:pk>/', views.product_delete, name='dashboard-product-delete'),
     path('product/update/<int:pk>/', views.product_update, name='dashboard-product-update'),
     path('product/detail/<int:pk>/', views.product_detail, name='dashboard-product-detail'),
-    
+
+    # URLs cho Nhóm Sản phẩm
+    path('product-category/', views.category_list, name='dashboard-category-list'),
+    path('product-category/new/', views.category_form, name='dashboard-category-add'),
+    path('product-category/edit/<int:pk>/', views.category_form, name='dashboard-category-edit'),
+
+    # URLs cho UoM Category
+    path('product/uom-category/', views.uom_category_list, name='dashboard-uom-category-list'),
+    path('product/uom-category/new/', views.uom_category_form, name='dashboard-uom-category-add'),
+    path('product/uom-category/edit/<int:pk>/', views.uom_category_form, name='dashboard-uom-category-edit'),
+    path('product/uom-category/detail/<int:pk>/', views.uom_category_detail, name='dashboard-uom-category-detail'),
+    path('product/uom-category/delete/<int:pk>/', views.uom_category_delete, name='dashboard-uom-category-delete'),
+
+    # URLs cho UoM
+    path('product/uom/new/', views.uom_form, name='dashboard-uom-add'),
+    path('product/uom/edit/<int:pk>/', views.uom_form, name='dashboard-uom-edit'),
+    path('product/uom/detail/<int:pk>/', views.uom_detail, name='dashboard-uom-detail'),
+    path('product/uom/delete/<int:pk>/', views.uom_delete, name='dashboard-uom-delete'),
+    path('product/uom/', views.uom_list, name='dashboard-uom-list'),
+
+    # URLs cho BOM
+    path('product/bom/', views.bom_list, name='dashboard-bom-list'),
+    path('product/bom/new/', views.bom_form, name='dashboard-bom-add'),
+    path('product/bom/detail/<int:pk>/', views.bom_detail, name='dashboard-bom-detail'),
+    path('product/bom/edit/<int:pk>/', views.bom_form, name='dashboard-bom-edit'),
+    path('product/bom/delete/<int:pk>/', views.bom_delete, name='dashboard-bom-delete'),
+
     # Order URL
     path('order/', views.order, name='dashboard-order'),
     
@@ -44,21 +70,7 @@ urlpatterns = [
             success_url=reverse_lazy('password_reset_done')
         ), name='password_reset'),
 
-    # URLs cho Nhóm Sản phẩm
-    path('product-category/', views.category_list, name='dashboard-category-list'),
-    path('product-category/new/', views.category_form, name='dashboard-category-add'),
-    path('product-category/edit/<int:pk>/', views.category_form, name='dashboard-category-edit'),
-
-    # URLs cho UoM
-    path('product/uom/', views.uom_list, name='dashboard-uom-list'),
-    path('product/uom/new/', views.uom_form, name='dashboard-uom-add'),
-    path('product/uom/edit/<int:pk>/', views.uom_form, name='dashboard-uom-edit'),
-    path('product/uom/delete/<int:pk>/', views.uom_delete, name='dashboard-uom-delete'),
-
-    # URLs cho BOM
-    path('product/bom/', views.bom_list, name='dashboard-bom-list'),
-    path('product/bom/new/', views.bom_form, name='dashboard-bom-add'),
-    path('product/bom/edit/<int:pk>/', views.bom_form, name='dashboard-bom-edit'),
-    path('product/bom/delete/<int:pk>/', views.bom_delete, name='dashboard-bom-delete'),
+    
+    
 
 ]

@@ -1,5 +1,10 @@
-{% extends 'partials/base.html' %} {% block title %} User Profile {% endblock %}
-{% load crispy_forms_tags %} {% block content %}
+{% extends 'partials/base.html' %}
+<!--  -->
+{% block title %} User Profile {% endblock %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% block content %}
 <div class="container">
   <div class="row my-4">
     <div class="col-md-4"></div>
@@ -12,8 +17,11 @@
               <span class="h4"> Profile Information</span>
               <hr />
               <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %} {{ user_form|crispy }} {{ profile_form|crispy
-                }}
+                {% csrf_token %}
+                <!--  -->
+                {{ user_form|crispy }}
+                <!--  -->
+                {{ profile_form|crispy }}
                 <input
                   class="btn btn-success"
                   type="submit"

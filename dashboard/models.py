@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
+from django.core.exceptions import ValidationError
 
 # =======================================================
 #               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
@@ -26,23 +27,45 @@ BLOOD_TYPE_CHOICES = (
     ('Unknown', 'Chưa rõ'),
 )
 
-
-# =======================================================
-#               CÁC MODEL KHÔNG PHỤ THUỘC
-#   Các model này không phụ thuộc vào các model khác trong file này.
-#   Chúng phải được định nghĩa trước.
-# =======================================================
+UOM_TYPE_CHOICES = (
+    ('reference', 'Reference Unit for this category'),
+    ('bigger', 'Bigger than the reference Unit of Measure'),
+    ('smaller', 'Smaller than the reference Unit of Measure'),
+)
 
 # =======================================================
 #               MODEL: UNITOFMEASURE (UoM)
-#   Lưu trữ các đơn vị tính (Viên, Vỉ, Hộp...).
 # =======================================================
-class UnitOfMeasure(models.Model):
-    name = models.CharField(max_length=50, unique=True, verbose_name="Unit Name")
+
+# -------------------------------------------------------
+#   MODEL: UOMCATEGORY (Nhóm/Chuyên mục Đơn vị tính)
+#   Ví dụ: "Trọng lượng", "Số lượng đếm", "Chiều dài"...
+# -------------------------------------------------------
+class UomCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Category Name")
+    description = models.TextField(null=True, blank=True, verbose_name="Description")
 
     class Meta:
-        verbose_name_plural = 'Units of Measure'
+        verbose_name_plural = 'UoM Categories'
         ordering = ['name']
+
+    def __str__(self):
+        return self.name
+    
+# -------------------------------------------------------
+#   MODEL: UNITOFMEASURE (UoM)
+#   Lưu trữ các đơn vị tính và logic quy đổi của chúng.
+# -------------------------------------------------------    
+class UnitOfMeasure(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Unit of Measure")
+    category = models.ForeignKey(UomCategory, on_delete=models.CASCADE, related_name='uoms', verbose_name="Category")
+    uom_type = models.CharField(max_length=20, choices=UOM_TYPE_CHOICES, verbose_name="Type")
+    active = models.BooleanField(default=True, verbose_name="Active")
+    rounding_precision = models.FloatField(default=0.01, verbose_name="Rounding Precision")
+    
+    class Meta:
+        verbose_name_plural = 'Units of Measure'
+        ordering = ['category', 'name']
 
     def __str__(self):
         return self.name
@@ -56,6 +79,7 @@ class ProductCategory(models.Model):
     parent = models.ForeignKey(
         'self', on_delete=models.SET_NULL, null=True, blank=True, 
         related_name='children', verbose_name="Parent Category")
+    description = models.TextField(null=True, blank=True, verbose_name="Description")
 
     class Meta:
         verbose_name_plural = 'Product Categories'
@@ -100,14 +124,8 @@ class Patient(models.Model):
 
 
 # =======================================================
-#               CÁC MODEL PHỤ THUỘC
-#   Các model này có quan hệ ForeignKey đến các model ở trên.
-# =======================================================
-
-# =======================================================
 #               MODEL CƠ SỞ: PRODUCT
 #   Đại diện cho một loại thuốc hoặc sản phẩm y tế trong kho.
-#   Phụ thuộc vào: ProductCategory, UnitOfMeasure.
 # =======================================================
 class Product(models.Model):
     code = models.CharField(max_length=50, unique=True, null=True, verbose_name="Product Code")
@@ -119,7 +137,8 @@ class Product(models.Model):
     sale_price = models.DecimalField(max_digits=15, decimal_places=2, null=True, verbose_name="Sale Price")
     expiry_date = models.DateField(null=True, blank=True, verbose_name="Expiry Date")
     supplier = models.CharField(max_length=100, null=True, blank=True, verbose_name="Supplier")
-
+    description = models.TextField(null=True, blank=True, verbose_name="Description")
+    
     class Meta:
         verbose_name_plural = 'Products'
         ordering = ['name']
@@ -128,27 +147,29 @@ class Product(models.Model):
         return f'{self.name} ({self.code})'
 
 # =======================================================
-#               MODEL MỚI: BILLOFMATERIALS (BOM)
-#   Định nghĩa cách quy đổi giữa các đơn vị.
-#   Phụ thuộc vào: Product, UnitOfMeasure.
+#               MODEL: BILLOFMATERIALS (BOM)
+#   Định nghĩa quy tắc quy đổi giữa các UoM cho một sản phẩm.
 # =======================================================
 class BillOfMaterials(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='boms', verbose_name="Product")
     uom_from = models.ForeignKey(UnitOfMeasure, on_delete=models.CASCADE, related_name='boms_from', verbose_name="From Unit")
-    uom_to = models.ForeignKey(UnitOfMeasure, on_delete=models.CASCADE, related_name='boms_to', verbose_name="To Unit (Base)")
+    uom_to = models.ForeignKey(UnitOfMeasure, on_delete=models.CASCADE, related_name='boms_to', verbose_name="To Unit")
     conversion_factor = models.IntegerField(verbose_name="Conversion Factor")
 
     class Meta:
         verbose_name_plural = 'Bills of Materials'
-        unique_together = ('product', 'uom_from')
+        unique_together = ('product', 'uom_from', 'uom_to')
 
     def __str__(self):
         return f"{self.product.name}: 1 {self.uom_from.name} = {self.conversion_factor} {self.uom_to.name}"
 
+    def clean(self):
+        if self.conversion_factor <= 0:
+            raise ValidationError({'conversion_factor': 'Conversion factor must be a positive number.'})
+        
 # =======================================================
 #               MODEL GIAO DỊCH: PRESCRIPTION
 #   Đại diện cho một toa thuốc tổng thể do bác sĩ kê cho bệnh nhân.
-#   Phụ thuộc vào: Patient, User.
 # =======================================================
 class Prescription(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.SET_NULL, null=True, verbose_name="Patient")
@@ -168,7 +189,6 @@ class Prescription(models.Model):
 # =======================================================
 #               MODEL GIAO DỊCH: ORDER
 #   Ghi lại một giao dịch xuất kho (bán hàng).
-#   Phụ thuộc vào: Prescription, Product, User.
 # =======================================================
 class Order(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="From Prescription")
@@ -189,7 +209,6 @@ class Order(models.Model):
 # =======================================================
 #               MODEL CHI TIẾT: PRESCRIPTIONDETAIL
 #   Lưu trữ chi tiết từng loại thuốc trong một toa thuốc.
-#   Phụ thuộc vào: Prescription, Product, UnitOfMeasure.
 # =======================================================
 class PrescriptionDetail(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='details', verbose_name="Prescription")

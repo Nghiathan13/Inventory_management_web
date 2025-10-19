@@ -7,33 +7,17 @@
 {% block content %}
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="col-lg-8">
+    <div class="col-md-6">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
-          <h4>
-            {% if instance.pk %}
-            <i class="fas fa-edit me-2"></i>Edit Product Category {% else %}
-            <i class="fas fa-plus-circle me-2"></i>Create New Product Category
-            {% endif %}
-          </h4>
+          <h4><i class="fas fa-tags me-2"></i>{{ title }}</h4>
         </div>
         <div class="card-body p-4">
           <form method="POST">
-            {% csrf_token %}
-
-            <!-- Bố cục 2 cột -->
-            <div class="row">
-              <div class="col-md-6">{{ form.name|as_crispy_field }}</div>
-              <div class="col-md-6">{{ form.parent|as_crispy_field }}</div>
-            </div>
-
-            <!-- Trường Mô tả chiếm toàn bộ chiều rộng -->
-            {{ form.description|as_crispy_field }}
-
-            <!-- Nút bấm -->
+            {% csrf_token %} {{ form|crispy }}
             <div class="mt-4 text-end">
               <a
-                href="{% url 'dashboard-category-list' %}"
+                href="{% url 'dashboard-uom-category-list' %}"
                 class="btn btn-secondary"
                 >Cancel</a
               >

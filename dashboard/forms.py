@@ -5,10 +5,23 @@ from django import forms
 from .models import (
     Product, Order, Prescription,
     PrescriptionDetail, Patient, ProductCategory,
-    UnitOfMeasure, BillOfMaterials
+    UnitOfMeasure, UomCategory, BillOfMaterials
 )
 from decimal import Decimal, InvalidOperation
 
+
+# =======================================================
+#               FORM QUẢN LÝ NHÓM ĐƠN VỊ TÍNH
+# =======================================================
+class UomCategoryForm(forms.ModelForm):
+    class Meta:
+        model = UomCategory
+        fields = ['name', 'description']
+        labels = {'name': 'Category Name', 'description': 'Description'}
+        widgets = {
+           'name': forms.TextInput(attrs={'placeholder': 'e.g., Count, Weight, Volume'}),
+           'description': forms.Textarea(attrs={'rows': 3}),
+       }
 
 # =======================================================
 #               FORM QUẢN LÝ ĐƠN VỊ TÍNH (UoM)
@@ -16,12 +29,20 @@ from decimal import Decimal, InvalidOperation
 class UnitOfMeasureForm(forms.ModelForm):
     class Meta:
         model = UnitOfMeasure
-        fields = ['name']
-        labels = {'name': 'Unit Name'}
-        widgets = {'name': forms.TextInput(attrs={'placeholder': 'e.g., Pill, Blister, Box'})}
+        fields = ['name', 'category', 'uom_type', 'active', 'rounding_precision']
+        labels = {
+            'name': 'Unit of Measure',
+            'category': 'Category',
+            'uom_type': 'Type',
+            'active': 'Active',
+            'rounding_precision': 'Rounding Precision',
+        }
+        widgets = {
+           'rounding_precision': forms.NumberInput(attrs={'step': 'any'})
+       }
 
 # =======================================================
-#               FORM QUẢN LÝ BOM
+#               FORM QUẢN LÝ BOM form
 # =======================================================
 class BillOfMaterialsForm(forms.ModelForm):
     class Meta:
@@ -29,9 +50,12 @@ class BillOfMaterialsForm(forms.ModelForm):
         fields = ['product', 'uom_from', 'uom_to', 'conversion_factor']
         labels = {
             'product': 'Product',
-            'uom_from': 'From Unit (e.g., Box)',
-            'uom_to': 'To Unit (Base Unit, e.g., Pill)',
+            'uom_from': 'From Unit',
+            'uom_to': 'To Unit',
             'conversion_factor': 'Conversion Factor'
+        }
+        widgets = {
+            'conversion_factor': forms.NumberInput(attrs={'step': 'any'}),
         }
 
 # =======================================================
@@ -56,17 +80,19 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = [
             'name', 'code', 'category', 'uom', 'quantity',
-            'import_price', 'sale_price', 'expiry_date', 'supplier'
+            'import_price', 'sale_price', 'expiry_date', 'supplier',
+            'description'
         ]
 
         labels = {
             'name': 'Product Name',
             'code': 'Product Code',
             'category': 'Product Category', 
-            'uom': 'Base Unit of Measure',
+            'uom': 'Base UoM',
             'quantity': 'Quantity',
             'expiry_date': 'Expiry Date',
             'supplier': 'Supplier',
+            'description': 'Description',
         }
 
         widgets = {
@@ -74,10 +100,9 @@ class ProductForm(forms.ModelForm):
             'code': forms.TextInput(attrs={'placeholder': 'Enter product code'}),
             'supplier': forms.TextInput(attrs={'placeholder': 'Enter supplier name'}),
             'expiry_date': forms.DateInput(attrs={'type': 'date'}),
-            
-            # Ghi đè widget cho các trường giá tiền đã được định nghĩa ở trên
             'import_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,200,000'}),
             'sale_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,500,000'}),
+            'description': forms.Textarea(attrs={'rows': 4}),
         }
 
     def clean_import_price(self):
@@ -111,17 +136,19 @@ class ProductCategoryForm(forms.ModelForm):
         model = ProductCategory
         
         # Các trường sẽ hiển thị trong form
-        fields = ['name', 'parent']
+        fields = ['name', 'parent', 'description']
         
         # Tùy chỉnh nhãn (label) cho các trường
         labels = {
             'name': 'Category Name',
             'parent': 'Parent Category',
+            'description': 'Description',
         }
         
         # Thêm placeholder và các thuộc tính khác cho widget
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'e.g., Painkillers, Vitamins'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Enter a description for the category'}),
         }
 
     def __init__(self, *args, **kwargs):

@@ -1,0 +1,50 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} UoM Detail: {{ uom.name }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4 odoo-form-view">
+  <!-- Thanh hành động -->
+  <div class="odoo-form-header">
+    <a href="{% url 'dashboard-uom-edit' uom.id %}" class="btn btn-primary"
+      >EDIT</a
+    >
+    <a href="{% url 'dashboard-uom-list' %}" class="btn btn-secondary"
+      >BACK TO LIST</a
+    >
+  </div>
+
+  <!-- Tiêu đề -->
+  <div class="odoo-form-title">
+    <h3>{{ uom.name }}</h3>
+  </div>
+
+  <!-- Form sheet -->
+  <div class="odoo-form-sheet">
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>Unit Name:</strong><br />{{ uom.name }}</p>
+        <p><strong>Category:</strong><br />{{ uom.category.name }}</p>
+        <p><strong>Type:</strong><br />{{ uom.get_uom_type_display }}</p>
+      </div>
+      <div class="col-md-6">
+        <p>
+          <strong>Active:</strong><br />{% if uom.active %}<span
+            class="badge bg-success"
+            >Yes</span
+          >{% else %}<span class="badge bg-danger">No</span>{% endif %}
+        </p>
+        <p>
+          <strong>Rounding Precision:</strong><br />{{ uom.rounding_precision }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -23,9 +23,7 @@ from .forms import (
 from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
-from django.urls import reverse_lazy
 from django.contrib import messages
-from django.core.exceptions import ObjectDoesNotExist
 
 
 # Import json
@@ -35,9 +33,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Sum
 from datetime import datetime, timedelta
 
-#Import BOM
-from .models import BillOfMaterials, UnitOfMeasure
-from .forms import BillOfMaterialsForm, UnitOfMeasureForm
+#Import BOM, UoM
+from .models import UnitOfMeasure, BillOfMaterials, UomCategory
+from .forms import UnitOfMeasureForm, BillOfMaterialsForm, UomCategoryForm
 
 
 # =======================================================
@@ -74,6 +72,57 @@ def order(request):
     }
     return render(request, 'dashboard/order/order.html', context)
 
+# =======================================================
+#               QUẢN LÝ NHÓM ĐƠN VỊ TÍNH (UOM CATEGORY)
+# =======================================================
+
+# -------------------------------------------------------
+#   VIEW: DANH SÁCH NHÓM ĐƠN VỊ TÍNH (READ)
+# -------------------------------------------------------
+@login_required
+def uom_category_list(request):
+    categories = UomCategory.objects.all().order_by('name')
+    context = {'categories': categories}
+    return render(request, 'dashboard/uom_category/uom_category_list.html', context)
+
+# -------------------------------------------------------
+#   VIEW: FORM THÊM/SỬA NHÓM ĐƠN VỊ TÍNH (CREATE/UPDATE)
+# -------------------------------------------------------
+@login_required
+def uom_category_form(request, pk=None):
+    instance = get_object_or_404(UomCategory, pk=pk) if pk else None
+    form = UomCategoryForm(request.POST or None, instance=instance)
+    
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'UoM Category saved successfully.')
+        return redirect('dashboard-uom-category-list')
+        
+    title = 'Edit UoM Category' if instance else 'Create New UoM Category'
+    context = {'form': form, 'title': title}
+    return render(request, 'dashboard/uom_category/uom_category_form.html', context)
+
+# -------------------------------------------------------
+#   VIEW: XEM CHI TIẾT MỘT NHÓM ĐƠN VỊ TÍNH (READ DETAIL)
+# -------------------------------------------------------
+@login_required
+def uom_category_detail(request, pk):
+    category = get_object_or_404(UomCategory.objects.prefetch_related('uoms'), pk=pk)
+    context = {'category': category}
+    return render(request, 'dashboard/uom_category/uom_category_detail.html', context)
+
+# -------------------------------------------------------
+#   VIEW: XÁC NHẬN XÓA NHÓM ĐƠN VỊ TÍNH (DELETE)
+# -------------------------------------------------------
+@login_required
+def uom_category_delete(request, pk):
+    category = get_object_or_404(UomCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, f'UoM Category "{category.name}" has been deleted.')
+        return redirect('dashboard-uom-category-list')
+    return render(request, 'dashboard/uom_category/uom_category_confirm_delete.html', {'item': category})
+
 
 # =======================================================
 #               QUẢN LÝ ĐƠN VỊ TÍNH (UoM CRUD)
@@ -95,9 +144,20 @@ def uom_form(request, pk=None):
     context = {
         'form': form,
         'title': title,
+        'instance': instance,
     }
     return render(request, 'dashboard/uom/uom_form.html', context)
 
+# -------------------------------------------------------
+#   VIEW: XEM CHI TIẾT MỘT ĐƠN VỊ TÍNH (READ DETAIL)
+# -------------------------------------------------------
+@login_required
+def uom_detail(request, pk):
+    uom = get_object_or_404(UnitOfMeasure.objects.select_related('category'), pk=pk)
+    context = {'uom': uom}
+    return render(request, 'dashboard/uom/uom_detail.html', context)
+
+# Delete
 @login_required
 def uom_delete(request, pk):
     uom = get_object_or_404(UnitOfMeasure, pk=pk)
@@ -110,32 +170,49 @@ def uom_delete(request, pk):
     }
     return render(request, 'dashboard/uom/uom_confirm_delete.html', context)
 
+
 # =======================================================
 #               QUẢN LÝ BOM (BOM CRUD)
 # =======================================================
+
+# -------------------------------------------------------
+#   VIEW: DANH SÁCH CÁC QUY TẮC BOM (READ)
+# -------------------------------------------------------
 @login_required
 def bom_list(request):
-    boms = BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to').all()
-    context = {
-        'boms': boms
-    }
+    boms = BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to').all().order_by('product__name')
+    context = {'boms': boms}
     return render(request, 'dashboard/bom/bom_list.html', context)
 
+# -------------------------------------------------------
+#   VIEW: FORM THÊM/SỬA MỘT QUY TẮC BOM (CREATE/UPDATE)
+# -------------------------------------------------------
 @login_required
 def bom_form(request, pk=None):
     instance = get_object_or_404(BillOfMaterials, pk=pk) if pk else None
     form = BillOfMaterialsForm(request.POST or None, instance=instance)
+    
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, 'Bill of Materials rule saved successfully.')
         return redirect('dashboard-bom-list')
+        
     title = 'Edit BOM Rule' if instance else 'Create New BOM Rule'
-    context = {
-        'form': form,
-        'title': title,
-    }
+    context = {'form': form, 'title': title}
     return render(request, 'dashboard/bom/bom_form.html', context)
 
+# -------------------------------------------------------
+#   VIEW: XEM CHI TIẾT MỘT QUY TẮC BOM (READ DETAIL)
+# -------------------------------------------------------
+@login_required
+def bom_detail(request, pk):
+    bom = get_object_or_404(BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to'), pk=pk)
+    context = {'bom': bom}
+    return render(request, 'dashboard/bom/bom_detail.html', context)
+
+# -------------------------------------------------------
+#   VIEW: XÁC NHẬN XÓA MỘT QUY TẮC BOM (DELETE)
+# -------------------------------------------------------
 @login_required
 def bom_delete(request, pk):
     bom = get_object_or_404(BillOfMaterials, pk=pk)
@@ -143,9 +220,7 @@ def bom_delete(request, pk):
         bom.delete()
         messages.success(request, 'BOM rule has been deleted.')
         return redirect('dashboard-bom-list')
-    context =  {
-        'item': bom
-    }
+    context = {'item': bom}
     return render(request, 'dashboard/bom/bom_confirm_delete.html', context)
 
 # =======================================================
@@ -387,7 +462,6 @@ def dispense_list(request):
 
 # -------------------------------------------------------
 #   VIEW: CHI TIẾT VÀ XỬ LÝ CẤP PHÁT THUỐC
-#   - Logic chính giữ nguyên.
 # -------------------------------------------------------
 @login_required
 def dispense_process(request, pk):
@@ -413,22 +487,47 @@ def dispense_process(request, pk):
                     product = detail.product
                     prescribed_uom = detail.uom
                     prescribed_quantity = detail.quantity
+                    base_uom = product.uom
 
-                    quantity_to_deduct = prescribed_quantity # Mặc định
+                    quantity_to_deduct = prescribed_quantity
                     
                     # Nếu đơn vị kê đơn khác đơn vị cơ bản trong kho
-                    if prescribed_uom and prescribed_uom != product.uom:
-                        try:
-                            bom_rule = BillOfMaterials.objects.get(
-                                product=product,
-                                uom_from=prescribed_uom,
-                                uom_to=product.uom
-                            )
-                            quantity_to_deduct = prescribed_quantity * bom_rule.conversion_factor
-                        except BillOfMaterials.DoesNotExist:
-                            raise Exception(f"Không tìm thấy quy tắc quy đổi từ '{prescribed_uom.name}' sang '{product.uom.name}' cho '{product.name}'.")
+                    if prescribed_uom and prescribed_uom != base_uom:
+                        # KIỂM TRA NHÓM UOM
+                        if prescribed_uom.category != base_uom.category:
+                            raise Exception(f"Không thể quy đổi giữa 2 nhóm đơn vị khác nhau ('{prescribed_uom.category.name}' và '{base_uom.category.name}').")
 
-                     # Kiểm tra tồn kho với số lượng ĐÃ QUY ĐỔI
+                        # =======================================================
+                        #        LOGIC QUY ĐỔI KẾT HỢP BOM VÀ UOM_TYPE
+                        # =======================================================
+                        
+                        # --- Trường hợp 1: Đơn vị kê đơn LỚN HƠN đơn vị gốc ---
+                        # Ví dụ: Kê "Hộp", trừ kho "Viên"
+                        if prescribed_uom.uom_type == 'bigger' and base_uom.uom_type == 'reference':
+                            try:
+                                bom_rule = BillOfMaterials.objects.get(
+                                    product=product, uom_from=prescribed_uom, uom_to=base_uom
+                                )
+                                quantity_to_deduct = prescribed_quantity * bom_rule.conversion_factor # Phép nhân
+                            except BillOfMaterials.DoesNotExist:
+                                raise Exception(f"Thiếu quy tắc BOM để quy đổi từ '{prescribed_uom.name}' sang '{base_uom.name}'.")
+                        
+                        # --- Trường hợp 2: Đơn vị kê đơn NHỎ HƠN đơn vị gốc ---
+                        # Ví dụ: Kê "Viên", trừ kho "Hộp" (ít xảy ra nhưng cần xử lý)
+                        elif prescribed_uom.uom_type == 'smaller' and base_uom.uom_type == 'reference':
+                             try:
+                                bom_rule = BillOfMaterials.objects.get(
+                                    product=product, uom_from=base_uom, uom_to=prescribed_uom
+                                )
+                                quantity_to_deduct = prescribed_quantity / bom_rule.conversion_factor # Phép chia
+                             except BillOfMaterials.DoesNotExist:
+                                raise Exception(f"Thiếu quy tắc BOM để quy đổi từ '{base_uom.name}' sang '{prescribed_uom.name}'.")
+                        
+                        # (Thêm các trường hợp quy đổi phức tạp hơn nếu cần, ví dụ: bigger -> bigger)
+                        else:
+                            raise Exception("Quy tắc quy đổi không được hỗ trợ (chỉ hỗ trợ từ Bigger/Smaller về Reference).")
+
+                    # Kiểm tra tồn kho với số lượng ĐÃ QUY ĐỔI
                     if product.quantity < quantity_to_deduct:
                         raise Exception(f"Không đủ '{product.name}'. Cần {quantity_to_deduct} {product.uom.name} nhưng chỉ còn {product.quantity}.")
                     

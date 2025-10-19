@@ -1,0 +1,13 @@
+/* Kích thước các cột trong bảng Đơn vị tính */
+.table {
+  min-width: 900px;
+}
+.col-uom-name {
+  width: 350px;
+}
+.col-uom-category {
+  width: 350px;
+}
+.col-actions {
+  width: 150px;
+}

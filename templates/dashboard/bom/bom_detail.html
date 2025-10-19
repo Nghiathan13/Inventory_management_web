@@ -1,0 +1,51 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} BOM Detail: {{ bom.product.name }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4 odoo-form-view">
+  <div class="odoo-form-header">
+    <a href="{% url 'dashboard-bom-edit' bom.id %}" class="btn btn-primary"
+      >EDIT</a
+    >
+    <a href="{% url 'dashboard-bom-list' %}" class="btn btn-secondary"
+      >BACK TO LIST</a
+    >
+  </div>
+
+  <div class="odoo-form-title">
+    <h3>{{ bom.product.name }}</h3>
+    <small class="text-muted">Bill of Materials Rule</small>
+  </div>
+
+  <div class="odoo-form-sheet">
+    <h4>Conversion Rule</h4>
+    <hr />
+    <div class="row">
+      <div class="col-md-6">
+        <p>
+          <strong>Product:</strong><br /><a
+            href="{% url 'dashboard-product-detail' bom.product.id %}"
+            >{{ bom.product.name }}</a
+          >
+        </p>
+        <p><strong>From Unit (Bigger):</strong><br />{{ bom.uom_from.name }}</p>
+      </div>
+      <div class="col-md-6">
+        <p><strong>To Unit (Smaller):</strong><br />{{ bom.uom_to.name }}</p>
+        <p>
+          <strong>Conversion Factor:</strong><br />1 {{ bom.uom_from.name }} =
+          <strong>{{ bom.conversion_factor|floatformat }}</strong> {{
+          bom.uom_to.name }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

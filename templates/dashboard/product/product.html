@@ -38,7 +38,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <h4><i class="fa-solid fa-list-ul me-2"></i>Medication List</h4>
             <a href="{% url 'dashboard-product-add' %}" class="btn btn-new">
-              <i class="fa-solid fa-plus me-1"></i>New
+              <i class="fa-solid fa-plus me-1"></i> New
             </a>
           </div>
         </div>
@@ -74,6 +74,7 @@
                   <th scope="col" class="col-code">ID</th>
                   <th scope="col" class="col-name">Name</th>
                   <th scope="col" class="col-category">Category</th>
+                  <th scope="col" class="col-description">Description</th>
                   <th scope="col" class="col-quantity">Quantity</th>
                   <th scope="col" class="col-unit">Unit</th>
                   <th scope="col" class="col-price">Import Price</th>
@@ -91,7 +92,12 @@
                 >
                   <td class="col-code"><strong>{{ item.code }}</strong></td>
                   <td class="col-name text-start">{{ item.name }}</td>
-                  <td class="col-category">{{ item.category }}</td>
+                  <td class="col-category">
+                    {{ item.category.name|default:"N/A" }}
+                  </td>
+                  <td class="col-description text-start">
+                    {{ item.description|truncatewords:10|default:"--" }}
+                  </td>
                   <td class="col-quantity">
                     <span
                       class="badge {% if item.quantity == 0 %}bg-danger{% elif item.quantity < 10 %}bg-warning{% else %}bg-info{% endif %} p-2"

@@ -19,6 +19,8 @@ urlpatterns = [
     path('product-category/', views.category_list, name='dashboard-category-list'),
     path('product-category/new/', views.category_form, name='dashboard-category-add'),
     path('product-category/edit/<int:pk>/', views.category_form, name='dashboard-category-edit'),
+    path('product/detail/<int:pk>/', views.category_detail, name='dashboard-category-detail'),
+    path('product-category/delete/<int:pk>/', views.category_delete, name='dashboard-category-delete'),
 
     # URLs cho UoM Category
     path('product/uom-category/', views.uom_category_list, name='dashboard-uom-category-list'),

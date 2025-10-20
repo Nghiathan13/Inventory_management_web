@@ -1,0 +1,82 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Category: {{ category.name }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4 odoo-form-view">
+  <div class="odoo-form-header">
+    <a
+      href="{% url 'dashboard-category-edit' category.id %}"
+      class="btn btn-primary"
+      >EDIT</a
+    >
+    <a href="{% url 'dashboard-category-list' %}" class="btn btn-secondary"
+      >BACK TO LIST</a
+    >
+  </div>
+
+  <div class="odoo-form-title">
+    <nav aria-label="breadcrumb" class="bg-transparent p-0">
+      <ol class="breadcrumb bg-transparent p-0">
+        <li class="breadcrumb-item">
+          <a href="{% url 'dashboard-category-list' %}">Product Categories</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          {{ category.name }}
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  <div class="odoo-form-sheet">
+    <div class="mb-3">
+      <h5>Description</h5>
+      <p class="text-muted">
+        {{ category.description|linebreaksbr|default:"No description provided."
+        }}
+      </p>
+    </div>
+    <hr />
+    <div class="row">
+      <div class="col-md-6">
+        <h5>Child Categories</h5>
+        <ul class="list-group list-group-flush">
+          {% for child in category.children.all %}
+          <li class="list-group-item">
+            <a href="{% url 'dashboard-category-detail' child.id %}"
+              >{{ child.name }}</a
+            >
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">
+            This category has no child categories.
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <h5>Products in this Category</h5>
+        <ul class="list-group list-group-flush">
+          {% for product in category.product_set.all %}
+          <li class="list-group-item">
+            <a href="{% url 'dashboard-product-detail' product.id %}"
+              >{{ product.name }}</a
+            >
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">
+            No products are in this category.
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

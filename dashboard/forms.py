@@ -109,7 +109,7 @@ class ProductForm(forms.ModelForm):
         price_str = self.cleaned_data.get('import_price')
         if not price_str:
             return None 
-        cleaned_price_str = price_str.replace('.', '').replace('.', '').strip()
+        cleaned_price_str = price_str.replace('.', '').replace(',', '').strip()
         try:
             return Decimal(cleaned_price_str)
         except (InvalidOperation, ValueError):
@@ -120,7 +120,7 @@ class ProductForm(forms.ModelForm):
         if not price_str:
             return None
             
-        cleaned_price_str = price_str.replace('.', '').replace('.', '').strip()
+        cleaned_price_str = price_str.replace('.', '').replace(',', '').strip()
         try:
             return Decimal(cleaned_price_str)
         except (InvalidOperation, ValueError):
@@ -152,18 +152,9 @@ class ProductCategoryForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """
-        Ghi đè hàm khởi tạo để tùy chỉnh thêm cho trường 'parent'.
-        """
         super().__init__(*args, **kwargs)
-        
-        # Làm cho trường 'parent' không bắt buộc (optional)
         self.fields['parent'].required = False
-        
-        # Thêm một lựa chọn "rỗng" vào đầu danh sách Parent Category
         self.fields['parent'].empty_label = "--------- (No Parent Category) ---------"
-        
-        # Sắp xếp danh sách các danh mục cha theo tên cho dễ tìm
         self.fields['parent'].queryset = ProductCategory.objects.all().order_by('name')
 
 

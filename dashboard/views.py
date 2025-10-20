@@ -226,12 +226,19 @@ def bom_delete(request, pk):
 # =======================================================
 #           QUẢN LÝ NHÓM SẢN PHẨM (CATEGORY CRUD)
 # =======================================================
+
+# -------------------------------------------------------
+#   VIEW: DANH SÁCH NHÓM SẢN PHẨM (READ)
+# -------------------------------------------------------
 @login_required
 def category_list(request):
     categories = ProductCategory.objects.all()
     context = {'categories': categories}
     return render(request, 'dashboard/product_category/category_list.html', context)
 
+# -------------------------------------------------------
+#   VIEW: FORM THÊM/SỬA NHÓM SẢN PHẨM (CREATE/UPDATE)
+# -------------------------------------------------------
 @login_required
 def category_form(request, pk=None):
     if pk:
@@ -253,7 +260,26 @@ def category_form(request, pk=None):
     context = {'form': form, 'title': title, 'instance': instance}
     return render(request, 'dashboard/product_category/category_form.html', context)
 
+# -------------------------------------------------------
+#   VIEW: XEM CHI TIẾT NHÓM SẢN PHẨM (READ DETAIL)
+# -------------------------------------------------------
+@login_required
+def category_detail(request, pk):
+    category = get_object_or_404(ProductCategory.objects.prefetch_related('children', 'product_set'), pk=pk)
+    context = {'category': category}
+    return render(request, 'dashboard/product_category/category_detail.html', context)
 
+# -------------------------------------------------------
+#   VIEW: XÁC NHẬN XÓA NHÓM SẢN PHẨM (DELETE)
+# -------------------------------------------------------
+@login_required
+def category_delete(request, pk):
+    category = get_object_or_404(ProductCategory, pk=pk)
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, f'Product Category "{category.name}" has been deleted.')
+        return redirect('dashboard-category-list')
+    return render(request, 'dashboard/product_category/category_confirm_delete.html', {'item': category})
 
 # =======================================================
 #               QUẢN LÝ KÊ ĐƠN (PRESCRIPTION)
@@ -447,7 +473,6 @@ def report_inventory_status(request):
 
 # -------------------------------------------------------
 #   VIEW: DANH SÁCH TOA THUỐC CHỜ LẤY
-#   - Đã xóa bỏ các biến *_count không cần thiết.
 # -------------------------------------------------------
 @login_required
 def dispense_list(request):

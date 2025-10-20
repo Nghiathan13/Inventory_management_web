@@ -86,3 +86,22 @@
 .table-warning > td {
   background-color: #fff3cd !important;
 }
+/* THU */
+.btn-success {
+  background-color: #5d3fd3; /* Màu tím violet */
+  border-color: #5d3fd3;
+}
+
+/* Hiệu ứng khi di chuột qua (hover) */
+.btn-success:hover {
+  background-color: #4c33a3; /* Màu tím đậm hơn */
+  border-color: #4c33a3;
+}
+
+/* Hiệu ứng khi đang nhấn nút (active/focus) */
+.btn-success:active,
+.btn-success:focus {
+  background-color: #3e2773 !important; /* Màu tím rất đậm */
+  border-color: #3e2773 !important;
+  box-shadow: 0 0 0 0.25rem rgba(93, 63, 211, 0.5) !important; /* Hiệu ứng viền sáng */
+}

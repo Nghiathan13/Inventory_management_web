@@ -47,9 +47,9 @@
           onsubmit="return confirm('Are you sure you want to complete and dispatch this prescription? This action cannot be undone.');"
         >
           {% csrf_token %}
-          <!-- Dòng này sẽ tự động render ô chọn Bệnh nhân và trường Bác sĩ (đã bị ẩn) -->
+          <!--  -->
           {{ prescription_form|crispy }}
-
+          <!--  -->
           <hr />
           <!-- Medicine Details -->
           <p>Medicine Details <span class="required">*</span></p>

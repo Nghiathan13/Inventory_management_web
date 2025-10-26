@@ -2,9 +2,10 @@
 #               KHAI BÁO THƯ VIỆN (IMPORTS)
 # =======================================================
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.views import View
 from django import forms
+from django.urls import reverse
 
 # Decorators & Authentication
 from django.contrib.auth.decorators import login_required
@@ -377,11 +378,16 @@ def prescription(request):
         prescriptions = Prescription.objects.all().order_by('-created_at')
     else:
         prescriptions = Prescription.objects.filter(doctor=request.user).order_by('-created_at')
+
+    # Lấy tất cả sản phẩm và thông tin uom, uom.category liên quan
+    all_products = Product.objects.select_related('base_uom__category').all()
+    all_uoms = UnitOfMeasure.objects.select_related('category').all()
+
     context = {
         'prescription_form': prescription_form,
         'prescriptions': prescriptions,
-        'products': Product.objects.all(),
-        'uoms': UnitOfMeasure.objects.all(),
+        'products': all_products,
+        'uoms': all_uoms,
     }
     return render(request, 'dashboard/prescription/prescription.html', context)
 
@@ -627,9 +633,20 @@ def product_add(request):
             return redirect('dashboard-product')
     else:
         form = ProductForm()
+
+
+    all_uoms = UnitOfMeasure.objects.values('id', 'name', 'category_id')
+    uoms_by_category = {}
+    for uom in all_uoms:
+        cat_id = uom['category_id']
+        if cat_id not in uoms_by_category:
+            uoms_by_category[cat_id] = []
+        uoms_by_category[cat_id].append({'id': uom['id'], 'name': uom['name']})
+
     context = {
         'form': form,
-        'title': 'New Medication'
+        'title': 'New Medication',
+        'uoms_by_category_json': json.dumps(uoms_by_category),
     }
     return render(request, 'dashboard/product/product_form.html', context)
 
@@ -648,10 +665,20 @@ def product_update(request, pk):
             return redirect('dashboard-product')
     else:
         form = ProductForm(instance=item)
-        context = {
-            'form': form,
-            'title': f'Chỉnh Sửa: {item.name}'
-        }
+
+    all_uoms = UnitOfMeasure.objects.values('id', 'name', 'category_id')
+    uoms_by_category = {}
+    for uom in all_uoms:
+        cat_id = uom['category_id']
+        if cat_id not in uoms_by_category:
+            uoms_by_category[cat_id] = []
+        uoms_by_category[cat_id].append({'id': uom['id'], 'name': uom['name']})
+
+    context = {
+        'form': form,
+        'title': f'Chỉnh Sửa: {item.name}',
+        'uoms_by_category_json': json.dumps(uoms_by_category),
+    }
     return render(request, 'dashboard/product/product_form.html', context)
 
 
@@ -839,3 +866,44 @@ class CustomPasswordResetView(BasePasswordResetView):
         except User.DoesNotExist:
             messages.error(request, "User not found.")
             return redirect('username-reset')
+        
+
+# =======================================================
+#               API ENDPOINTS (CHO JAVASCRIPT)
+# =======================================================
+
+# -------------------------------------------------------
+#   API: TÌM KIẾM GỢI Ý SẢN PHẨM
+#   - Trả về danh sách sản phẩm khớp với từ khóa dưới dạng JSON.
+# -------------------------------------------------------
+@login_required
+def product_search_api(request):
+    # Lấy từ khóa tìm kiếm từ query parameter 'q'
+    query = request.GET.get('q', '')
+    
+    # Chỉ tìm kiếm nếu có ít nhất 2 ký tự được gõ
+    if len(query) >= 2:
+        # Tìm kiếm trong tên, mã, và tên category
+        products = Product.objects.filter(
+            Q(name__icontains=query) |
+            Q(code__icontains=query) |
+            Q(category__name__icontains=query)
+        ).select_related('category', 'uom')[:10] # Giới hạn 10 kết quả
+        
+        # Chuyển đổi QuerySet thành một danh sách các dictionary
+        results = [
+            {
+                'id': p.id,
+                'name': p.name,
+                'code': p.code,
+                'category': p.category.name if p.category else 'N/A',
+                'quantity': p.quantity,
+                'uom': p.uom.name if p.uom else 'N/A',
+                'url': reverse('dashboard-product-detail', args=[p.id]) # Tạo URL đến trang chi tiết
+            }
+            for p in products
+        ]
+    else:
+        results = []
+
+    return JsonResponse(results, safe=False)

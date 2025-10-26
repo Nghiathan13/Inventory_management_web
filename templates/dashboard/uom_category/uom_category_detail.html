@@ -2,100 +2,86 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block extracss %}
-<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
-{% endblock %}
-<!--  -->
 {% block title %} UoM Category: {{ category.name }} {% endblock %}
 <!--  -->
 {% block content %}
-<div class="container mt-4 odoo-form-view">
-  <!-- Thanh hành động -->
-  <div class="odoo-form-header">
-    <a
-      href="{% url 'dashboard-uom-category-edit' category.id %}"
-      class="btn btn-primary"
-      >EDIT</a
-    >
-    <a href="{% url 'dashboard-uom-category-list' %}" class="btn btn-secondary"
-      >BACK TO LIST</a
-    >
-  </div>
-
-  <!-- Tiêu đề và breadcrumb -->
-  <div class="odoo-form-title">
-    <nav aria-label="breadcrumb" class="bg-transparent p-0">
-      <ol class="breadcrumb bg-transparent p-0">
-        <li class="breadcrumb-item">
-          <a href="{% url 'dashboard-uom-category-list' %}">UoM Categories</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-          {{ category.name }}
-        </li>
-      </ol>
-    </nav>
-  </div>
-
-  <!-- Form sheet -->
-  <div class="odoo-form-sheet">
-    <div class="mb-3">
-      <h5>Description</h5>
-      <p class="text-muted">
-        {{ category.description|linebreaksbr|default:"No description provided."
-        }}
-      </p>
-    </div>
-    <hr />
-
-    <ul class="nav nav-tabs">
-      <li class="nav-item"><a class="nav-link active">Units of Measure</a></li>
-    </ul>
-    <div class="tab-content pt-3">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>Unit of Measure</th>
-              <th>Type</th>
-              <th>Active</th>
-              <th class="text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for uom in category.uoms.all %}
-            <tr
-              class="{% if uom.uom_type == 'reference' %}table-primary{% endif %}"
-            >
-              <td>{{ uom.name }}</td>
-              <td>{{ uom.get_uom_type_display }}</td>
-              <td class="text-center">
-                {% if uom.active %}
-                <i class="fas fa-check-circle text-success"></i>
-                {% else %}
-                <i class="fas fa-times-circle text-danger"></i>
-                {% endif %}
-              </td>
-              <td class="text-center">
-                <a
-                  href="{% url 'dashboard-uom-edit' uom.id %}"
-                  class="btn btn-link btn-sm p-0"
-                  >Edit</a
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Áp dụng lớp "form-card" -->
+      <div class="card shadow-sm form-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+              <i class="fas fa-tags me-2"></i>Category: {{ category.name }}
+            </h4>
+            <div>
+              <a
+                href="{% url 'dashboard-uom-category-list' %}"
+                class="btn btn-secondary btn-sm"
+                >BACK TO LIST</a
+              >
+              <a
+                href="{% url 'dashboard-uom-category-edit' category.id %}"
+                class="btn btn-primary btn-sm"
+              >
+                <i class="fas fa-pen me-1"></i> EDIT
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="card-body p-4">
+          <h5>Description</h5>
+          <p class="text-muted">
+            {% if category.description %}
+            <!--  -->
+            {{ category.description|linebreaksbr }}
+            <!--  -->
+            {% else %} No description provided. {% endif %}
+          </p>
+          <hr />
+          <h5>
+            <i class="fas fa-balance-scale me-2"></i>Units in this Category
+          </h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>Unit of Measure</th>
+                  <th>Type</th>
+                  <th>Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for uom in category.uoms.all %}
+                <tr
+                  class="{% if uom.uom_type == 'reference' %}table-info{% endif %}"
                 >
-              </td>
-            </tr>
-            {% endfor %}
-            <tr>
-              <td colspan="4">
-                <!-- Nút này sẽ đưa đến trang tạo UoM mới và tự động điền sẵn category này -->
-                <a
-                  href="{% url 'dashboard-uom-add' %}?category={{ category.id }}"
-                  class="btn btn-link p-0"
-                  >Add a Unit</a
-                >
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  <td>
+                    <a href="{% url 'dashboard-uom-edit' uom.id %}"
+                      >{{ uom.name }}</a
+                    >
+                  </td>
+                  <td>{{ uom.get_uom_type_display }}</td>
+                  <td class="text-center">
+                    {% if uom.active %}
+                    <i class="fas fa-check-circle text-success"></i>
+                    {% else %}
+                    <i class="fas fa-times-circle text-danger"></i>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center text-muted">
+                    No units found in this category.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -68,3 +68,29 @@ GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
   font-weight: 500;
   border-bottom: 2px solid #0d6efd;
 }
+
+/* ===============================================
+   TÙY CHỈNH KÍCH THƯỚC ẢNH SẢN PHẨM
+================================================ */
+
+/* --- Ảnh trên trang Chi tiết sản phẩm (product_detail) --- */
+.product-detail-image {
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* --- Khung xem trước ảnh trên trang Form (product_form) --- */
+.image-preview-container {
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#image-preview {
+  max-height: 150px;
+  width: 100%;
+  object-fit: contain;
+}

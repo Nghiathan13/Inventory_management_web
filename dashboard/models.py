@@ -132,13 +132,15 @@ class Product(models.Model):
     name = models.CharField(max_length=100, null=True, verbose_name="Product Name")
     category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Category")
     quantity = models.PositiveIntegerField(null=True, verbose_name="Quantity")
-    uom = models.ForeignKey(UnitOfMeasure, on_delete=models.SET_NULL, null=True, verbose_name="Base Unit of Measure")
+    uom_category = models.ForeignKey(UomCategory, on_delete=models.SET_NULL, null=True, verbose_name="UoM Category")
+    base_uom = models.ForeignKey(UnitOfMeasure, on_delete=models.SET_NULL, null=True, verbose_name="Base Unit of Measure")
     import_price = models.DecimalField(max_digits=15, decimal_places=2, null=True, verbose_name="Import Price")
     sale_price = models.DecimalField(max_digits=15, decimal_places=2, null=True, verbose_name="Sale Price")
     expiry_date = models.DateField(null=True, blank=True, verbose_name="Expiry Date")
     supplier = models.CharField(max_length=100, null=True, blank=True, verbose_name="Supplier")
     description = models.TextField(null=True, blank=True, verbose_name="Description")
-    
+    image = models.ImageField(upload_to='product_images/', null=True, blank=True, verbose_name="Product Image")
+
     class Meta:
         verbose_name_plural = 'Products'
         ordering = ['name']

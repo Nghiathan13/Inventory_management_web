@@ -4,64 +4,54 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block extracss %}
-<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
-{% endblock %}
-<!--  -->
 {% block title %} {{ title }} {% endblock %}
 <!--  -->
 {% block content %}
-<div class="container mt-4 odoo-form-view">
-  <!-- Thanh hành động -->
-  <div class="odoo-form-header">
-    <button type="submit" form="uom-form" class="btn btn-primary">
-      <i class="fas fa-save me-1"></i> SAVE
-    </button>
-    <a href="{% url 'dashboard-uom-list' %}" class="btn btn-secondary"
-      >DISCARD</a
-    >
-  </div>
-
-  <!-- Tiêu đề và Breadcrumb -->
-  <div class="odoo-form-title">
-    <nav aria-label="breadcrumb" class="bg-transparent p-0">
-      <ol class="breadcrumb bg-transparent p-0">
-        <li class="breadcrumb-item">
-          <a href="{% url 'dashboard-uom-list' %}">Units of Measure</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-          {{ instance.name|default:"New" }}
-        </li>
-      </ol>
-    </nav>
-  </div>
-
-  <!-- Form sheet -->
-  <div class="odoo-form-sheet">
-    <form method="POST" id="uom-form">
-      {% csrf_token %}
-      <div class="row">
-        <!-- Cột trái: Thông tin chính -->
-        <div class="col-md-6">
-          <h5>General Information</h5>
-          <hr />
-          {{ form.name|as_crispy_field }}
-          <!--  -->
-          {{ form.category|as_crispy_field }}
-          <!--  -->
-          {{ form.uom_type|as_crispy_field }}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <form method="POST">
+        {% csrf_token %}
+        <!-- Áp dụng lớp "form-card" -->
+        <div class="card shadow-sm form-card">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="mb-0">
+                <i class="fas fa-balance-scale me-2"></i>{{ title }}
+              </h4>
+              <div>
+                <a
+                  href="{% url 'dashboard-uom-list' %}"
+                  class="btn btn-secondary btn-sm"
+                  >CANCEL</a
+                >
+                <button class="btn btn-primary btn-sm" type="submit">
+                  <i class="fas fa-save me-1"></i> SAVE
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-4">
+            <div class="row">
+              <div class="col-md-6">
+                <h5>General Information</h5>
+                {{ form.name|as_crispy_field }}
+                <!--  -->
+                {{ form.category|as_crispy_field }}
+                <!--  -->
+                {{ form.uom_type|as_crispy_field }}
+              </div>
+              <div class="col-md-6">
+                <h5>Options & Settings</h5>
+                {{ form.active|as_crispy_field }}
+                <!--  -->
+                {{ form.rounding_precision|as_crispy_field }}
+              </div>
+            </div>
+          </div>
         </div>
-
-        <!-- Cột phải: Tùy chọn & Cài đặt -->
-        <div class="col-md-6">
-          <h5>Options & Settings</h5>
-          <hr />
-          {{ form.active|as_crispy_field }}
-          <!--  -->
-          {{ form.rounding_precision|as_crispy_field }}
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

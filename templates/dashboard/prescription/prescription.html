@@ -8,14 +8,16 @@
 <link rel="stylesheet" href="{% static 'css/dashboard/prescription.css' %}" />
 {% endblock %}
 <!---->
-{% block title %} Kê Đơn Thuốc {% endblock %}
+{% block title %} Prescribing Medicine {% endblock %}
 <!---->
 {% block content %}
 <div class="container">
   <!-- ALERT -->
   <div class="row">
     <div class="col">
-      {% if messages %} {% for message in messages %}
+      {% if messages %}
+      <!--  -->
+      {% for message in messages %}
       <div
         class="alert alert-{{ message.tags }} alert-dismissible fade show"
         role="alert"
@@ -28,7 +30,9 @@
           aria-label="Close"
         ></button>
       </div>
-      {% endfor %} {% endif %}
+      {% endfor %}
+      <!--  -->
+      {% endif %}
     </div>
   </div>
 
@@ -57,25 +61,44 @@
             <!-- Form details will be added here by JS -->
           </div>
 
+          <!-- Các ô chọn -->
           <template id="detail-form-template">
             <div
               class="row mb-3 detail-form align-items-end"
               data-index="__prefix__"
             >
+              <!-- Chọn tên thuốc -->
               <div class="col-md">
                 <label for="id_details___prefix___product">Name</label>
                 <select
                   name="details-__prefix__-product"
                   id="id_details___prefix___product"
-                  class="form-control"
+                  class="form-select product-select"
                   required
+                ></select>
+              </div>
+
+              <!-- Chọn đơn vị tính -->
+              <div class="col-md">
+                <label for="id_details___prefix___uom" class="form-label"
+                  >Unit</label
                 >
-                  <option value="">---------</option>
-                  <!-- Options will be populated by JS -->
+                <select
+                  name="details-__prefix__-uom"
+                  id="id_details___prefix___uom"
+                  class="form-select uom-select"
+                  required
+                  disabled
+                >
+                  <option value="">Choose medicine first.</option>
                 </select>
               </div>
+
+              <!-- Chọn số  lượng -->
               <div class="col-md">
-                <label for="id_details___prefix___quantity">Quantity</label>
+                <label for="id_details___prefix___quantity" class="form-label"
+                  >Quantity</label
+                >
                 <input
                   type="number"
                   name="details-__prefix__-quantity"
@@ -85,6 +108,8 @@
                   required
                 />
               </div>
+
+              <!-- DELETE -->
               <div class="col-md-auto">
                 <button type="button" class="btn btn-danger remove-form">
                   <i class="fa-solid fa-trash"></i>
@@ -94,7 +119,7 @@
             </div>
           </template>
 
-          <!-- This hidden input is VERY IMPORTANT for the view to know how many forms are submitted -->
+          <!-- Input ẩn để đếm số lượng form chi tiết -->
           <input type="hidden" name="form_count" id="form-count" value="0" />
           <hr />
 
@@ -167,16 +192,23 @@
 {% block javascript %}
 <script src="{% static 'js/dashboard/prescription.js' %}"></script>
 <script>
-  // Truyền dữ liệu từ Django sang JavaScript
   const productsData = [
       {% for product in products %}
-      { id: '{{ product.id }}', name: '{{ product.name|escapejs }} (Còn: {{product.quantity}})' },
+        {
+          id: '{{ product.id }}',
+          name: '{{ product.name|escapejs }} (Còn: {{product.quantity}})',
+          uom_category_id: '{{ product.base_uom.category.id|default:"" }}'
+        },
       {% endfor %}
   ];
 
   const uomsData = [
             {% for uom in uoms %}
-            { id: '{{ uom.id }}', name: '{{ uom.name|escapejs }}' },
+              {
+                id: '{{ uom.id }}',
+                name: '{{ uom.name|escapejs }}',
+                category_id : '{{ uom.category.id }}'
+              },
             {% endfor %}
   ];
   // Gọi hàm khởi tạo với dữ liệu

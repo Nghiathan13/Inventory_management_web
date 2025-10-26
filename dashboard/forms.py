@@ -79,20 +79,22 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'name', 'code', 'category', 'uom', 'quantity',
-            'import_price', 'sale_price', 'expiry_date', 'supplier',
-            'description'
+            'name', 'code', 'category', 'uom_category', 'base_uom',
+             'quantity', 'import_price', 'sale_price', 'expiry_date', 
+             'supplier', 'description', 'image'
         ]
 
         labels = {
             'name': 'Product Name',
             'code': 'Product Code',
             'category': 'Product Category', 
-            'uom': 'Base UoM',
+            'uom_category': 'UoM Category',
+            'base_uom': 'Base UoM',
             'quantity': 'Quantity',
             'expiry_date': 'Expiry Date',
             'supplier': 'Supplier',
             'description': 'Description',
+            'image': 'Product Image',
         }
 
         widgets = {
@@ -103,6 +105,7 @@ class ProductForm(forms.ModelForm):
             'import_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,200,000'}),
             'sale_price': forms.TextInput(attrs={'placeholder': 'e.g., 1,500,000'}),
             'description': forms.Textarea(attrs={'rows': 4}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
     def clean_import_price(self):

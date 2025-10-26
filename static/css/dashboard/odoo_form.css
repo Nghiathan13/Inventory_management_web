@@ -41,6 +41,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 65vh;
 }
 
 /* Tiêu đề nhóm (ví dụ: "Thông Tin Cơ Bản") */
@@ -60,4 +61,8 @@
 .odoo-form-sheet .form-label {
   font-weight: 500;
   color: #495057;
+}
+
+.form-card-body {
+  min-height: 60vh;
 }

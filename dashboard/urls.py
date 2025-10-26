@@ -1,4 +1,4 @@
-from django.urls import path,reverse_lazy
+from django.urls import path, reverse_lazy , reverse
 from . import views
 
 urlpatterns = [
@@ -19,7 +19,7 @@ urlpatterns = [
     path('product-category/', views.category_list, name='dashboard-category-list'),
     path('product-category/new/', views.category_form, name='dashboard-category-add'),
     path('product-category/edit/<int:pk>/', views.category_form, name='dashboard-category-edit'),
-    path('product/detail/<int:pk>/', views.category_detail, name='dashboard-category-detail'),
+    path('product-category/detail/<int:pk>/', views.category_detail, name='dashboard-category-detail'),
     path('product-category/delete/<int:pk>/', views.category_delete, name='dashboard-category-delete'),
 
     # URLs cho UoM Category
@@ -73,6 +73,7 @@ urlpatterns = [
         ), name='password_reset'),
 
     
-    
+    # URL cho API tìm kiếm gợi ý
+    path('api/product-search/', views.product_search_api, name='api-product-search'),
 
 ]

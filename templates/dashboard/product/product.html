@@ -105,7 +105,7 @@
                       {{ item.quantity|default:"N/A" }}
                     </span>
                   </td>
-                  <td class="col-unit">{{ item.uom|default:"N/A" }}</td>
+                  <td class="col-unit">{{ item.base_uom|default:"N/A" }}</td>
                   <td class="col-price text-end">
                     {{ item.import_price|floatformat:"0"|intcomma }}
                   </td>

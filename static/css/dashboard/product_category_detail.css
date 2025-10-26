@@ -1,0 +1,65 @@
+/* ===============================================
+   NÂNG CẤP GIAO DIỆN TRANG CHI TIẾT NHÓM SẢN PHẨM
+================================================ */
+
+/* --- Khu vực tiêu đề --- */
+.category-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.category-header h2 {
+  font-weight: 700;
+  margin: 0;
+}
+
+.category-header .parent-link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.category-header .parent-link:hover {
+  color: #ffffff;
+}
+
+.category-header .action-buttons {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+/* --- Các card thống kê --- */
+.stat-card {
+  border: none;
+  border-left: 4px solid #0d6efd; /* Màu viền trái */
+  padding: 1rem;
+}
+.stat-card-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+.stat-card-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+/* --- Danh sách con (sản phẩm, category con) --- */
+.detail-list .list-group-item {
+  border-left: 0;
+  border-right: 0;
+  padding-left: 0;
+  transition: background-color 0.2s ease;
+}
+.detail-list .list-group-item a {
+  text-decoration: none;
+  font-weight: 500;
+}
+.detail-list .list-group-item:hover {
+  background-color: #f8f9fa;
+}

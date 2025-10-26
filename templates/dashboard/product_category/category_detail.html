@@ -2,79 +2,90 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block extracss %}
-<link rel="stylesheet" href="{% static 'css/dashboard/odoo_form.css' %}" />
+{% block title %} Category Detail: {{ category.name }}
+<!--  -->
 {% endblock %}
 <!--  -->
-{% block title %} Category: {{ category.name }} {% endblock %}
-<!--  -->
 {% block content %}
-<div class="container mt-4 odoo-form-view">
-  <div class="odoo-form-header">
-    <a
-      href="{% url 'dashboard-category-edit' category.id %}"
-      class="btn btn-primary"
-      >EDIT</a
-    >
-    <a href="{% url 'dashboard-category-list' %}" class="btn btn-secondary"
-      >BACK TO LIST</a
-    >
-  </div>
-
-  <div class="odoo-form-title">
-    <nav aria-label="breadcrumb" class="bg-transparent p-0">
-      <ol class="breadcrumb bg-transparent p-0">
-        <li class="breadcrumb-item">
-          <a href="{% url 'dashboard-category-list' %}">Product Categories</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
-          {{ category.name }}
-        </li>
-      </ol>
-    </nav>
-  </div>
-
-  <div class="odoo-form-sheet">
-    <div class="mb-3">
+<div class="container mt-4">
+  <!-- Áp dụng lớp "form-card" -->
+  <div class="card shadow-sm form-card">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+          <i class="fas fa-sitemap me-2"></i>Category: {{ category.name }}
+        </h4>
+        <div>
+          <a
+            href="{% url 'dashboard-category-list' %}"
+            class="btn btn-secondary btn-sm"
+            >BACK TO LIST</a
+          >
+          <a
+            href="{% url 'dashboard-category-edit' category.id %}"
+            class="btn btn-primary btn-sm"
+          >
+            <i class="fas fa-pen me-1"></i> EDIT
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row">
+        <div class="col-md-6">
+          <p>
+            <strong>Parent Category:</strong><br />
+            {% if category.parent %}
+            <a href="{% url 'dashboard-category-detail' category.parent.id %}"
+              >{{ category.parent.name }}</a
+            >
+            {% else %} -- {% endif %}
+          </p>
+        </div>
+      </div>
+      <hr />
       <h5>Description</h5>
       <p class="text-muted">
-        {{ category.description|linebreaksbr|default:"No description provided."
-        }}
+        {% if category.description %}
+        <!--  -->
+        {{ category.description|linebreaksbr }}
+        <!--  -->
+        {% else %} No description provided. {% endif %}
       </p>
-    </div>
-    <hr />
-    <div class="row">
-      <div class="col-md-6">
-        <h5>Child Categories</h5>
-        <ul class="list-group list-group-flush">
-          {% for child in category.children.all %}
-          <li class="list-group-item">
-            <a href="{% url 'dashboard-category-detail' child.id %}"
-              >{{ child.name }}</a
-            >
-          </li>
-          {% empty %}
-          <li class="list-group-item text-muted">
-            This category has no child categories.
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="col-md-6">
-        <h5>Products in this Category</h5>
-        <ul class="list-group list-group-flush">
-          {% for product in category.product_set.all %}
-          <li class="list-group-item">
-            <a href="{% url 'dashboard-product-detail' product.id %}"
-              >{{ product.name }}</a
-            >
-          </li>
-          {% empty %}
-          <li class="list-group-item text-muted">
-            No products are in this category.
-          </li>
-          {% endfor %}
-        </ul>
+      <hr />
+      <div class="row">
+        <div class="col-md-6">
+          <h5><i class="fas fa-level-down-alt me-2"></i>Child Categories</h5>
+          <ul class="list-group list-group-flush">
+            {% for child in category.children.all %}
+            <li class="list-group-item">
+              <a href="{% url 'dashboard-category-detail' child.id %}"
+                >{{ child.name }}</a
+              >
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">
+              This category has no child categories.
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h5><i class="fas fa-pills me-2"></i>Products in this Category</h5>
+          <ul class="list-group list-group-flush">
+            {% for product in category.product_set.all %}
+            <li class="list-group-item">
+              <a href="{% url 'dashboard-product-detail' product.id %}"
+                >{{ product.name }}</a
+              >
+            </li>
+            {% empty %}
+            <li class="list-group-item text-muted">
+              No products are in this category.
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     </div>
   </div>

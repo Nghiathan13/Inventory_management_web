@@ -1,39 +1,45 @@
 {% extends 'partials/base.html' %}
 <!--  -->
+{% load static %}
+<!--  -->
 {% block title %} Xử Lý Toa Thuốc {{ prescription.id }} {% endblock %}
 <!--  -->
 {% block content %}
 <div class="container mt-5">
-  <div class="row">
-    <div class="col-md-8 offset-md-2">
-      {% if messages %}{% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}{% endif %}
-      <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-          <h4>
-            <i class="fa-solid fa-pills"></i> Cấp Phát Thuốc - Toa
-            <!---->
-            #{{ prescription.id }}
-          </h4>
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Áp dụng lớp "form-card" -->
+      <div class="card shadow-sm form-card">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">
+              <i class="fas fa-pills me-2"></i>Dispense Medication -
+              Prescription #{{ prescription.id }}
+            </h4>
+            <!-- Các nút Save/Cancel sẽ nằm ở dưới -->
+          </div>
         </div>
-        <div class="card-body">
-          <p>
-            <strong>Bệnh nhân:</strong> {{ prescription.patient.full_name }}
-          </p>
-          <p>
-            <strong>Bác sĩ kê đơn:</strong> {{ prescription.doctor.username }}
-          </p>
-          <p>
-            <strong>Ngày kê đơn:</strong>
-            <!---->
-            {{ prescription.created_at|date:"d/m/Y H:i" }}
-          </p>
-          <hr />
-          <h5>Chi tiết thuốc cần lấy:</h5>
+        <div class="card-body p-4">
           <form method="POST">
             {% csrf_token %}
-            <ul class="list-group">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <p class="mb-0"><strong>Patient:</strong></p>
+                <p>{{ prescription.patient.full_name }}</p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-0"><strong>Prescribing Doctor:</strong></p>
+                <p>{{ prescription.doctor.username }}</p>
+              </div>
+            </div>
+            <p>
+              <strong>Date Prescribed:</strong>
+              <!--  -->
+              {{ prescription.created_at|date:"d/m/Y H:i" }}
+            </p>
+            <hr />
+            <h5>Medications to Dispense:</h5>
+            <ul class="list-group mb-4">
               {% for detail in prescription.details.all %}
               <li class="list-group-item">
                 <div class="form-check">
@@ -45,11 +51,13 @@
                     value="{{ detail.id }}"
                   />
                   <label class="form-check-label" for="detail{{ detail.id }}">
-                    <strong>{{ detail.product.name }}</strong> - Quantity:
-                    <!---->
-                    {{ detail.quantity }}
-                    <small class="text-muted"
-                      >(Tồn kho: {{ detail.product.quantity }})</small
+                    <strong>{{ detail.product.name }}</strong>
+                    <br />
+                    <small
+                      >Quantity: {{ detail.quantity }} {{ detail.uom.name }} |
+                      In Stock: {{ detail.product.quantity }}
+                      <!--  -->
+                      {{ detail.product.base_uom.name }}</small
                     >
                   </label>
                 </div>
@@ -58,10 +66,10 @@
             </ul>
             <div class="mt-4 text-end">
               <a href="{% url 'dispense-list' %}" class="btn btn-secondary"
-                >Quay Lại</a
+                >Cancel</a
               >
               <button type="submit" class="btn btn-success">
-                <i class="fa-solid fa-check-circle"></i> Hoàn Thành Cấp Phát
+                <i class="fas fa-check-circle me-1"></i> Complete Dispense
               </button>
             </div>
           </form>

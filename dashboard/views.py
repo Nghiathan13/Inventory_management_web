@@ -38,6 +38,14 @@ from datetime import datetime, timedelta
 from .models import UnitOfMeasure, BillOfMaterials, UomCategory
 from .forms import UnitOfMeasureForm, BillOfMaterialsForm, UomCategoryForm
 
+# Cho việc tạo mã qrcode
+from io import BytesIO
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+import qrcode
+from django.urls import reverse
 
 # =======================================================
 #               CÁC VIEW CHÍNH & DASHBOARD
@@ -199,7 +207,27 @@ def bom_form(request, pk=None):
         return redirect('dashboard-bom-list')
         
     title = 'Edit BOM Rule' if instance else 'Create New BOM Rule'
-    context = {'form': form, 'title': title}
+
+    # 1. Lấy danh sách sản phẩm và ID nhóm UoM của chúng
+    products_with_uom_cat = list(Product.objects.filter(
+        uom_category__isnull=False
+    ).values('id', 'uom_category_id'))
+
+    # 2. Lấy tất cả UoM và nhóm chúng theo category_id
+    all_uoms = UnitOfMeasure.objects.values('id', 'name', 'category_id')
+    uoms_by_category = {}
+    for uom in all_uoms:
+        cat_id = uom['category_id']
+        if cat_id not in uoms_by_category:
+            uoms_by_category[cat_id] = []
+        uoms_by_category[cat_id].append({'id': uom['id'], 'name': uom['name']})
+
+    context = {
+        'form': form, 
+        'title': title,
+        'products_with_uom_cat_json': json.dumps(products_with_uom_cat),
+        'uoms_by_category_json': json.dumps(uoms_by_category),
+    }
     return render(request, 'dashboard/bom/bom_form.html', context)
 
 # -------------------------------------------------------
@@ -328,18 +356,18 @@ def prescription(request):
                             quantity_to_deduct = quantity # Mặc định số lượng cần trừ
 
                             # Nếu đơn vị được chọn khác với đơn vị cơ bản của sản phẩm
-                            if uom_selected != product.uom:
+                            if uom_selected != product.base_uom:
                                 try:
                                     # Tìm quy tắc quy đổi trong BOM
                                     bom = BillOfMaterials.objects.get(
                                         product=product,
                                         uom_from=uom_selected,
-                                        uom_to=product.uom # Đảm bảo quy đổi về đơn vị cơ bản
+                                        uom_to=product.base_uom # Đảm bảo quy đổi về đơn vị cơ bản
                                     )
                                     quantity_to_deduct = quantity * bom.conversion_factor
                                 except BillOfMaterials.DoesNotExist:
                                     # Nếu không có quy tắc, báo lỗi
-                                    messages.error(request, f"Không tìm thấy quy tắc quy đổi từ '{uom_selected.name}' sang '{product.uom.name}' cho sản phẩm '{product.name}'.")
+                                    messages.error(request, f"Không tìm thấy quy tắc quy đổi từ '{uom_selected.name}' sang '{product.base_uom.name}' cho sản phẩm '{product.name}'.")
                                     return redirect('dashboard-prescription')
                                 
                             
@@ -485,9 +513,10 @@ def dispense_list(request):
     if not (request.user.is_staff or request.user.is_superuser):
         return redirect('dashboard-index')
         
-    pending_prescriptions = Prescription.objects.filter(status='Pending').order_by('created_at')
+    pending_prescriptions_list = Prescription.objects.filter(status='Pending').select_related('patient', 'doctor').order_by('created_at')
+
     context = {
-        'prescriptions': pending_prescriptions,
+        'pending_prescriptions': pending_prescriptions_list,
     }
     return render(request, 'dashboard/dispense/dispense_list.html', context)
 
@@ -518,7 +547,7 @@ def dispense_process(request, pk):
                     product = detail.product
                     prescribed_uom = detail.uom
                     prescribed_quantity = detail.quantity
-                    base_uom = product.uom
+                    base_uom = product.base_uom
 
                     quantity_to_deduct = prescribed_quantity
                     
@@ -560,10 +589,10 @@ def dispense_process(request, pk):
 
                     # Kiểm tra tồn kho với số lượng ĐÃ QUY ĐỔI
                     if product.quantity < quantity_to_deduct:
-                        raise Exception(f"Không đủ '{product.name}'. Cần {quantity_to_deduct} {product.uom.name} nhưng chỉ còn {product.quantity}.")
+                        raise Exception(f"Không đủ '{product.name}'. Cần {quantity_to_deduct} {product.base_uom.name} nhưng chỉ còn {product.quantity}.")
                     
                     #Trừ kho
-                    product.quantity -= detail.quantity
+                    product.quantity -= quantity_to_deduct
                     product.save()
 
                     #Cập nhật trạng thái
@@ -907,3 +936,56 @@ def product_search_api(request):
         results = []
 
     return JsonResponse(results, safe=False)
+
+
+
+# =======================================================
+#               XUẤT TOA THUỐC PDF VỚI MÃ QR
+# =======================================================
+@login_required
+def download_prescription_pdf(request, pk):
+    prescription = get_object_or_404(Prescription.objects.select_related('patient', 'doctor'), pk=pk)
+
+    # --- 1. Tạo nội dung cho mã QR ---
+    # URL mà dược sĩ sẽ được chuyển đến sau khi quét
+    dispense_url = request.build_absolute_uri(
+        reverse('dispense-process', args=[prescription.pk])
+    )
+    
+    # --- 2. Tạo ảnh mã QR trong bộ nhớ ---
+    qr_img = qrcode.make(dispense_url)
+    qr_buffer = BytesIO()
+    qr_img.save(qr_buffer, format='PNG')
+    qr_buffer.seek(0)
+
+    # --- 3. Tạo file PDF trong bộ nhớ ---
+    pdf_buffer = BytesIO()
+    p = canvas.Canvas(pdf_buffer, pagesize=letter)
+    width, height = letter
+
+    # --- 4. Vẽ nội dung lên file PDF ---
+    # (Đây là ví dụ, bạn có thể tùy chỉnh font, vị trí...)
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(1 * inch, height - 1 * inch, "TOA THUỐC ĐIỆN TỬ")
+    p.setFont("Helvetica", 12)
+    p.drawString(1 * inch, height - 1.5 * inch, f"Bệnh nhân: {prescription.patient.full_name}")
+    p.drawString(5 * inch, height - 1.5 * inch, f"Bác sĩ: {prescription.doctor.username}")
+    p.line(1 * inch, height - 1.8 * inch, width - 1 * inch, height - 1.8 * inch)
+
+    y_position = height - 2.2 * inch
+    for detail in prescription.details.all():
+        p.drawString(1 * inch, y_position, f"- {detail.product.name} ({detail.quantity} {detail.uom.name})")
+        y_position -= 0.3 * inch
+
+    # Vẽ ảnh QR vào góc dưới
+    from reportlab.lib.utils import ImageReader
+    p.drawImage(ImageReader(qr_buffer), width - 2.5 * inch, 1 * inch, width=1.5*inch, height=1.5*inch)
+
+    p.showPage()
+    p.save()
+    pdf_buffer.seek(0)
+
+    # --- 5. Trả file PDF về cho trình duyệt ---
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="toa_thuoc_{prescription.id}.pdf"'
+    return response

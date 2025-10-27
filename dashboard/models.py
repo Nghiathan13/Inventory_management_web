@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
 from django.core.exceptions import ValidationError
+import uuid
 
 # =======================================================
 #               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
@@ -179,6 +180,7 @@ class Prescription(models.Model):
     status = models.CharField(max_length=20, choices=PRESCRIPTION_STATUS_CHOICES, default='Pending', verbose_name="Status")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
     completed_at = models.DateTimeField(null=True, blank=True, verbose_name="Completed At")
+    unique_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     class Meta:
         verbose_name_plural = 'Prescriptions'

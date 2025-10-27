@@ -48,6 +48,7 @@ urlpatterns = [
     
     # Prescription URL
     path('prescription/', views.prescription, name='dashboard-prescription'),
+    path('prescription/download/<int:pk>/', views.download_prescription_pdf, name='download-prescription-pdf'),
     
     # Patient URLs
     path('patient/', views.patient_list, name='dashboard-patient-list'),

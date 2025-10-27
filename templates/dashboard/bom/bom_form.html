@@ -43,3 +43,15 @@
   </div>
 </div>
 {% endblock %}
+<!--  -->
+{% block javascript %}
+<script src="{% static 'js/dashboard/bom_form.js' %}"></script>
+<script>
+  // TRUYỀN DỮ LIỆU TỪ DJANGO SANG JAVASCRIPT
+  const productsWithUomCat = {{ products_with_uom_cat_json|safe }};
+  const uomsByCat = {{ uoms_by_category_json|safe }};
+
+  // GỌI HÀM KHỞI TẠO
+  initializeBomForm(productsWithUomCat, uomsByCat);
+</script>
+{% endblock %}

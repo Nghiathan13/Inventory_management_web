@@ -2,54 +2,114 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block extracss %}
-<link rel="stylesheet" href="{% static 'css/dashboard/dispense.css' %}" />
-{% endblock %}
-<!--  -->
-{% block title %} Prescriptions Awaiting Pickup {% endblock %}
+{% block title %} Pending Prescriptions {% endblock %}
 <!--  -->
 {% block content %}
-<div class="container">
+<div class="container mt-4">
+  <!-- MODAL (POPUP) CHO CAMERA -->
+  <div
+    class="modal fade"
+    id="qr-scanner-modal"
+    tabindex="-1"
+    aria-labelledby="scannerModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="scannerModalLabel">
+            <i class="fas fa-qrcode me-2"></i>Scan Prescription QR Code
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body text-center p-4">
+          <div
+            id="video-container"
+            style="
+              width: 100%;
+              max-width: 400px;
+              margin: 0 auto;
+              border-radius: 8px;
+              overflow: hidden;
+            "
+          >
+            <video id="qr-video" style="width: 100%; height: auto"></video>
+          </div>
+          <p id="qr-scan-feedback" class="text-muted mt-3">
+            Point your camera at the QR code...
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Áp dụng style card từ _table.css -->
   <div class="card shadow-sm">
     <div class="card-header">
-      <h4>
-        <i class="fa-solid fa-hourglass-half"></i> Prescriptions Awaiting Pickup
-      </h4>
+      <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-hourglass-half me-2"></i>Pending Prescriptions</h4>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#qr-scanner-modal"
+        >
+          <i class="fas fa-qrcode me-2"></i>Scan Code
+        </button>
+      </div>
     </div>
     <div class="card-body">
-      {% if messages %}{% for message in messages %}
-      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-      {% endfor %}{% endif %}
-      <div class="table-responsive">
-        <table class="table table-hover">
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alert alert-{{ message.tags }} alert-dismissible fade show"
+        role="alert"
+      >
+        {{ message }}
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="alert"
+          aria-label="Close"
+        ></button>
+      </div>
+      {% endfor %} {% endif %}
+
+      <div class="table-responsive table-container">
+        <table class="table table-hover table-bordered align-middle">
           <thead class="thead-light">
             <tr>
-              <th>ID</th>
+              <th>Prescription ID</th>
               <th>Patient</th>
-              <th>Prescribing Doctor</th>
-              <th>Prescription Date</th>
-              <th>Actions</th>
+              <th>Doctor</th>
+              <th>Date Prescribed</th>
+              <th class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {% for p in prescriptions %}
+            {% for p in pending_prescriptions %}
             <tr>
-              <td>{{ p.id }}</td>
+              <td>#{{ p.id }}</td>
               <td>{{ p.patient.full_name|default:"N/A" }}</td>
               <td>{{ p.doctor.username }}</td>
               <td>{{ p.created_at|date:"d/m/Y H:i" }}</td>
-              <td>
+              <td class="text-center action-buttons">
                 <a
                   href="{% url 'dispense-process' p.id %}"
                   class="btn btn-primary btn-sm"
-                  ><i class="fa-solid fa-arrow-right"></i> Xử Lý</a
                 >
+                  <i class="fas fa-arrow-right me-1"></i> Process
+                </a>
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5" class="text-center">
-                Không có toa thuốc nào đang chờ.
+              <td colspan="5" class="text-center p-4 text-muted">
+                <em>There are no pending prescriptions to process.</em>
               </td>
             </tr>
             {% endfor %}
@@ -59,4 +119,9 @@
     </div>
   </div>
 </div>
+{% endblock %} {% block javascript %}
+<!-- Nạp thư viện quét mã QR -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<!-- Nạp file JS riêng cho trang này -->
+<script src="{% static 'js/dashboard/dispense.js' %}"></script>
 {% endblock %}

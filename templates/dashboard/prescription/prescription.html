@@ -171,6 +171,16 @@
                   <span class="badge bg-warning">Not yet completed.</span>
                   {% endif %}
                 </td>
+                <td class="text-center">
+                  <a
+                    href="{% url 'download-prescription-pdf' p.id %}"
+                    class="btn btn-secondary btn-sm"
+                    data-bs-toggle="tooltip"
+                    title="Download PDF"
+                  >
+                    <i class="fas fa-download"></i>
+                  </a>
+                </td>
               </tr>
               {% empty %}
               <tr>

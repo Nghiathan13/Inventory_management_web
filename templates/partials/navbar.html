@@ -1,6 +1,6 @@
 {% load static %}
 <nav class="navbar navbar-expand sticky-top custom-shadow">
-  <a class="navbar-brand" href="{% url 'dashboard-index' %}"> Adoo Medicine </a>
+  <a class="navbar-brand" href="{% url 'main:index' %}"> Adoo Medicine </a>
   <button
     class="navbar-toggler"
     type="button"
@@ -18,8 +18,8 @@
   <ul class="navbar-nav mx-auto">
     <li class="nav-item">
       <a
-        class="nav-link nav-icon-text {% if request.resolver_match.url_name == 'dashboard-index' %}active{% endif %}"
-        href="{% url 'dashboard-index' %}"
+        class="nav-link nav-icon-text {% if request.resolver_match.url_name == 'main:index' %}active{% endif %}"
+        href="{% url 'main:index' %}"
       >
         <i class="fa-regular fa-house icon-regular"></i>
         <i class="fa-solid fa-house icon-solid"></i>
@@ -51,12 +51,12 @@
         class="dropdown-menu dropdown-menu-end dropdown-menu-custom"
         aria-labelledby="navbarDropdown"
       >
-        <a class="dropdown-item" href="{% url 'user-profile' %}">
+        <a class="dropdown-item" href="{% url 'user:profile' %}">
           <i class="fa-solid fa-id-card me-2"></i>Profile
         </a>
         <div class="dropdown-divider"></div>
         <form
-          action="{% url 'user-logout' %}"
+          action="{% url 'user:logout' %}"
           method="POST"
           class="dropdown-item-form"
         >

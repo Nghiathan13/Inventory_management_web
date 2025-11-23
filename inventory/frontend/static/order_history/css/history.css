@@ -1,0 +1,120 @@
+/* ===================================================================
+        MENU ĐIỀU HƯỚNG PHỤ (INVENTORY NAV)
+   Kế thừa từ file product_nav.css để đồng bộ giao diện
+=================================================================== */
+.product-nav-tabs {
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.product-nav-tabs .nav-item .nav-link {
+  color: #6c757d;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.product-nav-tabs .nav-item .nav-link:hover {
+  border-bottom-color: #0d6efd;
+  color: #0d6efd;
+}
+
+.product-nav-tabs .nav-item .nav-link.active {
+  color: #0d6efd;
+  background-color: transparent;
+  border-bottom: 2px solid #0d6efd;
+}
+
+/* ===================================================================
+        CARD CHUNG
+=================================================================== */
+.card {
+  border: none;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.card-header h4 {
+  margin-bottom: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* ===================================================================
+        TRANG REORDER LIST & LỊCH SỬ ĐẶT HÀNG
+=================================================================== */
+
+/* --- Bảng sản phẩm cần đặt hàng --- */
+#supplier-select {
+  max-width: 400px; /* Giới hạn chiều rộng của ô chọn nhà cung cấp */
+}
+
+/* Căn giữa checkbox trong bảng */
+table thead th:first-child,
+table tbody tr td:first-child {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Input số lượng trong bảng */
+table .form-control-sm {
+  width: 80px;
+  text-align: center;
+}
+
+/* --- Bảng lịch sử đơn hàng --- */
+.table td,
+.table th {
+  vertical-align: middle;
+}
+
+/* Định dạng cho badge trạng thái */
+.badge {
+  font-size: 0.8rem;
+  padding: 0.5em 0.75em;
+  font-weight: 600;
+}
+
+/* ===================================================================
+        TRANG CHI TIẾT ĐƠN HÀNG (PO DETAIL)
+=================================================================== */
+.po-details-card {
+  font-size: 1rem;
+}
+
+.po-details-card dt {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.po-details-card dd {
+  margin-bottom: 0.75rem;
+}
+
+.po-details-card hr {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.po-status-badge {
+  font-size: 1.1rem;
+  padding: 0.6em 0.9em;
+}
+
+/* ===================================================================
+        TRANG LỊCH SỬ XUẤT KHO (ORDER HISTORY)
+=================================================================== */
+.table-history th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.table-history .product-name {
+  font-weight: 500;
+}

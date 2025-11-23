@@ -1,0 +1,115 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'main/css/modules.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Admin Dashboard {% endblock %}
+<!--  -->
+{% block content %}
+<!--  -->
+{%if user.is_authenticated and user.is_staff and user.is_superuser %}
+<div class="container">
+  <div class="row mb-4 text-center">
+    <h3 class="typing-text">Welcome to <span class="brand-text"></span></h3>
+  </div>
+
+  <!-- Các module chính -->
+  <div class="row align-items-center">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row justify-content-center">
+          <!-- Module Staff -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'main:staff_list' %}"
+            >
+              <div class="card my-card-custom card-staff h-100 text-center p-4">
+                <i class="fa-solid fa-users fa-2x mb-2"></i>
+                <h4>Staff</h4>
+                <h5>{{ workers_count }}</h5>
+              </div>
+            </a>
+          </div>
+
+          <!-- Module Products -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'products:list' %}"
+            >
+              <div class="card my-card-custom card-products h-100 text-center p-4">
+                <i class="fa-solid fa-box fa-2x mb-2"></i>
+                <h4>Product</h4>
+                <!-- <h5>{{ products_count }}</h5> -->
+                <small class="text-muted">Product, unit, BOM management</small>
+              </div>
+            </a>
+          </div>
+
+          <!-- Module Carousel Control -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'carousel:control_panel' %}"
+            >
+              <div class="card my-card-custom card-carousel h-100 text-center p-4">
+                <i class="fas fa-robot fa-2x mb-2"></i>
+                <h4>Control Panel</h4>
+                <small class="text-muted">Horizontal Carousel Management</small>
+              </div>
+            </a>
+          </div>
+
+          <!-- Module Inventory -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'inventory:dispense_list' %}"
+            >
+              <div class="card my-card-custom card-dispense h-100 text-center p-4">
+                <i class="fa-solid fa-warehouse fa-2x mb-2"></i>
+                <h4>Inventory</h4>
+                <small class="text-muted">Dispensing, Ordering, Warehousing</small>
+              </div>
+            </a>
+          </div>
+
+          <!-- Module Reports -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'reports:overview' %}"
+            >
+              <div class="card my-card-custom card-report h-100 text-center p-4">
+                <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
+                <h4>Reports</h4>
+                <small class="text-muted">View Statistics</small>
+              </div>
+            </a>
+          </div>
+
+          <!-- Module Patients -->
+          <div class="col-lg-4 col-md-6 mb-4">
+            <a
+              class="text-decoration-none text-dark"
+              href="{% url 'patients:list' %}"
+            >
+              <div class="card my-card-custom card-patient h-100 text-center p-4">
+                <i class="fa-solid fa-id-card fa-2x mb-2"></i>
+                <h4>Patient</h4>
+                <small class="text-muted">Manage Records</small>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+<!--  -->
+{% endblock %}

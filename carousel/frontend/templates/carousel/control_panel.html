@@ -1,0 +1,114 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'carousel/css/control_panel.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Horizontal Carousel Control Panel {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container-fluid mt-4 mb-5">
+  <div class="row">
+    <!-- CỘT TRÁI: ĐIỀU KHIỂN -->
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm mb-3 sticky-top" style="top: 20px; z-index: 100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-satellite-dish me-2"></i>Current State</h5>
+        </div>
+        <div class="card-body text-center">
+          <p class="text-muted mb-1">Shelves at the entrance:</p>
+          <h1 class="display-1 fw-bold text-primary" id="current-shelf-display">A</h1>
+          <div id="status-indicator" class="status-ready mt-2">
+            <span id="status-text" class="badge bg-success fs-6">Ready</span>
+          </div>
+        </div>
+        <div class="card-header border-top bg-light mt-2">
+          <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Control Panel</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2 mb-3">
+            <button class="btn btn-info text-white" id="homing-btn"><i class="fas fa-home me-1"></i> Homing</button>
+          </div>
+          <hr />
+          <p class="text-center small text-muted mb-2">Move to shelf:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2" id="move-buttons">
+            {% for name in all_shelf_names %}
+            <button class="btn btn-outline-secondary move-btn" data-shelf="{{ name }}">{{ name }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CỘT PHẢI: SƠ ĐỒ KỆ -->
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h5 class="mb-0 text-primary"><i class="fas fa-th-large me-2"></i>Shelf Layout Visualization</h5>
+        </div>
+        <div class="card-body bg-light">
+          <div class="row g-3 carousel-layout">
+            {% for shelf in shelf_data %}
+            <div class="col-sm-6 col-md-4 col-lg-3">
+              <div class="shelf-card h-100" id="shelf-card-{{ shelf.name }}">
+                <div class="shelf-header text-center fw-bold bg-white border-bottom">Kệ {{ shelf.name }}</div>
+                <div class="shelf-body p-2">
+                  <!-- Vòng lặp ngược -->
+                  {% for tray in shelf.trays reversed %}
+                  <div
+                    class="tray-item mb-2 rounded p-2 position-relative {% if tray.is_filled %}tray-filled{% endif %}"
+                  >
+                    <div class="tray-header-row">
+                      <span class="badge bg-secondary">Tầng {{ tray.level }}</span>
+                      <!-- Hiển thị % chính xác từ server -->
+                      <span class="tray-percent fw-bold small text-primary">
+                        {% if tray.percentage > 0 %}{{ tray.percentage }}%{% endif %}
+                      </span>
+                    </div>
+
+                    <div class="tray-product fw-bold text-truncate mt-1" title="{{ tray.product.name }}">
+                      {{ tray.product.name|default:"-- Trống --" }}
+                    </div>
+
+                    <div class="tray-batch small text-muted fst-italic">
+                      {% if tray.batch_number %}Lô: {{ tray.batch_number }}{% endif %}
+                    </div>
+
+                    <!-- Hiển thị chuỗi số lượng đã format (VD: 100 Viên / 50 Vỉ) -->
+                    <div class="tray-qty small text-dark mt-1">{{ tray.quantity_str }}</div>
+
+                    <!-- Progress Bar -->
+                    <div class="progress mt-2" style="height: 5px">
+                      <div
+                        class="progress-bar {% if tray.percentage > 90 %}bg-danger {% elif tray.percentage > 50 %}bg-warning {% else %}bg-success{% endif %}"
+                        role="progressbar"
+                        style="width: {{ tray.percentage }}%"
+                      ></div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<script>
+  const URLS = {
+    getStatus: "{% url 'carousel:api_get_status' %}",
+    homing: "{% url 'carousel:api_homing' %}",
+    moveToShelf: "{% url 'carousel:api_move_to_shelf' %}",
+  };
+  const csrfToken = "{{ csrf_token }}";
+</script>
+<script src="{% static 'carousel/js/control_panel.js' %}"></script>
+{% endblock %}

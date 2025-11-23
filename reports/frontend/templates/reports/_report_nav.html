@@ -1,0 +1,26 @@
+<ul class="nav report-nav-tabs">
+  <li class="nav-item">
+    <a
+      class="nav-link {% if active_report == 'overview' %}active{% endif %}"
+      href="{% url 'reports:overview' %}"
+    >
+      <i class="fas fa-warehouse me-2"></i>Inventory Overview
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if active_report == 'dispense' %}active{% endif %}"
+      href="{% url 'reports:dispense_analysis' %}"
+    >
+      <i class="fas fa-chart-pie me-2"></i>Dispense Analysis
+    </a>
+  </li>
+  <li class="nav-item">
+    <a
+      class="nav-link {% if active_report == 'status' %}active{% endif %}"
+      href="{% url 'reports:inventory_status' %}"
+    >
+      <i class="fas fa-exclamation-triangle me-2"></i>Warning Status
+    </a>
+  </li>
+</ul>

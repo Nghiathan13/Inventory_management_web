@@ -1,0 +1,94 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'supplier/css/login.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Supplier Sign in {% endblock%}
+<!--  -->
+{% block navbar %}{% endblock %}
+<!--  -->
+{% block content %}
+<div class="container">
+  <!-- ALERT -->
+  {% if messages %}{% for message in messages %}
+  <div
+    class="alert alert-{{ message.tags }} alert-dismissible fade show"
+    role="alert"
+  >
+    {{ message }}
+    <button
+      type="button"
+      class="btn-close"
+      data-bs-dismiss="alert"
+      aria-label="Close"
+    ></button>
+  </div>
+  {% endfor %}{% endif %}
+
+  <!-- CARD -->
+  <div class="card">
+    <!-- Header -->
+    <div class="login-header">
+      <p>Supplier Sign in</p>
+    </div>
+    <!-- Body -->
+    <div class="login-body">
+      <form method="POST">
+        {% csrf_token %}
+        <!-- Input ẩn để chuyển hướng sau khi đăng nhập thành công -->
+        <input
+          type="hidden"
+          name="next"
+          value="{% url 'supplier:dashboard' %}"
+        />
+
+        <div class="custom-form-group">
+          <input
+            type="text"
+            name="username"
+            class="custom-input"
+            placeholder=" "
+            required
+            id="id_username"
+          />
+          <label for="id_username">USERNAME</label>
+        </div>
+        <div class="custom-form-group">
+          <input
+            type="password"
+            name="password"
+            class="custom-input"
+            placeholder=" "
+            required
+            id="id_password"
+          />
+          <label for="id_password">PASSWORD</label>
+        </div>
+
+        <button class="btn" type="submit" id="btn-login">
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+    <div class="login-footer">
+      <a href="{% url 'user:username_reset' %}" class="footer-link"
+        >CAN'T SIGN IN?</a
+      >
+    </div>
+    <div class="card-footer bg-light text-center border-top">
+      <a
+        href="{% url 'user:login' %}"
+        class="btn btn-link text-decoration-none"
+      >
+        <i class="fas fa-user-shield me-1"></i> Not a Supplier? Login as
+        Staff/Doctor
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

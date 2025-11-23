@@ -1,0 +1,108 @@
+/* NỘI DUNG Y HỆT FILE static/css/user/login.css */
+
+.container {
+  margin-top: 15vh;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===================================================================
+         CARD
+=================================================================== */
+.card {
+  min-width: max-content;
+  width: 40rem;
+  box-shadow: 0 0 2rem 0.2rem rgba(138, 43, 226, 0.25);
+  padding: 0 1rem;
+}
+
+/* --- Hearder --- */
+.login-header {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: rgb(0, 0, 0);
+}
+
+/* --- Body --- */
+.login-body {
+  padding: 1.5rem;
+  font-size: 1rem;
+  color: rgb(0, 0, 0);
+}
+.custom-form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+.custom-input {
+  height: 4rem;
+  width: 100%;
+  border-radius: 0.25rem;
+  border: none;
+  background-color: rgb(245, 245, 245);
+  padding-left: 0.5rem;
+  padding-top: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  z-index: 1;
+}
+.custom-input:hover {
+  background-color: rgb(235, 235, 235);
+}
+.custom-input:focus {
+  background-color: rgb(255, 255, 255);
+}
+.custom-form-group label {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  font-weight: 1000;
+  color: rgb(75, 75, 75);
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+  z-index: 2;
+}
+.custom-input:focus + label,
+.custom-input:not(:placeholder-shown) + label {
+  top: 20%;
+  transform: translateY(-50%) translateX(-0.75rem) scale(0.9);
+  color: rgb(120, 120, 120);
+}
+/* Button */
+#btn-login {
+  display: block;
+  margin: 4rem auto 0;
+  height: 5rem;
+  width: 5rem;
+  border-radius: 1.5rem;
+  border-color: rgb(147, 147, 147);
+  background-color: rgb(255, 255, 255);
+  font-size: 2rem;
+  color: rgb(147, 147, 147);
+}
+#btn-login:hover {
+  border-color: rgb(255, 255, 255);
+  background-color: rgb(138, 43, 226);
+  color: rgb(255, 255, 255);
+}
+
+/* --- Footer --- */
+.login-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0 2rem;
+}
+.footer-link {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-decoration: none;
+  color: rgba(0, 0, 0, 0.5);
+}
+.footer-link:hover {
+  color: rgb(0, 0, 0);
+}

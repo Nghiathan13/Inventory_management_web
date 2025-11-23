@@ -1,0 +1,199 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!---->
+{% load static %}
+<!---->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'doctor/css/prescription.css' %}" />
+{% endblock %}
+<!---->
+{% block title %} Prescribing Medicine {% endblock %}
+<!---->
+{% block content %}
+<div class="container">
+  <!-- ALERT -->
+  <div class="row">
+    <div class="col">
+      {% if messages %}
+      <!--  -->
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endfor %}
+      <!--  -->
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- FORM KÊ ĐƠN -->
+  <div class="row">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <p><i class="fa-solid fa-file-medical"></i> New Prescription</p>
+      </div>
+      <div class="card-body">
+        <!-- Patient -->
+        <p>Patient <span class="required">*</span></p>
+        <form
+          method="POST"
+          id="prescription-form"
+          onsubmit="return confirm('Are you sure you want to complete and dispatch this prescription? This action cannot be undone.');"
+        >
+          {% csrf_token %}
+          <!--  -->
+          {{ prescription_form|crispy }}
+          <!--  -->
+          <hr />
+          <!-- Medicine Details -->
+          <p>Medicine Details <span class="required">*</span></p>
+          <div id="details-container">
+            <!-- Form details will be added here by JS -->
+          </div>
+
+          <!-- Template cho một dòng form chi tiết (blueprint) -->
+          <template id="detail-form-template">
+            <div class="row mb-3 detail-form align-items-end" data-index="__PREFIX__">
+              <!-- Chọn tên thuốc -->
+              <div class="col-md col-product">
+                <label for="id_details___PREFIX___product">Name</label>
+                <select
+                  name="details-__PREFIX__-product"
+                  id="id_details___PREFIX___product"
+                  class="form-select product-select"
+                  required
+                ></select>
+              </div>
+
+              <!-- Chọn đơn vị tính -->
+              <div class="col-md col-uom">
+                <label for="id_details___PREFIX___uom" class="form-label">Unit</label>
+                <select
+                  name="details-__PREFIX__-uom"
+                  id="id_details___PREFIX___uom"
+                  class="form-select uom-select"
+                  required
+                  disabled
+                >
+                  <option value="">Choose medicine first.</option>
+                </select>
+              </div>
+
+              <!-- Chọn số  lượng -->
+              <div class="col-md col-quantity">
+                <label for="id_details___PREFIX___quantity" class="form-label">Quantity</label>
+                <input
+                  type="number"
+                  name="details-__PREFIX__-quantity"
+                  id="id_details___PREFIX___quantity"
+                  class="form-control"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <!-- DELETE -->
+              <div class="col-md-auto col-action">
+                <button type="button" class="btn btn-danger remove-form" title="Delete this medicine">
+                  <i class="fa-solid fa-trash"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </template>
+
+          <!-- Template cho một <option> sản phẩm (blueprint) -->
+          <!-- Sử dụng placeholder an toàn như __NAME__ để Django không render -->
+          <template id="product-option-template">
+            <option value="__ID__">__NAME__ (Còn: __QUANTITY__)</option>
+          </template>
+
+          <!-- Template cho một <option> đơn vị tính (blueprint) -->
+          <template id="uom-option-template">
+            <option value="__ID__">__NAME__</option>
+          </template>
+
+          <!-- Template cho option "chọn sản phẩm trước" -->
+          <template id="uom-placeholder-template">
+            <option value="">Choose product first.</option>
+          </template>
+          <hr />
+
+          <!-- Button -->
+          <div class="mt-3">
+            <button type="button" id="add-more" class="btn btn-add"><i class="fa-solid fa-plus"></i> Add</button>
+            <button type="submit" class="btn btn-complete"><i class="fa-solid fa-check-circle"></i> Complete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- LỊCH SỬ TOA THUỐC -->
+  <div class="row">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <p><i class="fa-solid fa-clock-rotate-left"></i> History</p>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+              <tr>
+                <th>ID</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Created Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in prescriptions %}
+              <tr>
+                <td>{{ p.id }}</td>
+                <td>{{ p.patient.full_name|default:"N/A" }}</td>
+                <td>{{ p.doctor.username }}</td>
+                <td>{{ p.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                  {% if p.completed_at %}
+                  <span class="badge bg-success">Completed at {{ p.completed_at|date:"H:i d/m/Y" }}</span>
+                  {% else %}
+                  <span class="badge bg-warning">Not yet completed.</span>
+                  {% endif %}
+                </td>
+                <td class="text-center">
+                  <a
+                    href="{% url 'doctor:download_prescription_pdf' p.id %}"
+                    class="btn btn-secondary btn-sm"
+                    data-bs-toggle="tooltip"
+                    title="Download PDF"
+                  >
+                    <i class="fas fa-download"></i>
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No prescription has been created yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+<!---->
+{% block javascript %}
+<!--  -->
+{{ products_data|json_script:"products-data-json" }}
+<!--  -->
+{{ uoms_data|json_script:"uoms-data-json" }}
+<script src="{% static 'doctor/js/prescription.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,64 @@
+<ul class="nav product-nav-tabs">
+  <!--  -->
+  {% with view_name=request.resolver_match.view_name %}
+  <!-- Tab: Medications List -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if view_name in 'products:list,products:add,products:update,products:detail' %}active{% endif %}"
+      href="{% url 'products:list' %}"
+    >
+      <i class="fas fa-pills me-2"></i>Medications List
+    </a>
+  </li>
+
+  <!-- Tab: Medications Category -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'products:category' in view_name %}active{% endif %}"
+      href="{% url 'products:category_list' %}"
+    >
+      <i class="fas fa-sitemap me-2"></i>Medications Category
+    </a>
+  </li>
+
+  <!-- Tab: Unit Category -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'products:uom_category' in view_name %}active{% endif %}"
+      href="{% url 'products:uom_category_list' %}"
+    >
+      <i class="fas fa-tags me-2"></i>Unit Category
+    </a>
+  </li>
+
+  <!-- Tab: Unit -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'products:uom' in view_name and 'category' not in view_name %}active{% endif %}"
+      href="{% url 'products:uom_list' %}"
+    >
+      <i class="fas fa-balance-scale me-2"></i>Unit
+    </a>
+  </li>
+
+  <!-- Tab: BOM -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'products:bom' in view_name %}active{% endif %}"
+      href="{% url 'products:bom_list' %}"
+    >
+      <i class="fas fa-cogs me-2"></i>Bill Of Material
+    </a>
+  </li>
+
+  <!-- Tab: POSITION IN CAROUSEL -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'products:manage_locations' in view_name %}active{% endif %}"
+      href="{% url 'products:manage_locations' %}"
+    >
+      <i class="fas fa-map-marker-alt me-2"></i>Quản Lý Vị Trí
+    </a>
+  </li>
+  {% endwith %}
+</ul>

@@ -1,0 +1,205 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'dispense/css/process_dispense.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Dispense #{{ prescription.id }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container-fluid mt-4 pb-5">
+  <!-- HEADER TRANG (ĐÓNG KHUNG) -->
+  <div class="page-header-frame">
+    <h4 class="fw-bold text-primary mb-0">
+      <i class="fas fa-pills me-2"></i>Process Prescription #{{ prescription.id }}
+    </h4>
+    <!-- ID btn-back-top để JS ẩn đi -->
+    <a href="{% url 'inventory:dispense_list' %}" class="btn btn-outline-secondary fw-bold" id="btn-back-top">
+      <i class="fas fa-arrow-left me-1"></i> Back to List
+    </a>
+  </div>
+
+  <div class="row row-equal-height">
+    <!-- CỘT TRÁI: THÔNG TIN (Card viền đậm) -->
+    <div class="col-lg-7 mb-4 d-flex flex-column">
+      <div class="card card-strong-border h-100">
+        <div class="card-header bg-white border-bottom pt-3 pb-3">
+          <h5 class="mb-0 fw-bold text-dark">
+            <i class="fas fa-file-medical-alt me-2 text-primary"></i>Prescription Details
+          </h5>
+        </div>
+
+        <div class="card-body p-4">
+          <!-- (Giữ nguyên nội dung bên trong) -->
+          <div class="row mb-4 p-3 bg-light rounded mx-0">
+            <div class="col-md-6 border-end">
+              <small class="text-uppercase text-muted fw-bold">Patient</small>
+              <p class="fs-5 fw-bold text-dark mb-0">{{ prescription.patient.full_name }}</p>
+            </div>
+            <div class="col-md-6 ps-md-4">
+              <small class="text-uppercase text-muted fw-bold">Prescribed By</small>
+              <p class="fs-5 fw-bold text-dark mb-0">Dr. {{ prescription.doctor.username }}</p>
+            </div>
+          </div>
+
+          <h6 class="text-muted mb-3">Medication List (Request):</h6>
+          <div class="table-responsive border rounded">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th class="py-2">Product Name</th>
+                  <th class="py-2 text-center">Requested</th>
+                  <th class="py-2 text-center">In Stock (Total)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for detail in prescription.details.all %}
+                <tr>
+                  <td class="fw-bold text-primary">{{ detail.product.name }}</td>
+                  <td class="text-center">
+                    <span class="badge bg-info text-dark px-3 py-2"
+                      >{{ detail.quantity }} {{ detail.uom.name }}</span
+                    >
+                  </td>
+                  <td class="text-center text-muted">
+                    <small>{{ detail.product.quantity }} {{ detail.product.base_uom.name }}</small>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card-footer bg-white p-3 border-top">
+          <div class="d-flex justify-content-end align-items-center">
+            <form method="POST" id="finish-form">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary btn-lg px-4" id="btn-complete" disabled>
+                <i class="fas fa-check-double me-2"></i> Complete & Finish
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CỘT PHẢI: PICKING ASSISTANT (Card viền đậm) -->
+    <div class="col-lg-5 mb-4 d-flex flex-column">
+      <div class="card card-strong-border h-100 bg-light" style="min-height: 600px">
+        <div class="card-header bg-primary text-white pt-3 pb-3 d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-bold"><i class="fas fa-robot me-2"></i>Picking Assistant</h5>
+          <button class="btn btn-light text-primary btn-sm fw-bold px-3 shadow-sm" id="btn-start-picking">
+            <span class="js-btn-text"><i class="fas fa-play me-1"></i> START</span>
+            <span class="js-btn-loading d-none"
+              ><span class="spinner-border spinner-border-sm"></span> Loading...</span
+            >
+          </button>
+        </div>
+
+        <div class="card-body d-flex flex-column p-0">
+          <div class="p-3 bg-white border-bottom shadow-sm z-index-1 position-relative">
+            <div class="d-flex align-items-center justify-content-center">
+              <div class="text-center me-4">
+                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem"
+                  >Current Shelf</small
+                >
+                <span id="current-shelf-display" class="display-6 fw-bold text-dark">--</span>
+              </div>
+              <div class="vr h-100 mx-3"></div>
+              <div>
+                <span id="status-idle" class="badge bg-secondary px-3 py-2 rounded-pill"
+                  ><i class="fas fa-pause me-1"></i> Idle</span
+                >
+                <span id="status-moving" class="badge bg-warning text-dark px-3 py-2 rounded-pill d-none"
+                  ><i class="fas fa-sync fa-spin me-1"></i> Moving...</span
+                >
+                <span id="status-ready" class="badge bg-success px-3 py-2 rounded-pill d-none"
+                  ><i class="fas fa-check me-1"></i> Ready</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div
+            id="picking-queue"
+            class="flex-grow-1 p-3 overflow-auto custom-scrollbar"
+            style="background-color: #f8f9fa"
+          >
+            <div class="text-center text-muted py-5 mt-5 js-placeholder">
+              <div class="mb-3"><i class="fas fa-box-open fa-4x text-secondary opacity-25"></i></div>
+              <h5>Ready to Dispense</h5>
+              <p class="small">Click <strong>"START"</strong> to calculate path.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE ITEM -->
+<template id="picking-item-template">
+  <div class="picking-item p-3 mb-2 rounded border">
+    <div class="d-flex justify-content-between align-items-start">
+      <div class="me-2" style="flex: 1">
+        <div class="d-flex align-items-center mb-1">
+          <span class="me-2 fs-5 js-icon-pending d-none"><i class="far fa-circle text-secondary"></i></span>
+          <span class="me-2 fs-5 js-icon-active d-none"><i class="fas fa-spinner fa-spin text-primary"></i></span>
+          <span class="me-2 fs-5 js-icon-done d-none"><i class="fas fa-check-circle text-success"></i></span>
+          <h6 class="mb-0 fw-bold text-dark js-product-name"></h6>
+        </div>
+
+        <div class="small text-muted ms-4">
+          <div>
+            <i class="fas fa-map-marker-alt text-danger me-1"></i> Kệ <strong class="js-item-shelf"></strong> - Tầng
+            <strong class="js-item-level"></strong>
+          </div>
+          <!-- HIỂN THỊ SỐ LƯỢNG TẠI KỆ (MỚI) -->
+          <div class="text-primary fw-bold mt-1">
+            <i class="fas fa-cubes me-1"></i> Available on Shelf: <span class="js-stock-at-shelf"></span>
+          </div>
+          <!-- Thông báo nếu phải đi kệ tiếp theo -->
+          <div class="text-warning fst-italic d-none js-split-msg mt-1">
+            <i class="fas fa-arrow-right"></i> Not enough! Go to next shelf...
+          </div>
+        </div>
+      </div>
+
+      <div class="text-end" style="min-width: 130px">
+        <!-- Số lượng cần lấy tại bước này -->
+        <div class="badge bg-primary fs-6 mb-2 px-3 py-2 rounded-pill">
+          Pick: <span class="js-item-quantity"></span>
+        </div>
+
+        <div class="action-area mt-1">
+          <button class="btn btn-success btn-sm w-100 shadow-sm js-btn-confirm d-none">
+            <span class="js-text-confirm"><i class="fas fa-hand-holding-medical me-1"></i> Confirm</span>
+            <span class="js-text-wait d-none"><i class="fas fa-sync fa-spin"></i> Wait...</span>
+          </button>
+          <button class="btn btn-warning btn-sm w-100 mt-1 shadow-sm js-btn-undo d-none">
+            <i class="fas fa-undo-alt me-1"></i> Undo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<script>
+  const PRESCRIPTION_ID = {{ prescription.id }};
+  const URLS = {
+      calcPath: "{% url 'inventory:api_calculate_picking_path' prescription.id %}",
+      confirmPick: "{% url 'inventory:api_confirm_pick' %}",
+      undoPick: "{% url 'inventory:api_undo_pick' %}",
+      moveCarousel: "{% url 'carousel:api_move_to_shelf' %}",
+      carouselStatus: "{% url 'carousel:api_get_status' %}"
+  };
+  const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script src="{% static 'dispense/js/dispense_logic.js' %}"></script>
+{% endblock %}

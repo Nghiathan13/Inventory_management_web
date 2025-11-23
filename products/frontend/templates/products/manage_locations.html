@@ -1,0 +1,156 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block title %} Quản Lý Vị Trí Kệ Xoay {% endblock %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'products/css/manage_locations.css' %}" />
+{% endblock %}
+<!--  -->
+{% block content %}
+<div class="container">{% include '_product_nav.html' %}</div>
+<div class="container-fluid mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h4><i class="fas fa-tasks me-2"></i>Sơ Đồ Vị Trí Kho</h4>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 carousel-layout">
+        {% for shelf in all_shelves %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="card h-100">
+            <div class="card-header text-center fw-bold bg-light">Kệ {{ shelf.name }}</div>
+            <div class="card-body p-2">
+              {% for tray in shelf.trays.all reversed %}
+              <div
+                class="tray-item mb-2 rounded p-2 position-relative"
+                data-tray-id="{{ tray.pk }}"
+                data-tray-name="Kệ {{ shelf.name }} - Tầng {{ tray.level }}"
+              >
+                <div class="d-flex justify-content-between">
+                  <span class="badge bg-secondary">Tầng {{ tray.level }}</span>
+                  <span class="tray-percent fw-bold small text-primary">
+                    {% if tray.percentage > 0 %}
+                    <!--  -->
+                    {{ tray.percentage }}%
+                    <!--  -->
+                    {% endif %}
+                  </span>
+                </div>
+                <div class="tray-product fw-bold text-truncate mt-1" style="max-width: 100%">-- Trống --</div>
+                <div class="tray-batch small text-muted fst-italic"></div>
+                <div class="tray-qty small text-dark"></div>
+                <div class="progress mt-1" style="height: 5px">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THIẾT LẬP -->
+<div class="modal fade" id="locationSettingsModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="locationModalLabel">Thiết Lập Vị Trí</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- 1. Chọn Sản Phẩm -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">1. Chọn Sản Phẩm</label>
+          <select class="form-select" id="modal-product" style="width: 100%"></select>
+        </div>
+
+        <!-- 2. Chọn Lô -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">2. Chọn Lô (Batch)</label>
+          <select class="form-select" id="modal-batch" disabled>
+            <option value="">-- Vui lòng chọn sản phẩm trước --</option>
+          </select>
+        </div>
+
+        <!-- Panel Thông tin Lô -->
+        <div id="batch-info-panel" class="alert alert-warning d-none p-2">
+          <div class="d-flex justify-content-between fw-bold">
+            <span id="lblBatchName"></span>
+            <span id="lblBatchExpiry" class="text-danger"></span>
+          </div>
+          <hr class="my-1" />
+          <div class="row text-center small">
+            <div class="col-4 border-end">Tổng: <strong id="lblBatchTotal">0</strong></div>
+            <div class="col-4 border-end">Đã xếp: <strong id="lblBatchAllocated">0</strong></div>
+            <div class="col-4 text-success">
+              Còn lại: <strong id="lblBatchUnallocated" class="fs-6">0</strong> <span id="lblBatchBaseUom"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Sức Chứa Tối Đa -->
+        <div id="input-section" style="opacity: 0.5; pointer-events: none">
+          <hr />
+          <div class="row mb-3">
+            <label class="form-label fw-bold text-danger">3. Sức Chứa Tối Đa (Capacity)</label>
+            <div class="col-7">
+              <input type="number" class="form-control" id="modal-capacity" min="1" value="50" />
+            </div>
+            <div class="col-5">
+              <select class="form-select uom-select" id="modal-capacity-uom"></select>
+            </div>
+            <div class="form-text">Ví dụ: Kệ này chứa tối đa 5 Hộp.</div>
+          </div>
+
+          <!-- 4. Số Lượng Phân Bổ -->
+          <div class="row mb-2">
+            <label class="form-label fw-bold text-primary">4. Số Lượng Xếp Lên Kệ</label>
+            <div class="col-7">
+              <input type="number" class="form-control" id="modal-quantity" min="0" value="0" />
+            </div>
+            <div class="col-5">
+              <select class="form-select uom-select" id="modal-quantity-uom"></select>
+            </div>
+          </div>
+
+          <!-- Thông báo Validation -->
+          <div id="capacity-warning" class="alert alert-danger d-none mt-2 py-1 small">
+            <i class="fas fa-exclamation-triangle"></i>
+            Cảnh báo: Số lượng xếp vượt quá sức chứa tối đa! (Quy đổi: <span id="convert-msg"></span>)
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger me-auto" id="modal-remove-btn">Làm Trống</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" id="modal-save-btn">Lưu Thiết Lập</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<!-- Truyền dữ liệu ban đầu từ Django sang JavaScript -->
+{{ all_products_data|json_script:"all-products-data" }}
+<!--  -->
+{{ uoms_by_category|json_script:"uoms-by-category" }}
+<!--  -->
+{{ all_locations_data|json_script:"all-locations-data" }}
+<!--  -->
+{{ all_boms_data|json_script:"all-boms-data" }}
+
+<script>
+  const URL_GET_BATCHES = "{% url 'products:api_get_product_batches_details' %}";
+  const URL_SAVE = "{% url 'products:api_save_location' %}";
+  const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script src="{% static 'products/js/manage_locations.js' %}"></script>
+{% endblock %}

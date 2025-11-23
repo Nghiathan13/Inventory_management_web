@@ -1,0 +1,55 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'reports/css/report.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Report: Warehouse Analysis {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4">
+  {% include 'reports/_report_nav.html' %}
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm chart-card">
+        <div class="card-body">
+          <canvas id="salesTrendLineChart" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm chart-card">
+        <div class="card-body">
+          <canvas id="dispenseDoughnutChart" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<!--  -->
+{{ dispense_data|json_script:"dispense-data-json" }}
+<!--  -->
+{{ sales_trend_data|json_script:"sales-trend-data-json" }}
+<script src="{% static 'reports/js/report.js' %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Đọc dữ liệu từ các thẻ script ở trên
+    const dispenseData = JSON.parse(
+      document.getElementById("dispense-data-json").textContent
+    );
+    const salesTrendData = JSON.parse(
+      document.getElementById("sales-trend-data-json").textContent
+    );
+
+    // 2. Gọi hàm vẽ biểu đồ
+    drawDispenseChart("dispenseDoughnutChart", dispenseData);
+    drawSalesTrendChart("salesTrendLineChart", salesTrendData);
+  });
+</script>
+<!--  -->
+{% endblock %}

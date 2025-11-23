@@ -1,0 +1,142 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block title %}Xử Lý Đơn Hàng #{{ order.id }}{% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Xử Lý Đơn Hàng #{{ order.id }}</h4>
+          <span class="badge bg-light text-primary">NCC: {{ order.supplier.username }}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Hướng dẫn:</strong> Nhấn vào nút <strong>"Nhập HSD"</strong> của từng sản phẩm để nhập hạn sử
+            dụng. Sau khi nhập xong tất cả, nút xác nhận sẽ hiện ra.
+          </div>
+
+          <!-- Form chính -->
+          <form
+            id="confirm-form"
+            method="POST"
+            action="{% url 'supplier:confirm_order_api' order.pk %}"
+            data-redirect-url="{% url 'supplier:dashboard' %}"
+          >
+            {% csrf_token %}
+
+            <div class="table-responsive">
+              <table class="table table-hover align-middle table-bordered">
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center" style="width: 50px">Check</th>
+                    <th>Tên Sản Phẩm</th>
+                    <th class="text-center">Số Lượng</th>
+                    <th>Hạn Sử Dụng (Expiry Date)</th>
+                    <th class="text-center" style="width: 150px">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for detail in order.details.all %}
+                  <tr id="row-{{ detail.id }}">
+                    <td class="text-center">
+                      <!-- Checkbox ẩn, sẽ được JS tự động tick khi nhập xong date -->
+                      <div class="form-check d-flex justify-content-center">
+                        <input
+                          type="checkbox"
+                          class="form-check-input item-checkbox"
+                          name="details"
+                          value="{{ detail.id }}"
+                          style="pointer-events: none; opacity: 0.6"
+                          onclick="return false;"
+                        />
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-bold text-primary">{{ detail.product.name }}</span><br />
+                      <small class="text-muted">Code: {{ detail.product.code }}</small>
+                    </td>
+                    <td class="text-center fw-bold">
+                      {{ detail.quantity }} <small>{{ detail.product.base_uom.name }}</small>
+                    </td>
+                    <td>
+                      <!-- Input ẩn để chứa giá trị Date gửi về server -->
+                      <input type="hidden" name="expiry_date_{{ detail.id }}" id="input-expiry-{{ detail.id }}" />
+                      <!-- Text hiển thị cho người dùng thấy -->
+                      <span id="display-expiry-{{ detail.id }}" class="text-muted fst-italic">
+                        -- Chưa nhập --
+                      </span>
+                    </td>
+                    <td class="text-center">
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        onclick="openExpiryModal('{{ detail.id }}', '{{ detail.product.name|escapejs }}')"
+                      >
+                        <i class="fas fa-calendar-alt me-1"></i> Nhập HSD
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Khu vực thông báo lỗi -->
+            <div id="form-error" class="alert alert-danger d-none mt-3"></div>
+
+            <div class="d-flex justify-content-end mt-4 gap-2">
+              <a href="{% url 'supplier:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại
+              </a>
+              <!-- Nút Submit mặc định Disabled -->
+              <button type="submit" class="btn btn-success" id="submit-btn" disabled>
+                <i class="fas fa-print me-1"></i> Hoàn Thành & In Phiếu
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NHẬP HẠN SỬ DỤNG (Bootstrap Modal) -->
+<div class="modal fade" id="expiryModal" tabindex="-1" aria-labelledby="expiryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="expiryModalLabel">Thiết Lập Hạn Sử Dụng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="modal-detail-id" />
+
+        <div class="mb-3">
+          <label class="form-label text-muted">Sản phẩm đang chọn:</label>
+          <input type="text" class="form-control fw-bold" id="modal-product-name" disabled readonly />
+        </div>
+
+        <div class="mb-3">
+          <label for="modal-date-input" class="form-label fw-bold">Chọn Ngày Hết Hạn:</label>
+          <input type="date" class="form-control form-control-lg" id="modal-date-input" required />
+          <div class="form-text">Vui lòng kiểm tra kỹ trên bao bì sản phẩm.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" onclick="saveExpiryDate()">
+          <i class="fas fa-check me-1"></i> Lưu & Xác Nhận
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block javascript %}
+<script src="{% static 'supplier/js/process_order.js' %}"></script>
+{% endblock %}

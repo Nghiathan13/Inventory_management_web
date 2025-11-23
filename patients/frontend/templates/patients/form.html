@@ -1,0 +1,92 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'patients/css/patient.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} {{ title }} {% endblock %}
+<!--  -->
+{% load crispy_forms_tags %}
+<!--  -->
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h4><i class="fa-solid fa-edit me-2"></i>{{ title }}</h4>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+          <div class="col-md-8">
+            <h5>BASIC INFORMATION</h5>
+            <hr />
+            <div class="row">
+              <div class="col-md-6">{{ form.full_name|as_crispy_field }}</div>
+              <div class="col-md-6">
+                {{ form.date_of_birth|as_crispy_field }}
+              </div>
+              <div class="col-md-6">{{ form.gender|as_crispy_field }}</div>
+              <div class="col-md-6">
+                {{ form.phone_number|as_crispy_field }}
+              </div>
+              <div class="col-md-12">{{ form.address|as_crispy_field }}</div>
+            </div>
+            <h5 class="mt-4">Identification & Medical Information</h5>
+            <hr />
+            <div class="row">
+              <div class="col-md-6">{{ form.citizen_id|as_crispy_field }}</div>
+              <div class="col-md-6">
+                {{ form.health_insurance_id|as_crispy_field }}
+              </div>
+              <div class="col-md-6">{{ form.ethnicity|as_crispy_field }}</div>
+              <div class="col-md-6">{{ form.blood_type|as_crispy_field }}</div>
+            </div>
+          </div>
+          <div class="col-md-4 text-center">
+            <h5>AVATAR</h5>
+            <hr />
+            {% if form.instance and form.instance.avatar %}
+            <img
+              id="avatar-preview"
+              src="{{ form.instance.avatar.url }}"
+              class="img-thumbnail mb-2"
+              alt="Avatar"
+              style="object-fit: cover; height: 150px; width: 150px"
+            />
+            {% else %}
+            <img
+              id="avatar-preview"
+              src="{% static 'images/default_image.jpg' %}"
+              class="img-thumbnail mb-2"
+              alt="Default Avatar"
+              style="object-fit: cover; height: 150px; width: 150px"
+            />
+            {% endif %}
+            <!--  -->
+            {{ form.avatar|as_crispy_field }}
+          </div>
+        </div>
+        <h5 class="mt-4">Medical History and Allergies</h5>
+        <hr />
+        <div class="row">
+          <div class="col-md-6">{{ form.allergies|as_crispy_field }}</div>
+          <div class="col-md-6">{{ form.medical_history|as_crispy_field }}</div>
+        </div>
+        <div class="mt-4 text-end">
+          <a href="{% url 'patients:list' %}" class="btn btn-secondary">BACK</a>
+          <button class="btn btn-success" type="submit">
+            <i class="fa-solid fa-save me-1"></i> SAVE
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<script src="{% static 'patients/js/patient.js' %}"></script>
+{% endblock %}

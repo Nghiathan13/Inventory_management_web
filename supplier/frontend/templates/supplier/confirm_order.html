@@ -1,0 +1,55 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% block title %} Confirm Order #{{ order.id }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4>
+            <i class="fas fa-clipboard-check me-2"></i>Confirm Items for
+            Purchase Order #{{ order.id }}
+          </h4>
+        </div>
+        <div class="card-body">
+          <p>Please check the items you can supply and confirm the order.</p>
+          <form method="POST">
+            {% csrf_token %}
+            <ul class="list-group mb-4">
+              {% for detail in order.details.all %}
+              <li class="list-group-item">
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="detail{{ detail.id }}"
+                    name="details"
+                    value="{{ detail.id }}"
+                  />
+                  <label class="form-check-label" for="detail{{ detail.id }}">
+                    <strong>{{ detail.product.name }}</strong> - Quantity:
+                    <!--  -->
+                    {{ detail.quantity }}
+                  </label>
+                </div>
+              </li>
+              {% endfor %}
+            </ul>
+            <div class="text-end">
+              <a href="{% url 'supplier:dashboard' %}" class="btn btn-secondary"
+                >Cancel</a
+              >
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-check-circle me-1"></i> Confirm & Generate
+                Delivery Note
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

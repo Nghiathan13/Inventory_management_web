@@ -1,0 +1,241 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% load humanize %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'products/css/product.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Product Detail: {{ product.name }} {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4">
+  <!-- CARD 1: THÔNG TIN SẢN PHẨM -->
+  <div class="card shadow-sm form-card">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h4><i class="fas fa-pills me-2"></i>Product Details</h4>
+        <div>
+          <a href="{% url 'products:list' %}" class="btn btn-secondary btn-sm"
+            ><i class="fas fa-arrow-left me-1"></i> Back to List</a
+          >
+          <a href="{% url 'products:update' product.pk %}" class="btn btn-primary btn-sm"
+            ><i class="fas fa-edit me-1"></i> Edit Info</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row">
+        <!-- Cột trái: Ảnh và Tổng tồn kho -->
+        <div class="col-md-4 text-center">
+          <img
+            src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'images/default_product.png' %}{% endif %}"
+            class="img-thumbnail mb-3 product-detail-image"
+            alt="Product Image"
+          />
+          <p class="mb-1 text-muted">Total Stock Quantity</p>
+          <h1 class="display-4 fw-bold text-info">{{ product.quantity|default:0|intcomma }}</h1>
+          <p class="text-muted">{{ product.base_uom.name|default:'units' }}</p>
+        </div>
+
+        <!-- Cột phải: Thông tin chi tiết -->
+        <div class="col-md-8">
+          <h3 class="fw-bold mb-1">{{ product.name }}</h3>
+          <p class="text-muted">Code: <strong>{{ product.code|default:"--" }}</strong></p>
+          <hr />
+          <dl class="row">
+            <dt class="col-sm-4">Category:</dt>
+            <dd class="col-sm-8">{{ product.category.name|default:"--" }}</dd>
+
+            <dt class="col-sm-4">UoM Category:</dt>
+            <dd class="col-sm-8">{{ product.uom_category.name|default:"--" }}</dd>
+
+            <dt class="col-sm-4">Base UoM:</dt>
+            <dd class="col-sm-8">{{ product.base_uom.name|default:"--" }}</dd>
+
+            <dt class="col-sm-4">Reorder Point:</dt>
+            <dd class="col-sm-8">{{ product.reorder_point }}</dd>
+
+            <dt class="col-sm-4">Supplier:</dt>
+            <dd class="col-sm-8">{{ product.supplier|default:"--" }}</dd>
+          </dl>
+          <div class="bg-light p-3 rounded border mb-3">
+            <div class="row">
+              <div class="col-6 border-end text-center">
+                <small class="text-muted d-block">Import Price</small>
+                <span class="h5 text-secondary">{{ product.import_price|floatformat:0|intcomma }} ₫</span>
+              </div>
+              <div class="col-6 text-center">
+                <small class="text-muted d-block">Sale Price</small>
+                <span class="h5 text-success">{{ product.sale_price|floatformat:0|intcomma }} ₫</span>
+              </div>
+            </div>
+          </div>
+          <hr />
+          <h5>Description</h5>
+          <p class="text-muted">
+            {% if product.description %}
+            <!--  -->
+            {{ product.description|linebreaksbr }}
+            <!--  -->
+            {% else %}No description provided.{% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 2: STOCK DETAILS (CẬP NHẬT SỐ LIỆU CHÍNH XÁC) -->
+  <div class="card shadow-sm mb-4 form-card">
+    <div class="card-header bg-info text-white">
+      <h4 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Stock Distribution (Phân Bổ Tồn Kho)</h4>
+    </div>
+    <div class="card-body">
+      <div class="row text-center">
+        <!-- Cột 1: Tổng số lượng đã xếp lên kệ (Allocated) -->
+        <div class="col-md-4">
+          <div class="alert alert-primary mb-0">
+            <h6>Total Allocated (Trên Kệ)</h6>
+            <!-- Biến calculated_allocated từ view -->
+            <p class="h3 fw-bold mb-0">
+              {{ calculated_allocated|intcomma }}
+              <small class="fs-6 text-muted">{{ product.base_uom.name }}</small>
+            </p>
+          </div>
+        </div>
+
+        <!-- Cột 2: Tổng số lượng chưa phân bổ (Unallocated) -->
+        <div class="col-md-4">
+          <div class="alert alert-danger mb-0">
+            <h6>Unallocated (Trong Kho)</h6>
+            <!-- Biến calculated_unallocated từ view -->
+            <p class="h3 fw-bold mb-0">
+              {{ calculated_unallocated|intcomma }}
+              <small class="fs-6 text-muted">{{ product.base_uom.name }}</small>
+            </p>
+          </div>
+        </div>
+
+        <!-- Cột 3: Tổng tồn kho (Total Stock) -->
+        <div class="col-md-4">
+          <div class="alert alert-secondary mb-0">
+            <h6>Total Stock (Tổng)</h6>
+            <p class="h3 fw-bold mb-0">
+              {{ product.quantity|default:0|intcomma }}
+              <small class="fs-6 text-muted">{{ product.base_uom.name }}</small>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARD 3: DANH SÁCH LÔ HÀNG (BATCH MANAGEMENT) -->
+  <div class="card shadow-sm mb-4 form-card">
+    <div class="card-header">
+      <h4><i class="fas fa-layer-group me-2"></i>Batch Management (Quản lý Lô)</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Batch Code</th>
+              <th>Expiry Date</th>
+              <th>Import Date</th>
+              <th class="text-center">Total Qty</th>
+              <th class="text-center">On Shelf</th>
+              <th class="text-center">Unallocated</th>
+              <th>Current Locations</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in batches_data %}
+            <tr>
+              <td><strong>{{ item.obj.batch_number }}</strong></td>
+              <td>
+                {{ item.obj.expiry_date|date:"d/m/Y" }}
+                <!--  -->
+                {% now "Y-m-d" as today_str %}
+                <!--  -->
+                {% if item.obj.expiry_date|date:"Y-m-d" < today_str %}
+                <span class="badge bg-danger">Expired</span>
+                {% endif %}
+              </td>
+              <td>{{ item.obj.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="text-center fw-bold">{{ item.obj.quantity }}</td>
+
+              <!-- Số lượng đã lên kệ -->
+              <td class="text-center text-primary">
+                {{ item.allocated }} <small class="text-muted">{{ product.base_uom.name }}</small>
+              </td>
+
+              <!-- Số lượng chưa phân bổ (Kho tạm) -->
+              <td
+                class="text-center fw-bold {% if item.unallocated > 0 %}text-success{% else %}text-muted{% endif %}"
+              >
+                {{ item.unallocated }} <small class="text-muted">{{ product.base_uom.name }}</small>
+              </td>
+
+              <!-- Danh sách vị trí kệ của lô này -->
+              <td>
+                {% for loc in item.locations %}
+                <span class="badge bg-light text-dark border mb-1" style="font-size: 0.9rem">
+                  {{ loc.tray }}:
+                  <span class="fw-bold">{{ loc.quantity }} {{ loc.quantity_uom.name }}</span> </span
+                ><br />
+                {% empty %}
+                <small class="text-muted">Not assigned</small>
+                {% endfor %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted">No batches found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Lịch Sử Xuất Kho -->
+  <div class="card shadow-sm mt-4 form-card">
+    <div class="card-header">
+      <h4><i class="fas fa-history me-2"></i>Recent Dispense History</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Quantity</th>
+              <th>Created By</th>
+              <th>Patient</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in order_history %}
+            <tr>
+              <td>{{ order.date|date:"d/m/Y H:i" }}</td>
+              <td>{{ order.order_quantity }}</td>
+              <td>{{ order.staff.username }}</td>
+              <td>{{ order.prescription.patient.full_name|default:"Retail Sale" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center p-3">This product has no dispense history.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

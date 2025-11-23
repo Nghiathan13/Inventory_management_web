@@ -1,0 +1,63 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% load humanize %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'order_history/css/history.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Order History {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container">{% include '_inventory_nav.html' %}</div>
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h4><i class="fas fa-history me-2"></i>Dispense History</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle table-bordered table-history">
+          <thead class="thead-light">
+            <tr>
+              <th>Date</th>
+              <th>Product</th>
+              <th class="text-center">Quantity</th>
+              <th>Doctor</th>
+              <th>Patient</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for order in orders %}
+            <tr>
+              <td>{{ order.date|date:"d/m/Y H:i" }}</td>
+              <td class="product-name">{{ order.product.name|default:"Sản phẩm đã xóa" }}</td>
+              <td class="text-center">
+                <span class="badge bg-secondary">{{ order.order_quantity }}</span>
+              </td>
+              <td>{{ order.staff.username|default:"N/A" }}</td>
+              <td>
+                <!-- Nếu đơn hàng có prescription, hiển thị tên bệnh nhân -->
+                {% if order.prescription %}
+                <!--  -->
+                {{ order.prescription.patient.full_name|default:"N/A" }}
+                <!--  -->
+                {% else %}
+                <span class="text-muted fst-italic">Retail / Other</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center p-4">No shipment history yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

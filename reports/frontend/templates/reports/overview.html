@@ -1,0 +1,53 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'reports/css/report.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Report: Inventory Overview {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4">
+  {% include 'reports/_report_nav.html' %}
+  <div class="row">
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm chart-card">
+        <div class="card-body">
+          <canvas id="inventoryBarChart" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 mb-4">
+      <div class="card shadow-sm chart-card">
+        <div class="card-body">
+          <canvas id="categoryPieChart" height="400"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<script src="{% static 'reports/js/report.js' %}"></script>
+{{ products_data|json_script:"products-data-json" }}
+<!--  -->
+{{ category_data|json_script:"category-data-json" }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Đọc dữ liệu từ các thẻ script ở trên
+    const productsData = JSON.parse(
+      document.getElementById("products-data-json").textContent
+    );
+    const categoryData = JSON.parse(
+      document.getElementById("category-data-json").textContent
+    );
+
+    // 2. Gọi hàm vẽ biểu đồ
+    drawInventoryChart("inventoryBarChart", productsData);
+    drawCategoryChart("categoryPieChart", categoryData);
+  });
+</script>
+{% endblock %}

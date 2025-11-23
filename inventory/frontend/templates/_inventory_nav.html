@@ -1,0 +1,55 @@
+<ul class="nav product-nav-tabs">
+  {% with url_name=request.resolver_match.url_name %}
+
+  <!-- Tab: Cấp phát thuốc -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'dispense' in url_name %}active{% endif %}"
+      href="{% url 'inventory:dispense_list' %}"
+    >
+      <i class="fas fa-prescription-bottle-alt me-2"></i>Dispense
+    </a>
+  </li>
+
+  <!-- Tab: Đặt hàng -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'reorder' in url_name or 'purchasing' in url_name or 'po_detail' in url_name %}active{% endif %}"
+      href="{% url 'inventory:reorder_list' %}"
+    >
+      <i class="fas fa-shopping-cart me-2"></i>Order
+    </a>
+  </li>
+
+  <!-- Tab: Nhập kho -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'stock_in' in url_name %}active{% endif %}"
+      href="{% url 'inventory:stock_in_scan' %}"
+    >
+      <i class="fas fa-qrcode me-2"></i>Stock In
+    </a>
+  </li>
+
+  <!-- Tab MỚI: Nhập kho thủ công -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'manual_receive' in url_name %}active{% endif %}"
+      href="{% url 'inventory:manual_receive_list' %}"
+    >
+      <i class="fas fa-dolly me-2"></i>Manual stock entry
+    </a>
+  </li>
+
+  <!-- Tab: Lịch sử xuất kho -->
+  <li class="nav-item">
+    <a
+      class="nav-link {% if 'order_history' in url_name %}active{% endif %}"
+      href="{% url 'inventory:order_history' %}"
+    >
+      <i class="fas fa-history me-2"></i>History
+    </a>
+  </li>
+
+  {% endwith %}
+</ul>

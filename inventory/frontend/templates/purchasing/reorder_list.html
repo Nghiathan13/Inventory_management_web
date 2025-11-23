@@ -1,0 +1,157 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'purchasing/css/purchasing.css' %}" />
+{% endblock %}
+<!--  -->
+{% block title %} Products to Reorder {% endblock %}
+<!--  -->
+{% block content %}
+<div class="container">{% include '_inventory_nav.html' %}</div>
+<div class="container mt-4">
+  <!-- PHẦN 1: TẠO ĐƠN ĐẶT HÀNG MỚI -->
+  <form method="POST" action="{% url 'inventory:create_po' %}">
+    {% csrf_token %}
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h4>
+          <i class="fas fa-exclamation-triangle text-warning me-2"></i>Products Below
+          Reorder Point
+        </h4>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-plus me-1"></i> Create Purchase Order
+        </button>
+      </div>
+      <div class="card-body">
+        {% if messages %}{% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}{% endif %}
+
+        <div class="mb-3">
+          <label for="supplier-select" class="form-label"
+            >Select a Supplier to create the order for:</label
+          >
+          <select name="supplier_id" id="supplier-select" class="form-select" required>
+            <option value="">---------</option>
+            {% for supplier in suppliers %}
+            <option value="{{ supplier.id }}">{{ supplier.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="select-all" /></th>
+                <th>Product</th>
+                <th>In Stock</th>
+                <th>Reorder Point</th>
+                <th>Default Supplier</th>
+                <th>Quantity to Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products_to_reorder %}
+              <tr>
+                <td>
+                  <input
+                    type="checkbox"
+                    name="products_to_order"
+                    value="{{ product.id }}"
+                    class="reorder-checkbox"
+                  />
+                </td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.reorder_point }}</td>
+                <td>{{ product.supplier|default:"--" }}</td>
+                <td>
+                  <input
+                    type="number"
+                    name="quantity_{{ product.id }}"
+                    class="form-control form-control-sm"
+                    value="{{ product.reorder_point|add:10 }}"
+                    min="1"
+                  />
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted">
+                  <em>Great! No products need to be reordered.</em>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </form>
+  <hr />
+
+  <!-- PHẦN 2: LỊCH SỬ CÁC ĐƠN ĐẶT HÀNG -->
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h4><i class="fas fa-history me-2"></i>Purchase Order History</h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="thead-light">
+            <tr>
+              <th>ID</th>
+              <th>Supplier</th>
+              <th>Status</th>
+              <th>Date Created</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for po in purchase_orders %}
+            <tr>
+              <td><strong>#{{ po.id }}</strong></td>
+              <td>{{ po.supplier.username|default:"N/A" }}</td>
+              <td>
+                <span
+                  class="badge {% if po.status == 'To Confirm' %}bg-warning text-dark {% elif po.status == 'Confirmed' %}bg-info {% elif po.status == 'Received' %}bg-success {% else %}bg-secondary{% endif %}"
+                >
+                  {{ po.get_status_display }}
+                </span>
+              </td>
+              <td>{{ po.created_at|date:"d/m/Y H:i" }}</td>
+              <td class="text-center">
+                <a
+                  href="{% url 'inventory:po_detail' po.id %}"
+                  class="btn btn-primary btn-sm"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center p-4">
+                No Purchase Orders have been created yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+<!--  -->
+{% block javascript %}
+<script>
+  document.getElementById("select-all").addEventListener("change", function (e) {
+    document.querySelectorAll(".reorder-checkbox").forEach((checkbox) => {
+      checkbox.checked = e.target.checked;
+    });
+  });
+</script>
+{% endblock %}

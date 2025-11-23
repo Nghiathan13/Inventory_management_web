@@ -1,0 +1,98 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block title %} Order Acceptance #{{ po.id }} {% endblock %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'stock_in/css/receive_po.css' %}" />
+{% endblock %}
+<!--  -->
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Cột danh sách sản phẩm -->
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h4>
+            <i class="fas fa-list-ol me-2"></i>Products to Be Audited (Order #
+            <!--  -->
+            {{ po.id }})
+          </h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-group" id="product-list">
+            {% for detail in po.details.all %}
+            <li
+              class="list-group-item product-item"
+              data-code="{{ detail.unique_code }}"
+            >
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ detail.product.name }}</h5>
+                <span class="status-icon text-muted"
+                  ><i class="fas fa-circle"></i
+                ></span>
+              </div>
+              <p class="mb-1">
+                Quantity to enter:
+                <span class="fw-bold">{{ detail.quantity }}</span>
+              </p>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cột camera và thông báo -->
+    <div class="col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h4><i class="fas fa-qrcode me-2"></i>Scan Product Code</h4>
+        </div>
+        <div class="card-body text-center">
+          <div id="video-container">
+            <video id="qr-video"></video>
+          </div>
+          <div id="feedback-container" class="mt-3">
+            <!-- Thông báo mặc định (chờ quét) -->
+            <div id="feedback-default" class="alert alert-info">
+              Hướng camera vào mã QR trên sản phẩm...
+            </div>
+            <!-- Thông báo quét thành công (ẩn) -->
+            <div id="feedback-success" class="alert alert-success d-none">
+              <i class="fas fa-check-circle me-1"></i>Đã quét:
+              <strong><span class="product-name"></span></strong>
+            </div>
+            <!-- Thông báo lỗi (ẩn) -->
+            <div id="feedback-error" class="alert alert-danger d-none">
+              <i class="fas fa-times-circle me-1"></i
+              ><strong><span class="error-message"></span></strong>
+            </div>
+            <!-- Thông báo hoàn tất (ẩn) -->
+            <div id="feedback-complete" class="alert alert-primary d-none">
+              <i class="fas fa-clipboard-check me-1"></i
+              ><strong>Hoàn tất!</strong> Tất cả sản phẩm đã được nhập kho. Đang
+              chuyển hướng...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+  <!--  -->
+  {% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+  {{ detail_codes_data|json_script:"detail-codes-data" }}
+  <script>
+    var csrfToken = "{{ csrf_token }}";
+    var stockInProcessApiUrl =
+      "{% url 'inventory:stock_in_process_api' '00000000-0000-0000-0000-000000000000' %}";
+    var redirectUrlAfterCompletion = "{% url 'inventory:stock_in_scan' %}";
+  </script>
+
+  <script src="{% static 'stock_in/js/receive_po.js' %}"></script>
+  {% endblock %}
+</div>

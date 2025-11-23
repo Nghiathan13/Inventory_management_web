@@ -1,0 +1,43 @@
+{% extends 'partials/base.html' %}
+<!--  -->
+{% load static %}
+<!--  -->
+{% block extracss %}
+<link rel="stylesheet" href="{% static 'main/css/staff.css' %}" />
+{% endblock %} {% block title %} Staff List {% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-header">
+      <h4><i class="fas fa-users me-2"></i>Staff List</h4>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        {% for worker in workers %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card staff-card h-100">
+            <div class="card-body text-center">
+              <img
+                src="{{ worker.profile.image.url }}"
+                alt="Avatar"
+                class="staff-avatar mb-3"
+              />
+              <h5 class="card-title">{{ worker.username }}</h5>
+              <p class="card-text text-muted">{{ worker.email }}</p>
+              <a
+                href="{% url 'main:staff_detail' worker.pk %}"
+                class="btn btn-primary btn-sm"
+                >View</a
+              >
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+          <p class="text-center text-muted">There are no staffs.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

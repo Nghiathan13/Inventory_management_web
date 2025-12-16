@@ -11,6 +11,11 @@
     <!-- Bootstrap, FontAwesome CDN & Google Font-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+    />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" />
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link
@@ -19,10 +24,10 @@
     />
 
     <!-- CSS TÙY CHỈNH CỦA BẠN -->
-    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/components/navbar.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/components/table.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/components/form.css' %}" />
+    <link rel="stylesheet" href="{% static 'components/base.css' %}" />
+    <link rel="stylesheet" href="{% static 'components/navbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'components/table.css' %}" />
+    <link rel="stylesheet" href="{% static 'components/form.css' %}" />
 
     <!-- Block này sẽ được các trang con (như index.html) chèn file CSS riêng vào -->
     {% block extracss %}{% endblock %}
@@ -51,8 +56,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <!-- Script chung cho toàn bộ trang -->
-    <script src="{% static 'js/main.js' %}" defer></script>
+    <script src="{% static 'main/js/main.js' %}" defer></script>
     <!-- Block này sẽ được các trang con chèn file JS riêng vào -->
     {% block javascript %}
     <!--  -->

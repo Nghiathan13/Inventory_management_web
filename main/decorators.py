@@ -60,5 +60,3 @@ def supplier_required(function):
         else:
             raise PermissionDenied
     return wrap
-
-# Nếu làm vậy, nhớ sửa lại file `supplier/views.py` để import từ 'main.decorators'

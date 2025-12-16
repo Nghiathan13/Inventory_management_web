@@ -5,10 +5,10 @@ from .models import Prescription, PrescriptionDetail
 from patients.models import Patient
 from products.models import UnitOfMeasure
 
-# =======================================================
-#               FORM QUẢN LÝ KÊ ĐƠN (PRESCRIPTION)
-# =======================================================
 
+# =======================================================
+#               FORM KÊ ĐƠN
+# =======================================================
 class PrescriptionForm(forms.ModelForm):
     class Meta:
         model = Prescription
@@ -19,10 +19,13 @@ class PrescriptionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Tải danh sách bệnh nhân và sắp xếp theo tên
         self.fields['patient'].queryset = Patient.objects.all().order_by('full_name')
         self.fields['patient'].empty_label = "--- Chọn Bệnh Nhân ---"
 
+
+# =======================================================
+#               FORM KÊ ĐƠN CHI TIẾT
+# =======================================================
 class PrescriptionDetailForm(forms.ModelForm):
     class Meta:
         model = PrescriptionDetail

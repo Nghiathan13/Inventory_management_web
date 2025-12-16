@@ -6,9 +6,9 @@ import uuid
 #               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
 # =======================================================
 PRESCRIPTION_STATUS_CHOICES = (
-    ('Pending', 'Chờ lấy thuốc'),
-    ('Dispensed', 'Đã lấy thuốc'),
-    ('Cancelled', 'Đã hủy'),
+    ('Pending', 'Pending'),
+    ('Dispensed', 'Dispensed'),
+    ('Cancelled', 'Cancelled'),
 )
 
 # =======================================================
@@ -55,7 +55,7 @@ class Prescription(models.Model):
 
     def __str__(self):
         patient_name = self.patient.full_name if self.patient else "Unknown"
-        return f'Toa thuốc ID: #{self.id} - Bệnh nhân: {patient_name}'
+        return f'Prescription ID: #{self.id} - Patient: {patient_name}'
 
 # =======================================================
 #               MODEL CHI TIẾT: PRESCRIPTIONDETAIL

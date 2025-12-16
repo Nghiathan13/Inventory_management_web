@@ -43,21 +43,8 @@
 
   <!-- Tab: BOM -->
   <li class="nav-item">
-    <a
-      class="nav-link {% if 'products:bom' in view_name %}active{% endif %}"
-      href="{% url 'products:bom_list' %}"
-    >
+    <a class="nav-link {% if 'products:bom' in view_name %}active{% endif %}" href="{% url 'products:bom_list' %}">
       <i class="fas fa-cogs me-2"></i>Bill Of Material
-    </a>
-  </li>
-
-  <!-- Tab: POSITION IN CAROUSEL -->
-  <li class="nav-item">
-    <a
-      class="nav-link {% if 'products:manage_locations' in view_name %}active{% endif %}"
-      href="{% url 'products:manage_locations' %}"
-    >
-      <i class="fas fa-map-marker-alt me-2"></i>Quản Lý Vị Trí
     </a>
   </li>
   {% endwith %}

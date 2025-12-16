@@ -44,10 +44,7 @@
               </td>
               <td>{{ po.created_at|date:"d/m/Y H:i" }}</td>
               <td class="text-center">
-                <a
-                  href="{% url 'inventory:po_detail' po.id %}"
-                  class="btn btn-primary btn-sm"
-                >
+                <a href="{% url 'inventory:po_detail' po.id %}" class="btn btn-primary btn-sm">
                   <i class="fas fa-eye me-1"></i> View
                 </a>
               </td>

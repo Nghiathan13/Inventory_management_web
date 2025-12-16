@@ -3,7 +3,7 @@
 {% load static %}
 <!--  -->
 {% block extracss %}
-<link rel="stylesheet" href="{% static 'products/css/product.css' %}" />
+<link rel="stylesheet" href="{% static '_product_nav/css/_product_nav.css' %}" />
 <link rel="stylesheet" href="{% static 'product_category/css/product_category.css' %}" />
 {% endblock %}
 <!--  -->
@@ -23,17 +23,9 @@
     </div>
     <div class="card-body">
       {% if messages %}{% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show"
-        role="alert"
-      >
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
         {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       {% endfor %}{% endif %}
       <div class="table-responsive table-container">
@@ -53,9 +45,7 @@
                 <strong>{{ category.name }}</strong>
               </td>
               <td class="col-category-parent">{{ category.parent.name|default:"--" }}</td>
-              <td class="col-description text-start">
-                {{ category.description|truncatewords:15|default:"--" }}
-              </td>
+              <td class="col-description text-start">{{ category.description|truncatewords:15|default:"--" }}</td>
               <td class="col-actions text-center action-buttons">
                 <a
                   href="{% url 'products:category_detail' category.id %}"

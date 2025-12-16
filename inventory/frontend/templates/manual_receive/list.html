@@ -6,24 +6,26 @@
 <link rel="stylesheet" href="{% static 'manual_receive/css/manual_receive.css' %}" />
 {% endblock %}
 <!--  -->
-{% block title %} Đơn Hàng Chờ Nhập Kho {% endblock %}
+{% block title %} Pending Stock-In Orders {% endblock %}
 <!--  -->
 {% block content %}
 <div class="container">{% include '_inventory_nav.html' %}</div>
+
 <div class="container mt-4">
   <div class="card shadow-sm">
     <div class="card-header">
-      <h4><i class="fas fa-truck-loading me-2"></i>Đơn Hàng Chờ Nhập Kho (Thủ Công)</h4>
+      <h4><i class="fas fa-truck-loading me-2"></i>Pending Stock-In (Manual)</h4>
     </div>
+
     <div class="card-body">
       <div class="table-responsive">
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-              <th>ID Đơn Hàng</th>
-              <th>Nhà Cung Cấp</th>
-              <th>Ngày Xác Nhận</th>
-              <th class="text-center">Hành Động</th>
+              <th>PO ID</th>
+              <th>Supplier</th>
+              <th>Confirmed Date</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -33,19 +35,14 @@
               <td>{{ po.supplier.username|default:"N/A" }}</td>
               <td>{{ po.confirmed_at|date:"d/m/Y H:i" }}</td>
               <td class="text-center">
-                <a
-                  href="{% url 'inventory:manual_receive_order' po.pk %}"
-                  class="btn btn-primary btn-sm"
-                >
-                  <i class="fas fa-sign-in-alt me-1"></i> Bắt Đầu Nhập Kho
+                <a href="{% url 'inventory:manual_receive_order' po.pk %}" class="btn btn-primary btn-sm">
+                  <i class="fas fa-sign-in-alt me-1"></i> Start Receiving
                 </a>
               </td>
             </tr>
             {% empty %}
             <tr>
-              <td colspan="4" class="text-center p-4">
-                Không có đơn hàng nào chờ nhập kho.
-              </td>
+              <td colspan="4" class="text-center p-4 text-muted">No orders pending receipt.</td>
             </tr>
             {% endfor %}
           </tbody>

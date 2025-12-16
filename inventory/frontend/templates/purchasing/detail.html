@@ -9,42 +9,23 @@
   {% include 'products/_product_nav.html' %}
 
   <!-- Modal cho Camera -->
-  <div
-    class="modal fade"
-    id="qr-scanner-modal"
-    tabindex="-1"
-    aria-labelledby="scannerModalLabel"
-    aria-hidden="true"
-  >
+  <div class="modal fade" id="qr-scanner-modal" tabindex="-1" aria-labelledby="scannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="scannerModalLabel">
             <i class="fas fa-qrcode me-2"></i>Scan Delivery Note QR Code
           </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body text-center p-4">
           <div
             id="video-container"
-            style="
-              width: 100%;
-              max-width: 400px;
-              margin: 0 auto;
-              border-radius: 8px;
-              overflow: hidden;
-            "
+            style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 8px; overflow: hidden"
           >
             <video id="qr-video" style="width: 100%; height: auto"></video>
           </div>
-          <p id="qr-scan-feedback" class="text-muted mt-3">
-            Point your camera at the QR code...
-          </p>
+          <p id="qr-scan-feedback" class="text-muted mt-3">Point your camera at the QR code...</p>
         </div>
       </div>
     </div>
@@ -59,10 +40,7 @@
       <div class="alert alert-{{ message.tags }}">{{ message }}</div>
       {% endfor %}{% endif %}
       <p class="lead">Ready to receive new stock.</p>
-      <p>
-        Click the button below to start scanning the QR code on the supplier's
-        delivery note.
-      </p>
+      <p>Click the button below to start scanning the QR code on the supplier's delivery note.</p>
       <button
         type="button"
         class="btn btn-primary btn-lg mt-3"

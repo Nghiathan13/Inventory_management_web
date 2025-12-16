@@ -98,14 +98,14 @@ def report_inventory_status(request):
     
     # Lấy các lô hàng còn số lượng > 0 và sắp hết hạn
     expiring_batches = ProductBatch.objects.filter(
-        quantity__gt=0, # Chỉ quan tâm lô còn hàng
+        quantity__gt=0, 
         expiry_date__lte=thirty_days_later,
         expiry_date__gte=today
     ).select_related('product').order_by('expiry_date')
 
     context = {
         'out_of_stock': out_of_stock,
-        'expiring_batches': expiring_batches, # Đổi tên biến cho rõ nghĩa
+        'expiring_batches': expiring_batches,
         'active_report': 'status'
     }
     return render(request, 'reports/inventory_status.html', context)

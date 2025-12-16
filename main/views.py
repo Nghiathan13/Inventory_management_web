@@ -8,7 +8,7 @@ from inventory.models import Order
 from products.models import Product
 
 # Decorators
-from .decorators import admin_required, admin_or_doctor_required
+from .decorators import admin_required
 
 # =======================================================
 #               CÁC VIEW CHÍNH & ĐIỀU HƯỚNG
@@ -26,7 +26,7 @@ def index(request):
     elif request.user.groups.filter(name='Supplier').exists():
         return redirect('supplier:dashboard')
     else:
-        messages.error(request, "Tài khoản của bạn không được cấp quyền.")
+        messages.error(request, "Your account is not authorized.")
         return redirect('user:login')
 
 # -------------------------------------------------------

@@ -1,4 +1,4 @@
-{% extends 'partials/base.html' %}
+{% extends 'main/partials/base.html' %}
 <!--  -->
 {% block title %} CONFIRM DELETE {% endblock %}
 <!--  -->
@@ -8,26 +8,18 @@
     <div class="col-md-6 offset-md-3">
       <div class="card border-danger shadow-sm">
         <div class="card-header bg-danger text-white">
-          <h4>
-            <i class="fa-solid fa-exclamation-triangle"></i> Confirm Delete
-          </h4>
+          <h4><i class="fa-solid fa-exclamation-triangle"></i> Confirm Delete</h4>
         </div>
         <div class="card-body">
           <p>Are you sure you want to delete the patient's record later?</p>
           <h5 class="text-center my-3">
             <strong>{{ item.full_name }}</strong>
           </h5>
-          <div class="alert alert-warning text-center">
-            This action cannot be undone.
-          </div>
+          <div class="alert alert-warning text-center">This action cannot be undone.</div>
         </div>
         <div class="card-footer text-end">
           <form method="POST">
-            {% csrf_token %}<a
-              class="btn btn-secondary"
-              href="{% url 'patients:list' %}"
-              >Cancel</a
-            >
+            {% csrf_token %}<a class="btn btn-secondary" href="{% url 'patients:list' %}">Cancel</a>
             <button class="btn btn-danger" type="submit">Confirm Delete</button>
           </form>
         </div>

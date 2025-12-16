@@ -1,6 +1,9 @@
+/* ===================================================================
+        1. CARD NHÂN VIÊN (LIST VIEW)
+=================================================================== */
 .staff-card {
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   border: 1px solid #e9ecef;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .staff-card:hover {
@@ -8,6 +11,11 @@
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
+/* ===================================================================
+        2. AVATAR (HÌNH ĐẠI DIỆN)
+=================================================================== */
+
+/* Avatar nhỏ ở danh sách */
 .staff-avatar {
   width: 100px;
   height: 100px;
@@ -16,6 +24,7 @@
   border: 3px solid #dee2e6;
 }
 
+/* Avatar lớn ở trang chi tiết */
 .staff-avatar-detail {
   width: 150px;
   height: 150px;
@@ -25,8 +34,10 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* ===================================================================
+        3. DANH SÁCH THÔNG TIN (DETAIL VIEW)
+=================================================================== */
 .staff-info-list .list-group-item {
   border: none;
-  padding-left: 0;
-  padding-right: 0;
+  padding: 0.5rem 0;
 }

@@ -3,41 +3,34 @@
 {% load static %}
 <!--  -->
 {% block extracss %}
-<link rel="stylesheet" href="{% static 'products/css/product.css' %}" />
+<link rel="stylesheet" href="{% static '_product_nav/css/_product_nav.css' %}" />
 <link rel="stylesheet" href="{% static 'uom/css/uom.css' %}" />
 {% endblock %}
 <!--  -->
 {% block title %} Unit Management {% endblock %}
 <!--  -->
 {% block content %}
+
 <div class="container">{% include '_product_nav.html' %}</div>
+
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
       {% if messages %} {% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show"
-        role="alert"
-      >
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
         {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       {% endfor %} {% endif %}
 
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <div class="d-flex justify-content-between align-items-center">
-            <h4><i class="fas fa-balance-scale me-2"></i>Tất Cả Đơn Vị Tính</h4>
-            <a href="{% url 'products:uom_add' %}" class="btn btn-success">
-              <i class="fas fa-plus me-1"></i> New
-            </a>
+            <h4><i class="fas fa-balance-scale me-2"></i>All Units of Measure</h4>
+            <a href="{% url 'products:uom_add' %}" class="btn btn-success"> <i class="fas fa-plus me-1"></i> New </a>
           </div>
         </div>
+
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover table-bordered align-middle">
@@ -48,13 +41,15 @@
                   <th class="col-actions text-center">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
                 {% for uom in uoms %}
                 <tr>
                   <td class="col-uom-name"><strong>{{ uom.name }}</strong></td>
+
                   <td class="col-uom-category">{{ uom.category.name }}</td>
+
                   <td class="col-actions text-center">
-                    <!-- VIEW -->
                     <a
                       href="{% url 'products:uom_detail' uom.id %}"
                       class="btn btn-info btn-sm"
@@ -63,7 +58,6 @@
                     >
                       <i class="fas fa-eye"></i>
                     </a>
-                    <!-- EDIT -->
                     <a
                       href="{% url 'products:uom_edit' uom.id %}"
                       class="btn btn-primary btn-sm"
@@ -72,7 +66,6 @@
                     >
                       <i class="fas fa-pen"></i>
                     </a>
-                    <!-- DELETE -->
                     <a
                       href="{% url 'products:uom_delete' uom.id %}"
                       class="btn btn-danger btn-sm"
@@ -85,9 +78,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="2" class="text-center p-4">
-                    No unit of measure has been created yet.
-                  </td>
+                  <td colspan="3" class="text-center p-4">No unit of measure has been created yet.</td>
                 </tr>
                 {% endfor %}
               </tbody>

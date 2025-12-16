@@ -1,62 +1,62 @@
-// Hàm này sẽ được gọi khi toàn bộ trang đã tải xong
 document.addEventListener("DOMContentLoaded", function () {
-  // --- LOGIC CHO TRANG OVERVIEW ---
-  if (document.getElementById("inventoryBarChart")) {
-    // 1. Đọc dữ liệu từ thẻ script do Django tạo ra
-    const productsData = JSON.parse(
-      document.getElementById("products-data-json").textContent
-    );
-    // 2. Gọi hàm vẽ biểu đồ
-    drawInventoryChart(
-      productsData.map((p) => p.name),
-      productsData.map((p) => p.quantity)
-    );
+  // =======================================================
+  //        1. KHỞI TẠO BIỂU ĐỒ (INITIALIZATION)
+  // =======================================================
+
+  // --- Biểu đồ Tồn kho (Overview) ---
+  const invEl = document.getElementById("inventoryBarChart");
+  if (invEl) {
+    const rawData = JSON.parse(document.getElementById("products-data-json").textContent);
+    renderInventoryChart("inventoryBarChart", rawData);
   }
 
-  if (document.getElementById("categoryPieChart")) {
-    const categoryData = JSON.parse(
-      document.getElementById("category-data-json").textContent
-    );
-    drawCategoryChart(categoryData);
+  // --- Biểu đồ Danh mục (Overview) ---
+  const catEl = document.getElementById("categoryPieChart");
+  if (catEl) {
+    const rawData = JSON.parse(document.getElementById("category-data-json").textContent);
+    renderCategoryChart("categoryPieChart", rawData);
   }
 
-  // --- LOGIC CHO TRANG DISPENSE ANALYSIS ---
-  if (document.getElementById("dispenseDoughnutChart")) {
-    const dispenseData = JSON.parse(
-      document.getElementById("dispense-data-json").textContent
-    );
-    drawDispenseChart(dispenseData);
+  // --- Biểu đồ Xuất kho (Dispense Analysis) ---
+  const dispenseEl = document.getElementById("dispenseDoughnutChart");
+  if (dispenseEl) {
+    const rawData = JSON.parse(document.getElementById("dispense-data-json").textContent);
+    renderDispenseChart("dispenseDoughnutChart", rawData);
   }
 
-  if (document.getElementById("salesTrendLineChart")) {
-    const salesTrendData = JSON.parse(
-      document.getElementById("sales-trend-data-json").textContent
-    );
-    drawSalesTrendChart(salesTrendData);
+  // --- Biểu đồ Xu hướng (Dispense Analysis) ---
+  const trendEl = document.getElementById("salesTrendLineChart");
+  if (trendEl) {
+    const rawData = JSON.parse(document.getElementById("sales-trend-data-json").textContent);
+    renderSalesTrendChart("salesTrendLineChart", rawData);
   }
 });
 
 // =======================================================
-//        CÁC HÀM VẼ BIỂU ĐỒ CHUNG
+//        2. HÀM VẼ BIỂU ĐỒ (RENDER FUNCTIONS)
 // =======================================================
 
-// Hàm vẽ biểu đồ Tồn kho (Bar)
-function drawInventoryChart(chartId, data) {
-  const ctx = document.getElementById(chartId);
-  if (!ctx) return;
+/**
+ * Vẽ biểu đồ cột: Tồn kho
+ */
+function renderInventoryChart(canvasId, data) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
 
+  // Xử lý dữ liệu
   const labels = data.map((p) => p.name);
-  const quantities = data.map((p) => p.quantity);
+  const values = data.map((p) => p.quantity);
 
-  new Chart(ctx.getContext("2d"), {
+  // Vẽ biểu đồ
+  new Chart(ctx, {
     type: "bar",
     data: {
       labels: labels,
       datasets: [
         {
-          label: "Số Lượng Tồn Kho",
-          data: quantities,
+          label: "Stock Quantity",
+          data: values,
           backgroundColor: "#0a9396",
+          borderRadius: 4,
         },
       ],
     },
@@ -66,39 +66,38 @@ function drawInventoryChart(chartId, data) {
       plugins: {
         title: {
           display: true,
-          text: "Top 15 Sản Phẩm Tồn Kho Nhiều Nhất",
+          text: "Top 15 Highest Stock Products",
           font: { size: 16 },
         },
         legend: { display: false },
       },
-      scales: { y: { beginAtZero: true } },
+      scales: {
+        y: { beginAtZero: true },
+      },
     },
   });
 }
 
-// Hàm vẽ biểu đồ Danh mục (Pie)
-function drawCategoryChart(chartId, data) {
-  const ctx = document.getElementById(chartId);
-  if (!ctx) return;
+/**
+ * Vẽ biểu đồ tròn: Phân bổ danh mục
+ */
+function renderCategoryChart(canvasId, data) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
 
+  // Xử lý dữ liệu
   const labels = data.map((c) => c.name);
-  const counts = data.map((c) => c.count);
+  const values = data.map((c) => c.count);
 
-  new Chart(ctx.getContext("2d"), {
+  // Vẽ biểu đồ
+  new Chart(ctx, {
     type: "pie",
     data: {
       labels: labels,
       datasets: [
         {
-          label: "Số Lượng Sản Phẩm",
-          data: counts,
-          backgroundColor: [
-            "#DE51A8",
-            "#0a9396",
-            "#ee9b00",
-            "#94d2bd",
-            "#6c5ce7",
-          ],
+          data: values,
+          backgroundColor: ["#DE51A8", "#0a9396", "#ee9b00", "#94d2bd", "#6c5ce7", "#ff9f43", "#5f27cd"],
+          hoverOffset: 4,
         },
       ],
     },
@@ -108,39 +107,36 @@ function drawCategoryChart(chartId, data) {
       plugins: {
         title: {
           display: true,
-          text: "Phân Bổ Sản Phẩm Theo Nhóm",
+          text: "Product Distribution by Category",
           font: { size: 16 },
         },
+        legend: { position: "right" },
       },
     },
   });
 }
 
-// Hàm vẽ biểu đồ Tỉ lệ Xuất kho (Doughnut)
-function drawDispenseChart(chartId, data) {
-  const ctx = document.getElementById(chartId);
-  if (!ctx) return;
+/**
+ * Vẽ biểu đồ vành khuyên: Top bán chạy
+ */
+function renderDispenseChart(canvasId, data) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
 
+  // Xử lý dữ liệu
   const labels = data.map((p) => p.product__name);
-  const totals = data.map((p) => p.total_sold);
+  const values = data.map((p) => p.total_sold);
 
-  new Chart(ctx.getContext("2d"), {
+  // Vẽ biểu đồ
+  new Chart(ctx, {
     type: "doughnut",
     data: {
       labels: labels,
       datasets: [
         {
-          label: "Tổng Số Lượng Đã Bán",
-          data: totals,
-          backgroundColor: [
-            "#DE51A8",
-            "#0a9396",
-            "#ee9b00",
-            "#94d2bd",
-            "#ca6702",
-            "#ae2012",
-            "#005f73",
-          ],
+          label: "Total Sold",
+          data: values,
+          backgroundColor: ["#DE51A8", "#0a9396", "#ee9b00", "#94d2bd", "#ca6702", "#ae2012", "#005f73"],
+          hoverOffset: 4,
         },
       ],
     },
@@ -150,7 +146,7 @@ function drawDispenseChart(chartId, data) {
       plugins: {
         title: {
           display: true,
-          text: "Top 10 Sản Phẩm Bán Chạy Nhất",
+          text: "Top 10 Best Selling Products",
           font: { size: 16 },
         },
       },
@@ -158,20 +154,26 @@ function drawDispenseChart(chartId, data) {
   });
 }
 
-// Hàm vẽ biểu đồ Xu hướng Bán hàng (Line)
-function drawSalesTrendChart(chartId, data) {
-  const ctx = document.getElementById(chartId);
-  if (!ctx) return;
+/**
+ * Vẽ biểu đồ đường: Xu hướng bán hàng
+ */
+function renderSalesTrendChart(canvasId, data) {
+  const ctx = document.getElementById(canvasId).getContext("2d");
 
-  new Chart(ctx.getContext("2d"), {
+  // Vẽ biểu đồ
+  new Chart(ctx, {
     type: "line",
     data: {
       datasets: [
         {
-          label: "Số Lượng Toa Thuốc Hàng Ngày",
-          data: data,
+          label: "Daily Prescriptions",
+          data: data, // Dữ liệu dạng {x: date, y: count} từ Django
           borderColor: "#DE51A8",
-          tension: 0.1,
+          backgroundColor: "rgba(222, 81, 168, 0.1)",
+          tension: 0.3,
+          fill: true,
+          pointRadius: 4,
+          pointHoverRadius: 6,
         },
       ],
     },
@@ -181,13 +183,19 @@ function drawSalesTrendChart(chartId, data) {
       plugins: {
         title: {
           display: true,
-          text: "Xu Hướng Cấp Phát 7 Ngày Qua",
+          text: "Dispense Trend (Last 7 Days)",
           font: { size: 16 },
         },
       },
       scales: {
-        x: { type: "time", time: { unit: "day" } },
-        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: {
+          type: "time",
+          time: { unit: "day", tooltipFormat: "dd/MM/yyyy" },
+        },
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+        },
       },
     },
   });

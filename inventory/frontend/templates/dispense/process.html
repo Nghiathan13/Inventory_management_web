@@ -2,69 +2,74 @@
 <!--  -->
 {% load static %}
 <!--  -->
+{% block title %} Dispense #{{ prescription.id }} {% endblock %}
+<!--  -->
 {% block extracss %}
 <link rel="stylesheet" href="{% static 'dispense/css/process_dispense.css' %}" />
 {% endblock %}
 <!--  -->
-{% block title %} Dispense #{{ prescription.id }} {% endblock %}
-<!--  -->
 {% block content %}
 <div class="container-fluid mt-4 pb-5">
-  <!-- HEADER TRANG (ĐÓNG KHUNG) -->
-  <div class="page-header-frame">
-    <h4 class="fw-bold text-primary mb-0">
-      <i class="fas fa-pills me-2"></i>Process Prescription #{{ prescription.id }}
-    </h4>
-    <!-- ID btn-back-top để JS ẩn đi -->
-    <a href="{% url 'inventory:dispense_list' %}" class="btn btn-outline-secondary fw-bold" id="btn-back-top">
+  <!-- HEADER TRANG -->
+  <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h3 class="fw-bold text-black m-0">
+      <i class="fas fa-pills me-2 icon-black"></i>Process Prescription #{{ prescription.id }}
+    </h3>
+    <a href="{% url 'inventory:dispense_list' %}" class="btn btn-secondary" id="btn-back-top">
       <i class="fas fa-arrow-left me-1"></i> Back to List
     </a>
   </div>
 
   <div class="row row-equal-height">
-    <!-- CỘT TRÁI: THÔNG TIN (Card viền đậm) -->
+    <!-- ========================================== -->
+    <!--       CỘT TRÁI: THÔNG TIN CHI TIẾT       -->
+    <!-- ========================================== -->
     <div class="col-lg-7 mb-4 d-flex flex-column">
-      <div class="card card-strong-border h-100">
-        <div class="card-header bg-white border-bottom pt-3 pb-3">
-          <h5 class="mb-0 fw-bold text-dark">
-            <i class="fas fa-file-medical-alt me-2 text-primary"></i>Prescription Details
-          </h5>
+      <div class="card h-100 card-strong-border">
+        <!-- Header Tím -->
+        <div class="card-header card-header-purple">
+          <h4><i class="fas fa-file-medical-alt me-2"></i>Prescription Details</h4>
         </div>
 
         <div class="card-body p-4">
-          <!-- (Giữ nguyên nội dung bên trong) -->
-          <div class="row mb-4 p-3 bg-light rounded mx-0">
-            <div class="col-md-6 border-end">
+          <!-- Thông tin bệnh nhân & Bác sĩ -->
+          <div class="row mb-4 p-3 bg-light rounded border border-secondary mx-0">
+            <div class="col-md-6 border-end border-secondary">
               <small class="text-uppercase text-muted fw-bold">Patient</small>
-              <p class="fs-5 fw-bold text-dark mb-0">{{ prescription.patient.full_name }}</p>
+              <p class="fs-5 fw-bold text-black mb-0">{{ prescription.patient.full_name }}</p>
             </div>
             <div class="col-md-6 ps-md-4">
               <small class="text-uppercase text-muted fw-bold">Prescribed By</small>
-              <p class="fs-5 fw-bold text-dark mb-0">Dr. {{ prescription.doctor.username }}</p>
+              <p class="fs-5 fw-bold text-black mb-0">Dr. {{ prescription.doctor.username }}</p>
+              <small class="text-muted"
+                ><i class="far fa-clock me-1"></i> {{ prescription.created_at|date:"d/m/Y H:i" }}</small
+              >
             </div>
           </div>
 
-          <h6 class="text-muted mb-3">Medication List (Request):</h6>
-          <div class="table-responsive border rounded">
-            <table class="table table-hover mb-0 align-middle">
+          <h6 class="text-black mb-3 fw-bold">Medication List (Reference):</h6>
+          <div class="table-responsive">
+            <!-- Bảng viền đậm -->
+            <table class="table table-bordered-strong table-hover mb-0 align-middle">
               <thead class="table-light">
                 <tr>
-                  <th class="py-2">Product Name</th>
-                  <th class="py-2 text-center">Requested</th>
-                  <th class="py-2 text-center">In Stock (Total)</th>
+                  <th class="py-2 ps-3 text-black">Product Name</th>
+                  <th class="py-2 text-center text-black">Request Qty</th>
+                  <th class="py-2 text-center text-black">Total Stock</th>
                 </tr>
               </thead>
               <tbody>
                 {% for detail in prescription.details.all %}
                 <tr>
-                  <td class="fw-bold text-primary">{{ detail.product.name }}</td>
+                  <!-- Tên thuốc màu đen -->
+                  <td class="text-start ps-3 fw-bold text-black">{{ detail.product.name }}</td>
                   <td class="text-center">
-                    <span class="badge bg-info text-dark px-3 py-2"
-                      >{{ detail.quantity }} {{ detail.uom.name }}</span
-                    >
+                    <span class="badge bg-light text-dark border border-dark px-3 py-2">
+                      {{ detail.quantity }} {{ detail.uom.name }}
+                    </span>
                   </td>
-                  <td class="text-center text-muted">
-                    <small>{{ detail.product.quantity }} {{ detail.product.base_uom.name }}</small>
+                  <td class="text-center text-dark">
+                    <strong>{{ detail.product.quantity }}</strong> {{ detail.product.base_uom.name }}
                   </td>
                 </tr>
                 {% endfor %}
@@ -73,7 +78,8 @@
           </div>
         </div>
 
-        <div class="card-footer bg-white p-3 border-top">
+        <!-- Footer Cột Trái: Nút Hoàn thành (Submit Form) -->
+        <div class="card-footer bg-white p-3 border-top border-secondary">
           <div class="d-flex justify-content-end align-items-center">
             <form method="POST" id="finish-form">
               {% csrf_token %}
@@ -86,13 +92,17 @@
       </div>
     </div>
 
-    <!-- CỘT PHẢI: PICKING ASSISTANT (Card viền đậm) -->
+    <!-- ========================================== -->
+    <!--       CỘT PHẢI: TRỢ LÝ LẤY THUỐC         -->
+    <!-- ========================================== -->
     <div class="col-lg-5 mb-4 d-flex flex-column">
-      <div class="card card-strong-border h-100 bg-light" style="min-height: 600px">
-        <div class="card-header bg-primary text-white pt-3 pb-3 d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold"><i class="fas fa-robot me-2"></i>Picking Assistant</h5>
-          <button class="btn btn-light text-primary btn-sm fw-bold px-3 shadow-sm" id="btn-start-picking">
-            <span class="js-btn-text"><i class="fas fa-play me-1"></i> START</span>
+      <div class="card h-100 card-strong-border bg-light" style="min-height: 600px">
+        <!-- Header Tím -->
+        <div class="card-header card-header-purple d-flex justify-content-between align-items-center">
+          <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Picking Assistant</h5>
+          <!-- Nút Start Picking -->
+          <button class="btn btn-light text-dark btn-sm fw-bold px-3 shadow-sm" id="btn-start-picking">
+            <span class="js-btn-text"><i class="fas fa-play me-1 icon-black"></i> START</span>
             <span class="js-btn-loading d-none"
               ><span class="spinner-border spinner-border-sm"></span> Loading...</span
             >
@@ -100,85 +110,124 @@
         </div>
 
         <div class="card-body d-flex flex-column p-0">
-          <div class="p-3 bg-white border-bottom shadow-sm z-index-1 position-relative">
+          <!-- 1. Panel Trạng Thái Kệ -->
+          <div class="p-3 bg-white border-bottom border-secondary shadow-sm z-index-1 position-relative">
             <div class="d-flex align-items-center justify-content-center">
               <div class="text-center me-4">
-                <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.7rem"
+                <small class="text-uppercase fw-bold d-block text-black" style="font-size: 0.75rem"
                   >Current Shelf</small
                 >
-                <span id="current-shelf-display" class="display-6 fw-bold text-dark">--</span>
+                <span id="current-shelf-display" class="display-6 fw-bold text-black">--</span>
               </div>
               <div class="vr h-100 mx-3"></div>
               <div>
-                <span id="status-idle" class="badge bg-secondary px-3 py-2 rounded-pill"
-                  ><i class="fas fa-pause me-1"></i> Idle</span
+                <!-- 3 Trạng thái riêng biệt để JS điều khiển ẩn hiện -->
+                <span
+                  id="status-idle"
+                  class="badge bg-secondary px-3 py-2 rounded-pill border border-dark text-white"
                 >
-                <span id="status-moving" class="badge bg-warning text-dark px-3 py-2 rounded-pill d-none"
-                  ><i class="fas fa-sync fa-spin me-1"></i> Moving...</span
+                  <i class="fas fa-pause me-1"></i> Idle
+                </span>
+                <span
+                  id="status-moving"
+                  class="badge bg-warning text-dark px-3 py-2 rounded-pill border border-dark d-none"
                 >
-                <span id="status-ready" class="badge bg-success px-3 py-2 rounded-pill d-none"
-                  ><i class="fas fa-check me-1"></i> Ready</span
+                  <i class="fas fa-sync fa-spin me-1"></i> Moving...
+                </span>
+                <span
+                  id="status-ready"
+                  class="badge bg-success px-3 py-2 rounded-pill border border-dark text-white d-none"
                 >
+                  <i class="fas fa-check me-1"></i> Ready
+                </span>
               </div>
             </div>
           </div>
 
+          <!-- 2. Danh sách hàng chờ (Queue) -->
           <div
             id="picking-queue"
             class="flex-grow-1 p-3 overflow-auto custom-scrollbar"
-            style="background-color: #f8f9fa"
+            style="background-color: #e9ecef"
           >
             <div class="text-center text-muted py-5 mt-5 js-placeholder">
               <div class="mb-3"><i class="fas fa-box-open fa-4x text-secondary opacity-25"></i></div>
               <h5>Ready to Dispense</h5>
-              <p class="small">Click <strong>"START"</strong> to calculate path.</p>
+              <p class="small">Click <strong>"START"</strong> to calculate optimized path.</p>
             </div>
           </div>
+        </div>
+
+        <div
+          class="card-footer bg-white text-center text-muted py-2 border-top border-secondary"
+          style="font-size: 0.8rem"
+        >
+          <i class="fas fa-info-circle me-1"></i> Picking items will automatically deduct stock.
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TEMPLATE ITEM -->
+<!-- ======================================================= -->
+<!--    TEMPLATE ITEM (BLUEPRINT CHO JS)                      -->
+<!-- ======================================================= -->
 <template id="picking-item-template">
-  <div class="picking-item p-3 mb-2 rounded border">
+  <div class="picking-item p-3 mb-2 rounded">
     <div class="d-flex justify-content-between align-items-start">
+      <!-- Cột Trái: Thông tin -->
       <div class="me-2" style="flex: 1">
         <div class="d-flex align-items-center mb-1">
+          <!-- Icon trạng thái -->
           <span class="me-2 fs-5 js-icon-pending d-none"><i class="far fa-circle text-secondary"></i></span>
-          <span class="me-2 fs-5 js-icon-active d-none"><i class="fas fa-spinner fa-spin text-primary"></i></span>
+          <span class="me-2 fs-5 js-icon-active d-none"
+            ><i class="fas fa-spinner fa-spin" style="color: rgb(100, 55, 195)"></i
+          ></span>
           <span class="me-2 fs-5 js-icon-done d-none"><i class="fas fa-check-circle text-success"></i></span>
-          <h6 class="mb-0 fw-bold text-dark js-product-name"></h6>
+
+          <!-- Tên thuốc (Màu đen) -->
+          <h6 class="mb-0 fw-bold text-black js-product-name product-name"></h6>
         </div>
 
-        <div class="small text-muted ms-4">
+        <div class="small text-dark ms-4">
           <div>
-            <i class="fas fa-map-marker-alt text-danger me-1"></i> Kệ <strong class="js-item-shelf"></strong> - Tầng
-            <strong class="js-item-level"></strong>
+            <i class="fas fa-map-marker-alt me-1 icon-black"></i>
+            Kệ <strong class="js-item-shelf"></strong> - Tầng <strong class="js-item-level"></strong>
           </div>
-          <!-- HIỂN THỊ SỐ LƯỢNG TẠI KỆ (MỚI) -->
-          <div class="text-primary fw-bold mt-1">
-            <i class="fas fa-cubes me-1"></i> Available on Shelf: <span class="js-stock-at-shelf"></span>
+          <!-- Số lượng tồn trên kệ -->
+          <div class="fw-bold mt-1" style="font-size: 0.85rem; color: rgb(100, 55, 195)">
+            <i class="fas fa-cubes me-1"></i> Available: <span class="js-stock-at-shelf"></span>
           </div>
-          <!-- Thông báo nếu phải đi kệ tiếp theo -->
-          <div class="text-warning fst-italic d-none js-split-msg mt-1">
-            <i class="fas fa-arrow-right"></i> Not enough! Go to next shelf...
+          <div class="text-muted mt-1" style="font-size: 0.8rem">
+            <i class="fas fa-barcode me-1"></i> Batch: <span class="js-item-batch"></span>
+            <span class="ms-1">(HSD: <span class="js-item-expiry"></span>)</span>
+          </div>
+
+          <!-- QUAN TRỌNG: Class này để JS hiển thị khi tách lô -->
+          <div class="text-warning fst-italic d-none js-split-msg mt-1" style="font-size: 0.8rem">
+            <i class="fas fa-arrow-right me-1"></i> Not enough! Next shelf...
           </div>
         </div>
       </div>
 
+      <!-- Cột Phải: Nút bấm -->
       <div class="text-end" style="min-width: 130px">
-        <!-- Số lượng cần lấy tại bước này -->
-        <div class="badge bg-primary fs-6 mb-2 px-3 py-2 rounded-pill">
+        <!-- Badge số lượng cần lấy -->
+        <div class="badge fs-6 mb-2 px-3 py-2 rounded-pill" style="background-color: rgb(100, 55, 195)">
           Pick: <span class="js-item-quantity"></span>
         </div>
 
         <div class="action-area mt-1">
-          <button class="btn btn-success btn-sm w-100 shadow-sm js-btn-confirm d-none">
+          <!-- Nút Confirm (Lấy thuốc) -->
+          <button
+            class="btn btn-primary btn-sm w-100 shadow-sm js-btn-confirm d-none"
+            style="background-color: rgb(100, 55, 195); border-color: rgb(100, 55, 195)"
+          >
             <span class="js-text-confirm"><i class="fas fa-hand-holding-medical me-1"></i> Confirm</span>
             <span class="js-text-wait d-none"><i class="fas fa-sync fa-spin"></i> Wait...</span>
           </button>
+
+          <!-- Nút Undo -->
           <button class="btn btn-warning btn-sm w-100 mt-1 shadow-sm js-btn-undo d-none">
             <i class="fas fa-undo-alt me-1"></i> Undo
           </button>
@@ -187,6 +236,7 @@
     </div>
   </div>
 </template>
+
 {% endblock %}
 <!--  -->
 {% block javascript %}

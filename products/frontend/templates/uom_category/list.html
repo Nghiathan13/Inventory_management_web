@@ -4,6 +4,7 @@
 <!--  -->
 {% block extracss %}
 <link rel="stylesheet" href="{% static 'uom_category/css/uom_category.css' %}" />
+<link rel="stylesheet" href="{% static '_product_nav/css/_product_nav.css' %}" />
 {% endblock %}
 <!--  -->
 {% block title %} UoM Categories {% endblock %}
@@ -14,17 +15,9 @@
   <div class="row">
     <div class="col-12">
       {% if messages %} {% for message in messages %}
-      <div
-        class="alert alert-{{ message.tags }} alert-dismissible fade show"
-        role="alert"
-      >
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
         {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       {% endfor %} {% endif %}
 
@@ -85,9 +78,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="3" class="text-center p-4">
-                    No UoM Categories have been created yet.
-                  </td>
+                  <td colspan="3" class="text-center p-4">No UoM Categories have been created yet.</td>
                 </tr>
                 {% endfor %}
               </tbody>

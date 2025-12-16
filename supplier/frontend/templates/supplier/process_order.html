@@ -2,7 +2,7 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block title %}Xử Lý Đơn Hàng #{{ order.id }}{% endblock %}
+{% block title %}Process Order #{{ order.id }}{% endblock %}
 <!--  -->
 {% block content %}
 <div class="container mt-5">
@@ -10,15 +10,15 @@
     <div class="col-lg-10">
       <div class="card shadow-sm">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-          <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Xử Lý Đơn Hàng #{{ order.id }}</h4>
-          <span class="badge bg-light text-primary">NCC: {{ order.supplier.username }}</span>
+          <h4 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Order #{{ order.id }}</h4>
+          <span class="badge bg-light text-primary">Supplier: {{ order.supplier.username }}</span>
         </div>
 
         <div class="card-body">
           <div class="alert alert-info mb-4">
             <i class="fas fa-info-circle me-2"></i>
-            <strong>Hướng dẫn:</strong> Nhấn vào nút <strong>"Nhập HSD"</strong> của từng sản phẩm để nhập hạn sử
-            dụng. Sau khi nhập xong tất cả, nút xác nhận sẽ hiện ra.
+            <strong>Instruction:</strong> Click the <strong>"Set Expiry"</strong> button for each item to enter the
+            date.
           </div>
 
           <!-- Form chính -->
@@ -35,17 +35,16 @@
                 <thead class="table-light">
                   <tr>
                     <th class="text-center" style="width: 50px">Check</th>
-                    <th>Tên Sản Phẩm</th>
-                    <th class="text-center">Số Lượng</th>
-                    <th>Hạn Sử Dụng (Expiry Date)</th>
-                    <th class="text-center" style="width: 150px">Thao Tác</th>
+                    <th>Product Name</th>
+                    <th class="text-center">Quantity</th>
+                    <th>Expiry Date</th>
+                    <th class="text-center" style="width: 150px">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for detail in order.details.all %}
                   <tr id="row-{{ detail.id }}">
                     <td class="text-center">
-                      <!-- Checkbox ẩn, sẽ được JS tự động tick khi nhập xong date -->
                       <div class="form-check d-flex justify-content-center">
                         <input
                           type="checkbox"
@@ -65,12 +64,8 @@
                       {{ detail.quantity }} <small>{{ detail.product.base_uom.name }}</small>
                     </td>
                     <td>
-                      <!-- Input ẩn để chứa giá trị Date gửi về server -->
                       <input type="hidden" name="expiry_date_{{ detail.id }}" id="input-expiry-{{ detail.id }}" />
-                      <!-- Text hiển thị cho người dùng thấy -->
-                      <span id="display-expiry-{{ detail.id }}" class="text-muted fst-italic">
-                        -- Chưa nhập --
-                      </span>
+                      <span id="display-expiry-{{ detail.id }}" class="text-muted fst-italic">-- Not Seet --</span>
                     </td>
                     <td class="text-center">
                       <button
@@ -78,7 +73,7 @@
                         class="btn btn-outline-primary btn-sm"
                         onclick="openExpiryModal('{{ detail.id }}', '{{ detail.product.name|escapejs }}')"
                       >
-                        <i class="fas fa-calendar-alt me-1"></i> Nhập HSD
+                        <i class="fas fa-calendar-alt me-1"></i> Set Expiry
                       </button>
                     </td>
                   </tr>
@@ -92,11 +87,18 @@
 
             <div class="d-flex justify-content-end mt-4 gap-2">
               <a href="{% url 'supplier:dashboard' %}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                <i class="fas fa-arrow-left me-1"></i> Back
               </a>
-              <!-- Nút Submit mặc định Disabled -->
+
+              <!-- NÚT SUBMIT ĐÃ CẢI TIẾN (Chứa sẵn 2 trạng thái) -->
               <button type="submit" class="btn btn-success" id="submit-btn" disabled>
-                <i class="fas fa-print me-1"></i> Hoàn Thành & In Phiếu
+                <!-- Trạng thái bình thường -->
+                <span class="btn-text-normal"> <i class="fas fa-print me-1"></i> Complete & Print </span>
+                <!-- Trạng thái Loading (Ẩn mặc định) -->
+                <span class="btn-text-loading d-none">
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  Processing...
+                </span>
               </button>
             </div>
           </form>
@@ -106,37 +108,36 @@
   </div>
 </div>
 
-<!-- MODAL NHẬP HẠN SỬ DỤNG (Bootstrap Modal) -->
-<div class="modal fade" id="expiryModal" tabindex="-1" aria-labelledby="expiryModalLabel" aria-hidden="true">
+<!-- MODAL NHẬP HẠN SỬ DỤNG -->
+<div class="modal fade" id="expiryModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-info text-white">
-        <h5 class="modal-title" id="expiryModalLabel">Thiết Lập Hạn Sử Dụng</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Set Expiry Date</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="modal-detail-id" />
-
         <div class="mb-3">
-          <label class="form-label text-muted">Sản phẩm đang chọn:</label>
+          <label class="form-label text-muted">Selected Product:</label>
           <input type="text" class="form-control fw-bold" id="modal-product-name" disabled readonly />
         </div>
-
         <div class="mb-3">
-          <label for="modal-date-input" class="form-label fw-bold">Chọn Ngày Hết Hạn:</label>
+          <label for="modal-date-input" class="form-label fw-bold">Select Expiry Date:</label>
           <input type="date" class="form-control form-control-lg" id="modal-date-input" required />
-          <div class="form-text">Vui lòng kiểm tra kỹ trên bao bì sản phẩm.</div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
         <button type="button" class="btn btn-primary" onclick="saveExpiryDate()">
-          <i class="fas fa-check me-1"></i> Lưu & Xác Nhận
+          <i class="fas fa-check me-1"></i> Save & Confirm
         </button>
       </div>
     </div>
   </div>
 </div>
-{% endblock %} {% block javascript %}
+{% endblock %}
+<!--  -->
+{% block javascript %}
 <script src="{% static 'supplier/js/process_order.js' %}"></script>
 {% endblock %}

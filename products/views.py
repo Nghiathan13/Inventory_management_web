@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Q
 from django.urls import reverse
-from django.db import transaction, models
+from django.db import transaction
 import json
 import logging
 
@@ -24,31 +24,27 @@ from main.decorators import admin_required
 logger = logging.getLogger(__name__)
 
 
-
-
 # =======================================================
-#        HELPER: THUẬT TOÁN QUY ĐỔI THÔNG MINH (BFS)
+#               HELPER FUNCTIONS
 # =======================================================
+
+# -------------------------------------------------------
+#   CALCULATE CONVERSION FACTOR (BFS)
+# -------------------------------------------------------
 def get_smart_conversion_factor(product_id, from_uom_id, to_uom_id, all_boms_list):
     if not from_uom_id or not to_uom_id: return 1
     if from_uom_id == to_uom_id: return 1
 
-    # 1. Xây dựng đồ thị quy đổi cho sản phẩm này từ danh sách BOM
     graph = {}
-    
-    # Lọc các BOM rule liên quan đến product_id này
     relevant_boms = [b for b in all_boms_list if b['product_id'] == product_id]
 
     for bom in relevant_boms:
-        # Cạnh xuôi: From -> To (Factor)
         if bom['uom_from_id'] not in graph: graph[bom['uom_from_id']] = []
         graph[bom['uom_from_id']].append({'to': bom['uom_to_id'], 'factor': float(bom['conversion_factor'])})
         
-        # Cạnh ngược: To -> From (1 / Factor)
         if bom['uom_to_id'] not in graph: graph[bom['uom_to_id']] = []
         graph[bom['uom_to_id']].append({'to': bom['uom_from_id'], 'factor': 1.0 / float(bom['conversion_factor'])})
 
-    # 2. Tìm đường đi ngắn nhất (BFS)
     queue = [{'id': from_uom_id, 'factor': 1.0}]
     visited = set()
 
@@ -58,35 +54,27 @@ def get_smart_conversion_factor(product_id, from_uom_id, to_uom_id, all_boms_lis
             return curr['factor']
 
         visited.add(curr['id'])
-
         if curr['id'] in graph:
             for neighbor in graph[curr['id']]:
                 if neighbor['to'] not in visited:
-                    queue.append({
-                        'id': neighbor['to'],
-                        'factor': curr['factor'] * neighbor['factor'] # Tích lũy hệ số
-                    })
+                    queue.append({'id': neighbor['to'], 'factor': curr['factor'] * neighbor['factor']})
     
     return 1
 
+
 # =======================================================
-#               QUẢN LÝ SẢN PHẨM (PRODUCT CRUD)
+#               PRODUCT MANAGEMENT
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCH SẢN PHẨM (READ)
+#   PRODUCT LIST
 # -------------------------------------------------------
 @login_required
 @admin_required
 def product_list(request):
     search_query = request.GET.get('search', '')
-    items = Product.objects.select_related(
-        'category', 
-        'base_uom'
-    ).prefetch_related(
-        'locations__tray__shelf',
-        'locations__quantity_uom',
-        'locations__capacity_uom',
+    items = Product.objects.select_related('category', 'base_uom').prefetch_related(
+        'locations__tray__shelf', 'locations__quantity_uom', 'locations__capacity_uom'
     ).all()
 
     if search_query:
@@ -95,25 +83,20 @@ def product_list(request):
             Q(category__name__icontains=search_query) | 
             Q(code__icontains=search_query)
         )
-    context = {
-        'items': items,
-        'search_query': search_query,
-    }
-    return render(request, 'products/list.html', context)
+    return render(request, 'products/list.html', {'items': items, 'search_query': search_query})
 
 # -------------------------------------------------------
-#   VIEW: THÊM SẢN PHẨM (ADD)
+#   ADD PRODUCT
 # -------------------------------------------------------
 @login_required
 @admin_required
 def product_add(request):
-    """Xử lý việc thêm một sản phẩm mới (chỉ thông tin cơ bản)."""
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save()
-            messages.success(request, f'Đã tạo thành công sản phẩm "{product.name}".')
-            return redirect('products:list', pk=product.pk)
+            messages.success(request, f'Product "{product.name}" created successfully.')
+            return redirect('products:list')
     else:
         form = ProductForm()
     
@@ -126,25 +109,23 @@ def product_add(request):
 
     context = {
         'form': form, 
-        'title': 'Thêm Sản Phẩm Mới',
+        'title': 'Add New Product',
         'uoms_by_category': uoms_by_category,
     }
     return render(request, 'products/form.html', context)
 
-
 # -------------------------------------------------------
-#   VIEW: CẬP NHẬT SẢN PHẨM (UPDATE)
+#   UPDATE PRODUCT
 # -------------------------------------------------------
 @login_required
 @admin_required
 def product_update(request, pk):
-    """Xử lý việc cập nhật thông tin cơ bản của sản phẩm."""
     item = get_object_or_404(Product, id=pk)
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Cập nhật thông tin cho "{item.name}" thành công!')
+            messages.success(request, f'Product "{item.name}" updated successfully.')
             return redirect('products:list')
     else:
         form = ProductForm(instance=item)
@@ -158,13 +139,13 @@ def product_update(request, pk):
 
     context = {
         'form': form, 
-        'title': f'Chỉnh Sửa: {item.name}',
+        'title': f'Edit: {item.name}',
         'uoms_by_category': uoms_by_category,
     }
     return render(request, 'products/form.html', context)
 
 # -------------------------------------------------------
-#   VIEW: XÓA SẢN PHẨM (DELETE)
+#   DELETE PRODUCT
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -172,70 +153,44 @@ def product_delete(request, pk):
     item = get_object_or_404(Product, id=pk)
     if request.method == 'POST':
         item.delete()
-        messages.success(request, f'Đã xóa thuốc "{item.name}".')
+        messages.success(request, f'Product "{item.name}" deleted.')
         return redirect('products:list')
-    context = {
-        'item': item
-    }
-    return render(request, 'products/confirm_delete.html', context)
+    return render(request, 'products/confirm_delete.html', {'item': item})
 
 # -------------------------------------------------------
-#   VIEW: CHI TIẾT SẢN PHẨM (DETAIL)
+#   PRODUCT DETAIL
 # -------------------------------------------------------
 @login_required
 @admin_required
 def product_detail(request, pk):
-    """Hiển thị thông tin chi tiết của một sản phẩm."""
-    product = get_object_or_404(
-        Product.objects.prefetch_related(
-            'locations__tray__shelf',
-            'locations__quantity_uom',
-            'locations__capacity_uom'
-        ), 
-        pk=pk
-    )
+    product = get_object_or_404(Product.objects.prefetch_related(
+        'locations__tray__shelf', 'locations__quantity_uom', 'locations__capacity_uom'
+    ), pk=pk)
+    
     order_history = Order.objects.filter(product=product).select_related(
-        'staff', 
-        'prescription__patient'
+        'staff', 'prescription__patient'
     ).order_by('-date')[:10]
 
     all_boms_list = list(BillOfMaterials.objects.filter(product=product).values(
-        'product_id', 
-        'uom_from_id', 
-        'uom_to_id', 
-        'conversion_factor'
+        'product_id', 'uom_from_id', 'uom_to_id', 'conversion_factor'
     ))
 
     batches_data = []
-    all_batches = product.batches.all().order_by('expiry_date')
-
     total_allocated_product = 0 
+    all_batches = product.batches.all().order_by('expiry_date')
 
     for batch in all_batches:
         allocated_qty_batch = 0
-        locations = batch.batch_locations.all().select_related(
-            'quantity_uom', 
-            'tray__shelf'
-        ) 
+        locations = batch.batch_locations.all().select_related('quantity_uom', 'tray__shelf')
 
         for loc in locations:
-            factor = get_smart_conversion_factor(
-                product.id, 
-                loc.quantity_uom_id, 
-                product.base_uom_id, 
-                all_boms_list
-            )
+            factor = get_smart_conversion_factor(product.id, loc.quantity_uom_id, product.base_uom_id, all_boms_list)
             allocated_qty_batch += loc.quantity * factor
-
         
         allocated_qty_batch = round(allocated_qty_batch, 2)
         if allocated_qty_batch.is_integer(): allocated_qty_batch = int(allocated_qty_batch)
 
-        # Tính tồn kho chưa phân bổ của Lô
-        unallocated_qty_batch = batch.quantity - allocated_qty_batch
-        if unallocated_qty_batch < 0: unallocated_qty_batch = 0
-        
-        # Cộng dồn vào tổng sản phẩm
+        unallocated_qty_batch = max(0, batch.quantity - allocated_qty_batch)
         total_allocated_product += allocated_qty_batch
         
         batches_data.append({
@@ -245,8 +200,7 @@ def product_detail(request, pk):
             'locations': locations
         })
 
-    total_unallocated_product = product.quantity - total_allocated_product
-    if total_unallocated_product < 0: total_unallocated_product = 0
+    total_unallocated_product = max(0, product.quantity - total_allocated_product)
 
     context = {
         'product': product, 
@@ -257,64 +211,47 @@ def product_detail(request, pk):
     }
     return render(request, 'products/detail.html', context)
 
+
 # =======================================================
-#           QUẢN LÝ NHÓM SẢN PHẨM (PRODUCT CATEGORY)
+#               PRODUCT CATEGORY MANAGEMENT
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCH NHÓM SẢN PHẨM (READ)
+#   CATEGORY LIST
 # -------------------------------------------------------
 @login_required
 @admin_required
 def category_list(request):
-    categories = ProductCategory.objects.all()
-    context = {
-        'categories': categories
-    }
-    return render(request, 'product_category/list.html', context)
+    return render(request, 'product_category/list.html', {'categories': ProductCategory.objects.all()})
 
 # -------------------------------------------------------
-#   VIEW: FORM THÊM/SỬA NHÓM SẢN PHẨM (CREATE/UPDATE)
-# -------------------------------------------------------    
+#   ADD/UPDATE CATEGORY
+# -------------------------------------------------------
 @login_required
 @admin_required
 def category_form(request, pk=None):
-    if pk:
-        instance = ProductCategory.objects.get(id=pk)
-        title = "Edit Medication Category"
-    else:
-        instance = None
-        title = "Create New Medication Category"
-
-    if request.method == 'POST':
-        form = ProductCategoryForm(request.POST, instance=instance)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f'Đã lưu nhóm sản phẩm "{form.cleaned_data.get("name")}" thành công.')
-            return redirect('products:category_list')
-    else:
-        form = ProductCategoryForm(instance=instance)
-    context = {
-        'form': form, 
-        'title': title, 
-        'instance': instance
-    }
-    return render(request, 'product_category/form.html', context)
+    instance = get_object_or_404(ProductCategory, pk=pk) if pk else None
+    form = ProductCategoryForm(request.POST or None, instance=instance)
+    
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Category saved successfully.')
+        return redirect('products:category_list')
+        
+    title = 'Edit Category' if instance else 'Create Category'
+    return render(request, 'product_category/form.html', {'form': form, 'title': title})
 
 # -------------------------------------------------------
-#   VIEW: XEM CHI TIẾT NHÓM SẢN PHẨM (READ DETAIL)
+#   CATEGORY DETAIL
 # -------------------------------------------------------
 @login_required
 @admin_required
 def category_detail(request, pk):
     category = get_object_or_404(ProductCategory.objects.prefetch_related('children', 'product_set'), pk=pk)
-    context = {
-        'category': category
-        }
-    return render(request, 'product_category/detail.html', context)
+    return render(request, 'product_category/detail.html', {'category': category})
 
 # -------------------------------------------------------
-#   VIEW: XÁC NHẬN XÓA NHÓM SẢN PHẨM (DELETE)
+#   DELETE CATEGORY
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -322,60 +259,51 @@ def category_delete(request, pk):
     category = get_object_or_404(ProductCategory, pk=pk)
     if request.method == 'POST':
         category.delete()
-        messages.success(request, f'Product Category "{category.name}" has been deleted.')
+        messages.success(request, f'Category "{category.name}" deleted.')
         return redirect('products:category_list')
     return render(request, 'product_category/confirm_delete.html', {'item': category})
 
+
 # =======================================================
-#           QUẢN LÝ NHÓM ĐƠN VỊ TÍNH (UoM CATEGORY)
+#               UOM CATEGORY MANAGEMENT
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCH NHÓM ĐƠN VỊ TÍNH (READ)
+#   UOM CATEGORY LIST
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_category_list(request):
-    categories = UomCategory.objects.all().order_by('name')
-    context = {
-        'categories': categories
-    }
-    return render(request, 'uom_category/list.html', context)
+    return render(request, 'uom_category/list.html', {'categories': UomCategory.objects.all().order_by('name')})
 
 # -------------------------------------------------------
-#   VIEW: FORM THÊM/SỬA NHÓM ĐƠN VỊ TÍNH (CREATE/UPDATE)
+#   ADD/UPDATE UOM CATEGORY
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_category_form(request, pk=None):
     instance = get_object_or_404(UomCategory, pk=pk) if pk else None
     form = UomCategoryForm(request.POST or None, instance=instance)
+    
     if form.is_valid():
         form.save()
-        messages.success(request, 'Đã lưu nhóm đơn vị tính.')
+        messages.success(request, 'UoM Category saved.')
         return redirect('products:uom_category_list')
         
-    title = 'Sửa Nhóm Đơn Vị Tính' if instance else 'Tạo Nhóm Đơn Vị Tính Mới'
-    context = {
-        'form': form, 
-        'title': title
-    }
-    return render(request, 'uom_category/form.html', context)
+    title = 'Edit UoM Category' if instance else 'Create UoM Category'
+    return render(request, 'uom_category/form.html', {'form': form, 'title': title})
 
 # -------------------------------------------------------
-#   VIEW: XEM CHI TIẾT MỘT NHÓM ĐƠN VỊ TÍNH (READ DETAIL)
+#   UOM CATEGORY DETAIL
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_category_detail(request, pk):
     category = get_object_or_404(UomCategory.objects.prefetch_related('uoms'), pk=pk)
-    context = {
-        'category': category
-    }
-    return render(request, 'uom_category/detail.html', context)
+    return render(request, 'uom_category/detail.html', {'category': category})
 
 # -------------------------------------------------------
-#   VIEW: XÁC NHẬN XÓA NHÓM ĐƠN VỊ TÍNH (DELETE)
+#   DELETE UOM CATEGORY
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -383,60 +311,51 @@ def uom_category_delete(request, pk):
     category = get_object_or_404(UomCategory, pk=pk)
     if request.method == 'POST':
         category.delete()
-        messages.success(request, f'UoM Category "{category.name}" has been deleted.')
+        messages.success(request, f'UoM Category "{category.name}" deleted.')
         return redirect('products:uom_category_list')
     return render(request, 'uom_category/confirm_delete.html', {'item': category})
 
+
 # =======================================================
-#               QUẢN LÝ ĐƠN VỊ TÍNH (UoM)
+#               UNIT OF MEASURE MANAGEMENT
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCh ĐƠN VỊ (READ)
+#   UOM LIST
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_list(request):
-    uoms = UnitOfMeasure.objects.all()
-    context = {
-        'uoms': uoms
-    }
-    return render(request, 'uom/list.html', context)
+    return render(request, 'uom/list.html', {'uoms': UnitOfMeasure.objects.all()})
 
 # -------------------------------------------------------
-#   VIEW: FORM THÊM/SỬA ĐƠN VỊ (CREATE/UPDATE)
+#   ADD/UPDATE UOM
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_form(request, pk=None):
     instance = get_object_or_404(UnitOfMeasure, pk=pk) if pk else None
     form = UnitOfMeasureForm(request.POST or None, instance=instance)
-    if request.method == 'POST' and form.is_valid():
+    
+    if form.is_valid():
         form.save()
-        messages.success(request, 'Unit of Measure saved successfully.')
+        messages.success(request, 'Unit of Measure saved.')
         return redirect('products:uom_list')
-    title = 'Edit Unit of Measure' if instance else 'Create New Unit of Measure'
-    context = {
-        'form': form,
-        'title': title,
-        'instance': instance,
-    }
-    return render(request, 'uom/form.html', context)
+        
+    title = 'Edit Unit' if instance else 'Create Unit'
+    return render(request, 'uom/form.html', {'form': form, 'title': title})
 
 # -------------------------------------------------------
-#   VIEW: XEM CHI TIẾT MỘT ĐƠN VỊ TÍNH (READ DETAIL)
+#   UOM DETAIL
 # -------------------------------------------------------
 @login_required
 @admin_required
 def uom_detail(request, pk):
     uom = get_object_or_404(UnitOfMeasure.objects.select_related('category'), pk=pk)
-    context = {
-        'uom': uom
-    }
-    return render(request, 'uom/detail.html', context)
+    return render(request, 'uom/detail.html', {'uom': uom})
 
 # -------------------------------------------------------
-#   VIEW: XÁC NHẬN XÓA ĐƠN VỊ (DELETE)
+#   DELETE UOM
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -444,80 +363,67 @@ def uom_delete(request, pk):
     uom = get_object_or_404(UnitOfMeasure, pk=pk)
     if request.method == 'POST':
         uom.delete()
-        messages.success(request, f'Unit "{uom.name}" has been deleted.')
+        messages.success(request, f'Unit "{uom.name}" deleted.')
         return redirect('products:uom_list')
-    context = {
-        'item': uom
-    }
-    return render(request, 'uom/confirm_delete.html', context)
+    return render(request, 'uom/confirm_delete.html', {'item': uom})
+
 
 # =======================================================
-#               QUẢN LÝ BẢNG QUY ĐỔI (BOM)
+#               BILL OF MATERIALS (BOM)
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCH CÁC QUY TẮC BOM (READ)
+#   BOM LIST
 # -------------------------------------------------------
 @login_required
 @admin_required
 def bom_list(request):
     boms = BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to').all().order_by('product__name')
-    context = {
-        'boms': boms
-    }
-    return render(request, 'bom/list.html', context)
+    return render(request, 'bom/list.html', {'boms': boms})
 
 # -------------------------------------------------------
-#   VIEW: FORM THÊM/SỬA MỘT QUY TẮC BOM (CREATE/UPDATE)
+#   ADD/UPDATE BOM
 # -------------------------------------------------------
 @login_required
 @admin_required
 def bom_form(request, pk=None):
     instance = get_object_or_404(BillOfMaterials, pk=pk) if pk else None
     form = BillOfMaterialsForm(request.POST or None, instance=instance)
+    
     if form.is_valid():
         form.save()
-        messages.success(request, 'Đã lưu quy tắc quy đổi.')
+        messages.success(request, 'Conversion rule saved.')
         return redirect('products:bom_list')
         
-    title = 'Sửa Quy Tắc' if instance else 'Tạo Quy Tắc Mới'
+    title = 'Edit Rule' if instance else 'Create Rule'
 
-    # 1. Lấy danh sách sản phẩm và ID nhóm UoM của chúng
-    products_with_uom_cat = list(Product.objects.filter(
-        uom_category__isnull=False
-    ).values('id', 'uom_category_id'))
-
-    # 2. Lấy tất cả UoM và nhóm chúng theo category_id
+    products_json = json.dumps(list(Product.objects.filter(uom_category__isnull=False).values('id', 'uom_category_id')))
+    
     all_uoms = UnitOfMeasure.objects.values('id', 'name', 'category_id')
-    uoms_by_category = {}
+    uoms_map = {}
     for uom in all_uoms:
-        cat_id = uom['category_id']
-        if cat_id not in uoms_by_category:
-            uoms_by_category[cat_id] = []
-        uoms_by_category[cat_id].append({'id': uom['id'], 'name': uom['name']})
+        if uom['category_id'] not in uoms_map: uoms_map[uom['category_id']] = []
+        uoms_map[uom['category_id']].append({'id': uom['id'], 'name': uom['name']})
 
     context = {
         'form': form, 
         'title': title,
-        'products_with_uom_cat_json': json.dumps(products_with_uom_cat),
-        'uoms_by_category_json': json.dumps(uoms_by_category),
+        'products_with_uom_cat_json': products_json,
+        'uoms_by_category_json': json.dumps(uoms_map),
     }
     return render(request, 'bom/form.html', context)
 
 # -------------------------------------------------------
-#   VIEW: XEM CHI TIẾT MỘT QUY TẮC BOM (READ DETAIL)
+#   BOM DETAIL
 # -------------------------------------------------------
 @login_required
 @admin_required
 def bom_detail(request, pk):
     bom = get_object_or_404(BillOfMaterials.objects.select_related('product', 'uom_from', 'uom_to'), pk=pk)
-    context = {
-        'bom': bom
-    }
-    return render(request, 'bom/detail.html', context)
+    return render(request, 'bom/detail.html', {'bom': bom})
 
 # -------------------------------------------------------
-#   VIEW: XÁC NHẬN XÓA MỘT QUY TẮC BOM (DELETE)
+#   DELETE BOM
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -525,105 +431,68 @@ def bom_delete(request, pk):
     bom = get_object_or_404(BillOfMaterials, pk=pk)
     if request.method == 'POST':
         bom.delete()
-        messages.success(request, 'BOM rule has been deleted.')
+        messages.success(request, 'Rule deleted.')
         return redirect('products:bom_list')
-    context = {
-        'item': bom
-    }
-    return render(request, 'bom/confirm_delete.html', context)
+    return render(request, 'bom/confirm_delete.html', {'item': bom})
+
 
 # =======================================================
-#               API ENDPOINTS (CHO JAVASCRIPT)
+#               API ENDPOINTS
 # =======================================================
+
+# -------------------------------------------------------
+#   PRODUCT SEARCH API
+# -------------------------------------------------------
 @login_required
 @admin_required
 def product_search_api(request):
     query = request.GET.get('q', '')
     if len(query) >= 2:
         products = Product.objects.filter(
-            Q(name__icontains=query) |
-            Q(code__icontains=query) |
-            Q(category__name__icontains=query)
-        ).select_related('category', 'uom')[:10] 
+            Q(name__icontains=query) | Q(code__icontains=query) | Q(category__name__icontains=query)
+        ).select_related('category', 'base_uom')[:10] 
         
-        results = [
-            {
-                'id': p.id,
-                'name': p.name,
-                'code': p.code,
-                'category': p.category.name if p.category else 'N/A',
-                'quantity': p.quantity,
-                'uom': p.uom.name if p.uom else 'N/A',
-                'url': reverse('products:detail', args=[p.id])
-            }
-            for p in products
-        ]
+        results = [{
+            'id': p.id,
+            'name': p.name,
+            'code': p.code,
+            'category': p.category.name if p.category else 'N/A',
+            'quantity': p.quantity,
+            'uom': p.base_uom.name if p.base_uom else 'N/A',
+            'url': reverse('products:detail', args=[p.id])
+        } for p in products]
     else:
         results = []
     return JsonResponse(results, safe=False)
 
 
 # =======================================================
-#           QUẢN LÝ VỊ TRÍ TỔNG THỂ 
+#               STOCK LOCATION MANAGEMENT
 # =======================================================
 
+# -------------------------------------------------------
+#   MANAGE LOCATIONS VIEW
+# -------------------------------------------------------
 @login_required
 @admin_required
 def manage_locations(request):
-    """
-    Hiển thị giao diện quản lý vị trí tổng thể cho tất cả các kệ.
-    """
     all_shelves = Shelf.objects.prefetch_related(
-        'trays',
-        'trays__location__product', 
-        'trays__location__batch', 
-        'trays__location__quantity_uom',
-        'trays__location__capacity_uom',
+        'trays', 'trays__location__product', 'trays__location__batch', 
+        'trays__location__quantity_uom', 'trays__location__capacity_uom'
     ).all()
     
-    # Lấy tất cả sản phẩm
-    all_products_data = list(Product.objects.values(
-        'id', 
-        'name', 
-        'quantity', 
-        'uom_category_id', 
-        'base_uom__name',
-        'base_uom_id',
-    ))
-        
-    # Lấy dữ liệu đơn vị tính đã phân loại theo category
+    # Products & UoM Data
+    all_products_data = list(Product.objects.values('id', 'name', 'code', 'quantity', 'uom_category_id', 'base_uom__name', 'base_uom_id'))
+    
     all_uoms = UnitOfMeasure.objects.values('id', 'name', 'category_id')
     uoms_by_category = {}
     for uom in all_uoms:
-        cat_id = uom['category_id']
-        if cat_id not in uoms_by_category: 
-            uoms_by_category[cat_id] = []
-        uoms_by_category[cat_id].append({'id': uom['id'], 'name': uom['name']})
+        if uom['category_id'] not in uoms_by_category: uoms_by_category[uom['category_id']] = []
+        uoms_by_category[uom['category_id']].append({'id': uom['id'], 'name': uom['name']})
     
-    # Lấy thông tin tất cả các vị trí đã được gán để tính toán số lượng đã phân bổ
+    # Locations Data
+    locations = StockLocation.objects.select_related('product', 'batch', 'quantity_uom', 'capacity_uom').all()
     all_locations_data = []
-    locations = StockLocation.objects.select_related(
-        'product', 
-        'batch', 
-        'quantity_uom', 
-        'capacity_uom'
-    ).all()
-
-    all_boms_data = list(BillOfMaterials.objects.values(
-        'product_id', 
-        'uom_from_id', 
-        'uom_to_id', 
-        'conversion_factor'
-    ))
-    safe_boms_data = []
-    for bom in all_boms_data:
-        safe_boms_data.append({
-            'product_id': bom['product_id'],
-            'uom_from_id': bom['uom_from_id'],
-            'uom_to_id': bom['uom_to_id'],
-            'conversion_factor': float(bom['conversion_factor']) 
-        })
-
     for loc in locations:
         all_locations_data.append({
             'tray_id': loc.tray_id,
@@ -631,71 +500,57 @@ def manage_locations(request):
             'batch_id': loc.batch_id,
             'batch_number': loc.batch.batch_number if loc.batch else '',
             'quantity': loc.quantity,
-            'quantity_uom_id': loc.quantity_uom_id,    
+            'quantity_uom_id': loc.quantity_uom_id,
             'quantity_uom_name': loc.quantity_uom.name if loc.quantity_uom else '',
             'capacity': loc.capacity,
-            'capacity_uom_id': loc.capacity_uom_id,    
+            'capacity_uom_id': loc.capacity_uom_id,
             'capacity_uom_name': loc.capacity_uom.name if loc.capacity_uom else '',
-            'percent': 0
         })
+
+    # BOM Data
+    all_boms_data = list(BillOfMaterials.objects.values('product_id', 'uom_from_id', 'uom_to_id', 'conversion_factor'))
+    safe_boms = [{'product_id': b['product_id'], 'uom_from_id': b['uom_from_id'], 'uom_to_id': b['uom_to_id'], 'conversion_factor': float(b['conversion_factor'])} for b in all_boms_data]
 
     context = {
         'all_shelves': all_shelves,
         'all_products_data': all_products_data,
         'uoms_by_category': uoms_by_category,
         'all_locations_data': all_locations_data,
-        'all_boms_data': all_boms_data,
+        'all_boms_data': safe_boms,
     }
     return render(request, 'products/manage_locations.html', context)
 
 # -------------------------------------------------------
-#   API: LẤY CHI TIẾT LÔ VÀ TỒN KHO (Unallocated)
+#   API: GET BATCH DETAILS
 # -------------------------------------------------------
 @login_required
 @admin_required
 def api_get_product_batches_details(request):
-    """
-    API trả về danh sách các Lô của một sản phẩm.
-    """
     product_id = request.GET.get('product_id')
-    if not product_id:
-        return JsonResponse({'status': 'error', 'message': 'Missing product ID'})
+    if not product_id: return JsonResponse({'status': 'error', 'message': 'Missing product ID'})
     
     product = get_object_or_404(Product, pk=product_id)
-    
-    all_boms_list = list(BillOfMaterials.objects.filter(product=product).values(
-        'product_id', 
-        'uom_from_id', 
-        'uom_to_id', 
-        'conversion_factor'
-    ))
+    all_boms_list = list(BillOfMaterials.objects.filter(product=product).values('product_id', 'uom_from_id', 'uom_to_id', 'conversion_factor'))
 
     batches = product.batches.filter(quantity__gt=0).order_by('expiry_date')
     batches_data = []
     
     for batch in batches:
-        total_batch_qty = batch.quantity
-        locations = batch.batch_locations.select_related('quantity_uom')
-        allocated_qty_base = 0
-        
-        for loc in locations:
+        allocated = 0
+        for loc in batch.batch_locations.select_related('quantity_uom'):
             factor = get_smart_conversion_factor(product.id, loc.quantity_uom_id, product.base_uom_id, all_boms_list)
-            allocated_qty_base += loc.quantity * factor
+            allocated += loc.quantity * factor
             
-
-        allocated_qty_base = round(allocated_qty_base, 2)
-        if allocated_qty_base.is_integer(): allocated_qty_base = int(allocated_qty_base)
-
-        unallocated_qty = total_batch_qty - allocated_qty_base
-        if unallocated_qty < 0: unallocated_qty = 0
+        allocated = int(allocated) if round(allocated, 2).is_integer() else round(allocated, 2)
+        unallocated = max(0, batch.quantity - allocated)
 
         batches_data.append({
             'id': batch.id,
             'batch_number': batch.batch_number,
             'expiry': batch.expiry_date.strftime('%d/%m/%Y'),
-            'total': total_batch_qty,
-            'allocated': allocated_qty_base,
-            'unallocated': unallocated_qty
+            'total': batch.quantity,
+            'allocated': allocated,
+            'unallocated': unallocated
         })
 
     return JsonResponse({
@@ -704,9 +559,8 @@ def api_get_product_batches_details(request):
         'batches': batches_data
     })
 
-
 # -------------------------------------------------------
-#   API: LƯU VỊ TRÍ
+#   API: SAVE LOCATION
 # -------------------------------------------------------
 @login_required
 @admin_required
@@ -717,31 +571,22 @@ def api_save_location(request):
         tray_id = data.get('tray_id')
         batch_id = data.get('batch_id')
         
-        if not tray_id:
-            return JsonResponse({'status': 'error', 'message': 'Thiếu Tray ID'}, status=400)
+        if not tray_id: return JsonResponse({'status': 'error', 'message': 'Missing Tray ID'}, status=400)
 
         with transaction.atomic():
             StockLocation.objects.filter(tray_id=tray_id).delete()
             
-            if batch_id: # Nếu không phải lệnh xóa
-                qty = int(data.get('quantity', 0))
-                qty_uom_id = data.get('quantity_uom_id')
-                cap = int(data.get('capacity', 50))
-                cap_uom_id = data.get('capacity_uom_id')
-
+            if batch_id:
                 batch = get_object_or_404(ProductBatch, pk=batch_id)
-                
                 StockLocation.objects.create(
                     tray_id=tray_id,
                     product=batch.product,
                     batch=batch,
-                    quantity=qty,
-                    quantity_uom_id=qty_uom_id,
-                    capacity=cap,
-                    capacity_uom_id=cap_uom_id
+                    quantity=int(data.get('quantity', 0)),
+                    quantity_uom_id=data.get('quantity_uom_id'),
+                    capacity=int(data.get('capacity', 50)),
+                    capacity_uom_id=data.get('capacity_uom_id')
                 )
-        
         return JsonResponse({'status': 'ok'})
-        
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

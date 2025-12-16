@@ -7,9 +7,9 @@ from django.contrib.auth.models import User
 #               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
 # =======================================================
 ROLE_CHOICES = (
-    ('doctor', 'Bác sĩ'),
-    ('admin', 'Quản lý'),
-    ('supplier', 'Nhà cung cấp'),
+    ('doctor', 'Doctor'),
+    ('admin', 'Admin'),
+    ('supplier', 'Supplier'),
 )
 
 

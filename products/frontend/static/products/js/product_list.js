@@ -1,136 +1,111 @@
-// products/frontend/static/products/js/product_list.js
-
 document.addEventListener("DOMContentLoaded", function () {
-  /**
-   * Khởi tạo các tooltip của Bootstrap cho các phần tử trên trang.
-   */
-  function initializeTooltips() {
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    [...tooltipTriggerList].map(
-      (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
-    );
-  }
+  // Khởi tạo Tooltips Bootstrap
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  [...tooltipTriggerList].map((el) => new bootstrap.Tooltip(el));
 
-  /**
-   * Quản lý Modal thông báo, hiển thị các thông điệp thành công hoặc lỗi.
-   */
-  function setupInfoModal() {
-    const infoModalElement = document.getElementById("infoModal");
-    if (!infoModalElement) return;
+  // =======================================================
+  //        QUẢN LÝ MODAL THÔNG BÁO
+  // =======================================================
+  const infoModalElement = document.getElementById("infoModal");
+  let infoModalInstance = null;
 
-    const infoModal = new bootstrap.Modal(infoModalElement);
-    const infoModalTitle = document.getElementById("infoModalLabel");
-    const infoModalBody = document.getElementById("infoModalBody");
-    const infoModalActionBtn = document.getElementById("infoModalActionBtn");
+  if (infoModalElement) {
+    infoModalInstance = new bootstrap.Modal(infoModalElement);
 
-    /**
-     * Hiển thị Modal với nội dung tùy chỉnh.
-     */
-    function showInfoModal(title, body, actionUrl = "", actionText = "") {
-      infoModalTitle.textContent = title;
-      infoModalBody.textContent = body;
+    const modalTitle = document.getElementById("infoModalLabel");
+    const modalBody = document.getElementById("infoModalBody");
+    const modalBtn = document.getElementById("infoModalActionBtn");
+
+    // Hàm hiển thị Modal (Global)
+    window.showInfoModal = (title, body, actionUrl = "", actionText = "") => {
+      modalTitle.textContent = title;
+      modalBody.textContent = body;
 
       if (actionUrl && actionText) {
-        infoModalActionBtn.href = actionUrl;
-        infoModalActionBtn.textContent = actionText;
-        infoModalActionBtn.classList.remove("d-none");
+        modalBtn.href = actionUrl;
+        modalBtn.textContent = actionText;
+        modalBtn.classList.remove("d-none");
       } else {
-        infoModalActionBtn.classList.add("d-none");
+        modalBtn.classList.add("d-none");
       }
-      infoModal.show();
-    }
+      infoModalInstance.show();
+    };
 
-    // Gắn listener toàn cục để có thể gọi `showInfoModal` từ nơi khác nếu cần
-    window.showInfoModal = showInfoModal;
-  }
-
-  /**
-   * Xử lý các sự kiện click trên các nút "Di chuyển kệ".
-   */
-  function setupMoveShelfButtons() {
-    const moveButtons = document.querySelectorAll(".move-to-shelf-btn");
-
-    moveButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        const shelfName = this.dataset.shelfName;
-
-        if (!shelfName) {
-          window.showInfoModal("Lỗi", "Không tìm thấy thông tin kệ.");
-          return;
-        }
-
-        const originalIconHTML = this.innerHTML;
-        setButtonLoading(this, true);
-
-        const formData = new FormData();
-        formData.append("shelf_name", shelfName);
-
-        fetch(moveToShelfApiUrl, {
-          method: "POST",
-          headers: { "X-CSRFToken": csrfToken },
-          body: formData,
-        })
-          .then((response) => {
-            if (!response.ok)
-              return response.json().then((err) => {
-                throw new Error(err.message || "Lỗi không xác định từ server.");
-              });
-            return response.json();
-          })
-          .then((data) => {
-            if (data.status === "ok") {
-              window.showInfoModal(
-                "Thành Công",
-                `Đã gửi lệnh di chuyển đến kệ ${shelfName}. Bạn có muốn chuyển đến trang điều khiển để theo dõi không?`,
-                moveToShelfRedirectUrl,
-                "Đến Trang Điều Khiển"
-              );
-            } else {
-              throw new Error(data.message);
-            }
-          })
-          .catch((error) => {
-            window.showInfoModal("Lỗi", `Đã có lỗi xảy ra: ${error.message}`);
-          })
-          .finally(() => {
-            setButtonLoading(this, false, originalIconHTML);
-          });
-      });
-    });
-  }
-
-  /**
-   * Bật/tắt trạng thái loading của một nút.
-   */
-  function setButtonLoading(button, isLoading, originalContent = "") {
-    if (isLoading) {
-      button.disabled = true;
-      const spinner = document.createElement("span");
-      spinner.className = "spinner-border spinner-border-sm";
-      button.innerHTML = "";
-      button.appendChild(spinner);
-    } else {
-      button.disabled = false;
-      button.innerHTML = originalContent;
-    }
-  }
-
-  /**
-   * Gắn sự kiện cho nút hành động trên Modal.
-   */
-  function setupModalActionLink() {
-    const infoModalActionBtn = document.getElementById("infoModalActionBtn");
-    if (infoModalActionBtn) {
-      infoModalActionBtn.addEventListener("click", function (e) {
+    // Sự kiện click nút hành động trong Modal
+    if (modalBtn) {
+      modalBtn.addEventListener("click", function (e) {
         e.preventDefault();
         window.location.href = this.href;
       });
     }
   }
 
-  // === KHỞI CHẠY TẤT CẢ CÁC HÀM ===
-  initializeTooltips();
-  setupInfoModal();
-  setupMoveShelfButtons();
-  setupModalActionLink();
+  // =======================================================
+  //        HÀM TIỆN ÍCH UI
+  // =======================================================
+
+  // Bật/Tắt trạng thái Loading cho nút
+  function toggleButtonLoading(button, isLoading, originalContent = "") {
+    if (isLoading) {
+      button.disabled = true;
+      button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    } else {
+      button.disabled = false;
+      button.innerHTML = originalContent;
+    }
+  }
+
+  // =======================================================
+  //        XỬ LÝ DI CHUYỂN KỆ (API CALL)
+  // =======================================================
+  const moveButtons = document.querySelectorAll(".move-to-shelf-btn");
+
+  moveButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const shelfName = this.dataset.shelfName;
+
+      if (!shelfName) {
+        window.showInfoModal("Error", "Shelf information missing.");
+        return;
+      }
+
+      const originalIconHTML = this.innerHTML;
+      toggleButtonLoading(this, true);
+
+      const formData = new FormData();
+      formData.append("shelf_name", shelfName);
+
+      // Gọi API Backend
+      fetch(moveToShelfApiUrl, {
+        method: "POST",
+        headers: { "X-CSRFToken": csrfToken },
+        body: formData,
+      })
+        .then((response) => {
+          if (!response.ok)
+            return response.json().then((err) => {
+              throw new Error(err.message || "Unknown server error.");
+            });
+          return response.json();
+        })
+        .then((data) => {
+          if (data.status === "ok") {
+            window.showInfoModal(
+              "Success",
+              `Move command sent to Shelf ${shelfName}. Go to Control Panel to monitor?`,
+              moveToShelfRedirectUrl,
+              "Go to Control Panel"
+            );
+          } else {
+            throw new Error(data.message);
+          }
+        })
+        .catch((error) => {
+          window.showInfoModal("Error", `An error occurred: ${error.message}`);
+        })
+        .finally(() => {
+          toggleButtonLoading(this, false, originalIconHTML);
+        });
+    });
+  });
 });

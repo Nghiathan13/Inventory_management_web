@@ -2,14 +2,16 @@
 <!--  -->
 {% load static %}
 <!--  -->
-{% block title %} Bảng Điều Khiển Nhà Cung Cấp {% endblock %}
+{% block title %} Supplier Dashboard {% endblock %}
 <!--  -->
 {% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}" />
+
 <div class="container mt-4">
   <!-- PHẦN 1: CÁC ĐƠN HÀNG ĐANG CHỜ XÁC NHẬN -->
   <div class="card shadow-sm mb-4">
     <div class="card-header">
-      <h4><i class="fas fa-box-open me-2"></i>Đơn Hàng Chờ Xác Nhận</h4>
+      <h4><i class="fas fa-box-open me-2"></i>Pending Orders</h4>
     </div>
     <div class="card-body">
       {% if messages %}{% for message in messages %}
@@ -22,8 +24,8 @@
             <tr>
               <th>ID</th>
               <th>Ngày Tạo</th>
-              <th class="text-center">Số Lượng Mặt Hàng</th>
-              <th class="text-center">Hành Động</th>
+              <th class="text-center">Items Count</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -33,18 +35,15 @@
               <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
               <td class="text-center">{{ order.details.count }}</td>
               <td class="text-center">
-                <a
-                  href="{% url 'supplier:process_order' order.pk %}"
-                  class="btn btn-success btn-sm"
-                >
-                  <i class="fas fa-arrow-right me-1"></i> Xử Lý
+                <a href="{% url 'supplier:process_order' order.pk %}" class="btn btn-success btn-sm">
+                  <i class="fas fa-arrow-right me-1"></i> Process Order
                 </a>
               </td>
             </tr>
             {% empty %}
             <tr>
               <td colspan="4" class="text-center text-muted p-4">
-                <em>Không có đơn hàng nào đang chờ.</em>
+                <em>No pending orders found.</em>
               </td>
             </tr>
             {% endfor %}
@@ -57,7 +56,7 @@
   <!-- PHẦN 2: LỊCH SỬ CÁC ĐƠN HÀNG ĐÃ XÁC NHẬN -->
   <div class="card shadow-sm">
     <div class="card-header">
-      <h4><i class="fas fa-history me-2"></i>Lịch Sử Đơn Hàng</h4>
+      <h4><i class="fas fa-history me-2"></i>Purchase Order History</h4>
     </div>
     <div class="card-body">
       <div class="table-responsive">
@@ -65,9 +64,9 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Ngày Xác Nhận</th>
-              <th class="text-center">Trạng Thái</th>
-              <th class="text-center">Hành Động</th>
+              <th>Confirmed At</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -83,18 +82,15 @@
                 </span>
               </td>
               <td class="text-center">
-                <a
-                  href="{% url 'supplier:download_delivery_note' order.pk %}"
-                  class="btn btn-secondary btn-sm"
-                >
-                  <i class="fas fa-download me-1"></i> Tải Lại Tem Nhãn
+                <a href="{% url 'supplier:download_delivery_note' order.pk %}" class="btn btn-secondary btn-sm">
+                  <i class="fas fa-download me-1"></i> Download Label
                 </a>
               </td>
             </tr>
             {% empty %}
             <tr>
               <td colspan="4" class="text-center text-muted p-4">
-                <em>Chưa có lịch sử đơn hàng.</em>
+                <em>No order history available.</em>
               </td>
             </tr>
             {% endfor %}

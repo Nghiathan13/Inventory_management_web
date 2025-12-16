@@ -1,19 +1,101 @@
 /* =======================================================
-   1. LAYOUT & UTILITIES (Bố cục & Tiện ích chung)
+   1. GIAO DIỆN HEADER & CARD (MÀU TÍM & VIỀN ĐẬM)
 ======================================================= */
 
-/* Căn đều chiều cao cho các cột trong row */
+/* Header màu tím chủ đạo */
+.card-header-purple {
+  background-color: rgb(100, 55, 195);
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Chữ trong header tím phải màu trắng */
+.card-header-purple h4,
+.card-header-purple h5,
+.card-header-purple i {
+  color: #ffffff !important;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Viền Card đậm hơn mặc định */
+.card-strong-border {
+  border: 1px solid #ccc !important;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* =======================================================
+   2. BẢNG DỮ LIỆU (TABLE)
+======================================================= */
+
+/* Viền bảng đậm */
+.table-bordered-strong {
+  border: 2px solid #a0a0a0;
+}
+
+.table-bordered-strong th,
+.table-bordered-strong td {
+  border: 1px solid #b0b0b0;
+}
+
+/* =======================================================
+   3. UTILITIES (MÀU CHỮ & ICON)
+======================================================= */
+
+/* Chữ màu đen tuyền (ghi đè bootstrap text-dark) */
+.text-black {
+  color: #000000 !important;
+}
+
+/* Icon màu đen */
+.icon-black {
+  color: #000000 !important;
+}
+
+/* Cân bằng chiều cao 2 cột */
 .row-equal-height {
   display: flex;
   flex-wrap: wrap;
 }
 
-/* Chỉnh margin cho spinner trong nút bấm */
-.spinner-border-sm {
-  margin-right: 5px;
+/* Ẩn phần tử */
+.d-none-custom {
+  display: none !important;
 }
 
-/* Tùy chỉnh thanh cuộn cho danh sách Picking Queue */
+/* =======================================================
+   4. PICKING ITEM (THẺ THUỐC TRONG HÀNG CHỜ)
+======================================================= */
+
+.picking-item {
+  background-color: #fff;
+  border: 2px solid #d0d0d0; /* Viền đậm */
+  border-left: 6px solid #e9ecef;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Trạng thái: Đang xử lý (Active) */
+.picking-item.active {
+  border-left-color: rgb(100, 55, 195); /* Màu tím */
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Trạng thái: Đã xong (Done) */
+.picking-item.done {
+  border-left-color: #198754; /* Màu xanh lá */
+  opacity: 0.6;
+}
+
+.picking-item.done .product-name {
+  text-decoration: line-through;
+  color: #6c757d !important;
+}
+
+/* =======================================================
+   5. SCROLLBAR & ANIMATION
+======================================================= */
+
 #picking-queue::-webkit-scrollbar {
   width: 6px;
 }
@@ -23,106 +105,16 @@
   border-radius: 4px;
 }
 
-/* =======================================================
-   2. PICKING ITEM (Thẻ thuốc trong hàng chờ)
-======================================================= */
-
-/* --- Trạng thái mặc định (Chờ) --- */
-.picking-item {
-  background-color: #fff;
-  /* Viền mỏng bao quanh */
-  border: 1px solid #e9ecef;
-  /* Viền trái dày 5px để hiển thị màu trạng thái */
-  border-left: 5px solid #dee2e6;
-  transition: all 0.3s ease-in-out;
-}
-
-/* --- Trạng thái đang xử lý (Active) --- */
 .picking-item.active {
-  /* Đổi màu viền trái thành xanh dương */
-  border-left-color: #0d6efd;
+  border-left: 5px solid #0d6efd;
   background-color: #e7f1ff;
-
-  /* Hiệu ứng nổi lên và dịch sang phải một chút để nổi bật */
-  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
-  transform: translateX(5px) scale(1.01);
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+  transition: all 0.3s ease;
 }
 
-/* --- Trạng thái đã xong (Done) --- */
-.picking-item.done {
-  /* Đổi màu viền trái thành xanh lá */
-  border-left-color: #198754;
-  background-color: #f8f9fa;
-  opacity: 0.8; /* Làm mờ nhẹ */
-}
-
-/* Gạch ngang tên thuốc khi đã xong */
-.picking-item.done .product-name {
-  text-decoration: line-through;
-  color: #6c757d !important;
-}
-
-/* =======================================================
-   3. NÚT ĐIỀU KHIỂN (LOGIC ẨN/HIỆN)
-======================================================= */
-
-/* Mặc định ẩn nút Undo (Sửa) */
-.btn-undo {
-  display: none;
-}
-
-/* Chỉ hiện nút Undo khi item có class .done */
-.picking-item.done .btn-undo {
-  display: inline-block;
-}
-
-/* Ẩn nút Confirm (Lấy thuốc) khi item đã xong */
-.picking-item.done .btn-confirm {
-  display: none;
-}
-
-/* =======================================================
-   4. ANIMATION (Hiệu ứng động)
-======================================================= */
-
-/* Hiệu ứng nhấp nháy màu xanh (dùng cho nút Hoàn thành tổng) */
-@keyframes pulse-green {
-  0% {
-    box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba(25, 135, 84, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(25, 135, 84, 0);
-  }
-}
-
-.pulse-animation {
-  animation: pulse-green 2s infinite;
-}
-
-/* --- CẢI THIỆN GIAO DIỆN --- */
-.row-equal-height {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-/* Viền đậm cho Card */
-.card-strong-border {
-  border: 2px solid #b0b0b0; /* Viền xám đậm rõ ràng */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Khung tiêu đề */
-.page-header-frame {
-  background-color: #fff;
-  border: 2px solid #0d6efd;
-  border-radius: 8px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Hiệu ứng nhấp nháy nhẹ viền khi máy đang chạy (Busy) */
+.picking-item.active button:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }

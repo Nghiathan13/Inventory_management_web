@@ -26,7 +26,7 @@ import qrcode
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: TRANG CHỦ (DASHBOARD) CỦA SUPPLIER
+#           TRANG CHỦ (DASHBOARD) CỦA SUPPLIER
 # -------------------------------------------------------
 @login_required
 @supplier_required
@@ -47,7 +47,7 @@ def supplier_dashboard(request):
     return render(request, 'supplier/dashboard.html', context)
 
 # -------------------------------------------------------
-#   VIEW: TRANG XỬ LÝ CHI TIẾT ĐƠN HÀNG
+#           TRANG XỬ LÝ CHI TIẾT ĐƠN HÀNG
 # -------------------------------------------------------
 @login_required
 @supplier_required
@@ -62,7 +62,7 @@ def process_order(request, pk):
     return render(request, 'supplier/process_order.html', context)
 
 # -------------------------------------------------------
-#   VIEW: XÁC NHẬN ĐƠN HÀNG (CONFIRM ORDER)
+#           XÁC NHẬN ĐƠN HÀNG (CONFIRM ORDER)
 # -------------------------------------------------------
 @login_required
 @supplier_required
@@ -114,7 +114,7 @@ def confirm_order_api(request, pk):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 # -------------------------------------------------------
-#   VIEW: LỊCH SỬ ĐƠN HÀNG CỦA SUPPLIER
+#       LỊCH SỬ ĐƠN HÀNG CỦA SUPPLIER
 # -------------------------------------------------------
 @login_required
 @supplier_required
@@ -127,7 +127,7 @@ def order_history(request):
     return render(request, 'supplier/order_history.html', context)
 
 # -------------------------------------------------------
-#   VIEW: TẢI PHIẾU GIAO HÀNG (DOWNLOAD DELIVERY NOTE)
+#       TẢI PHIẾU GIAO HÀNG (DOWNLOAD DELIVERY NOTE)
 # -------------------------------------------------------
 @login_required
 @supplier_required
@@ -143,7 +143,6 @@ def download_delivery_note_pdf(request, pk):
     p.setFont("Helvetica", 14)
     p.drawCentredString(width / 2.0, height - 1.3 * inch, f"(For Order #{po.id})")
 
-    # a. Tạo URL cho trang tiếp nhận đơn hàng, sử dụng unique_code của PurchaseOrder
     receive_po_url = request.build_absolute_uri(
         reverse('inventory:receive_po', args=[po.unique_code])
     )
@@ -179,7 +178,6 @@ def download_delivery_note_pdf(request, pk):
             p.drawString(1 * inch, y_position, f"(Continued) - Delivery Note PO #{po.id}")
             y_position -= 0.5 * inch
 
-        # Vẽ thông tin sản phẩm
         p.setFont("Helvetica-Bold", 12)
         p.drawString(1 * inch, y_position, f"- {detail.product.name}")
         
@@ -188,7 +186,7 @@ def download_delivery_note_pdf(request, pk):
         p.drawString(1.2 * inch, y_position - 0.2 * inch, f"Qty: {detail.quantity} {detail.product.base_uom.name if detail.product.base_uom else ''}")
         # Dòng 2: Mã sản phẩm
         p.drawString(1.2 * inch, y_position - 0.35 * inch, f"Code: {detail.product.code}")
-        # Dòng 3: Hạn sử dụng (MỚI THÊM)
+        # Dòng 3: Hạn sử dụng 
         expiry_str = detail.expiry_date.strftime('%d/%m/%Y') if detail.expiry_date else "N/A"
         p.drawString(1.2 * inch, y_position - 0.5 * inch, f"Exp Date: {expiry_str}")
         
@@ -205,7 +203,7 @@ def download_delivery_note_pdf(request, pk):
                     width - 2.0 * inch, y_position - 0.8 * inch, 
                     width=1*inch, height=1*inch)
         
-        y_position -= 1.5 * inch # Tăng khoảng cách để chứa thêm dòng HSD
+        y_position -= 1.5 * inch 
 
     p.showPage()
     p.save()

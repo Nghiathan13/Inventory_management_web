@@ -1,0 +1,125 @@
+/* =======================================================
+   1. KHUNG CHÍNH (CARD)
+======================================================= */
+.card {
+  min-width: 20rem;
+}
+
+.card-header {
+  background-color: #fff;
+}
+
+.card-header h4 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+}
+
+/* Nút Thêm Mới (Header Action) */
+.card-header a {
+  background-color: rgb(100, 55, 195);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+}
+
+.card-header a:hover {
+  background-color: rgb(80, 35, 175);
+  color: #ebebeb;
+}
+
+/* =======================================================
+   2. THANH TÌM KIẾM (SEARCH BAR)
+======================================================= */
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper .form-control {
+  padding-right: 2.75rem;
+}
+
+/* Nút tìm kiếm (Icon) */
+.search-wrapper .btn-search {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.btn-search i {
+  pointer-events: auto;
+}
+
+/* =======================================================
+   3. BẢNG DỮ LIỆU (TABLE)
+======================================================= */
+/* Container cuộn */
+.table-container {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+/* Tiêu đề bảng */
+.table thead th {
+  background-color: #fff;
+  color: #000;
+  border-bottom: 1px solid #000;
+  vertical-align: middle;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Nội dung bảng */
+.table tbody td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table tbody tr:hover {
+  background-color: #e9ecef;
+}
+
+/* Nút hành động trong bảng */
+.action-buttons a {
+  margin: 0 5px;
+}
+
+/* --- Trạng thái dòng (Row Colors) --- */
+.table-danger,
+.table-danger > th,
+.table-danger > td {
+  background-color: #f8d7da !important;
+}
+
+/* Cảnh báo (Vàng nhạt) */
+.table-warning,
+.table-warning > th,
+.table-warning > td {
+  background-color: #fff3cd !important;
+}
+
+/* =======================================================
+   4. NÚT BẤM TÙY CHỈNH (CUSTOM BUTTONS)
+======================================================= */
+.btn-success {
+  background-color: #5d3fd3;
+  border-color: #5d3fd3;
+}
+
+.btn-success:hover {
+  background-color: #4c33a3;
+  border-color: #4c33a3;
+}
+
+.btn-success:active,
+.btn-success:focus {
+  background-color: #3e2773 !important;
+  border-color: #3e2773 !important;
+  box-shadow: 0 0 0 0.25rem rgba(93, 63, 211, 0.5) !important;
+}

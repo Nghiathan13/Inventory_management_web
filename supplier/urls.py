@@ -7,13 +7,7 @@ from user.views import CustomLogoutView
 
 app_name = 'supplier' 
 
-urlpatterns = [
-    # URL login
-    path('login/', auth_views.LoginView.as_view(
-        template_name='supplier/login.html',
-        redirect_authenticated_user=True 
-    ), name='login'),
-    
+urlpatterns = [    
     # URL dashboard
     path('', views.supplier_dashboard, name='dashboard'),
     

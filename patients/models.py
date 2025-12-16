@@ -1,5 +1,3 @@
-# patients/models.py
-
 from django.db import models
 from datetime import date
 
@@ -7,9 +5,9 @@ from datetime import date
 #               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
 # =======================================================
 GENDER_CHOICES = (
-    ('Nam', 'Nam'),
-    ('Nữ', 'Nữ'),
-    ('Khác', 'Khác'),
+    ('Male', 'Male'),
+    ('Female', 'Female'),
+    ('Other', 'Other'),
 )
 
 BLOOD_TYPE_CHOICES = (
@@ -17,7 +15,7 @@ BLOOD_TYPE_CHOICES = (
     ('B+', 'B+'), ('B-', 'B-'),
     ('AB+', 'AB+'), ('AB-', 'AB-'),
     ('O+', 'O+'), ('O-', 'O-'),
-    ('Unknown', 'Chưa rõ'),
+    ('Unknown', 'Unknown'),
 )
 
 # =======================================================

@@ -1,91 +1,136 @@
 /* =======================================================
         1. TRẠNG THÁI & ĐIỀU KHIỂN
 ======================================================= */
+:root {
+  --primary-purple: rgb(100, 55, 195);
+  --light-purple: rgba(100, 55, 195, 0.1);
+  --hover-purple: rgb(80, 35, 175);
+}
+
 #current-shelf-display {
   font-size: 5rem;
   line-height: 1;
-  transition: color 0.3s;
-}
-#status-indicator {
-  font-size: 1.2rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.status-ready {
-  color: #198754;
-}
-.status-moving {
-  color: #fd7e14;
-}
-.move-btn {
-  width: 3.5rem;
-  font-weight: 600;
-}
-
-/* Kệ đang active */
-.shelf-card.active {
-  border: 2px solid #0d6efd !important;
-  box-shadow: 0 0 15px rgba(13, 110, 253, 0.3);
-  transform: scale(1.02);
-  z-index: 10;
-}
-.shelf-card.active .shelf-header {
-  background-color: #0d6efd !important;
-  color: white !important;
+  color: var(--primary-purple); /* Đổi sang màu tím */
+  transition: color 0.3s ease;
 }
 
 /* =======================================================
-        2. GIAO DIỆN KỆ (ĐỒNG BỘ VỚI PRODUCTS)
+        2. DROPOFF (CỬA TRẢ)
+======================================================= */
+.dropoff-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.dropoff-box {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border: 3px dashed #dee2e6;
+  border-radius: 12px;
+  background-color: #f8f9fa;
+  color: #adb5bd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: not-allowed;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.dropoff-box.occupied {
+  background-color: #fff3cd;
+  border: 3px solid #ffc107;
+  color: #856404;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.3);
+}
+.dropoff-box.occupied:hover {
+  transform: translateY(-2px) scale(1.02);
+  background-color: #ffeeba;
+}
+
+/* =======================================================
+        3. GIAO DIỆN KỆ (SHELF LAYOUT)
 ======================================================= */
 .shelf-card {
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
-  background-color: #fff;
   height: 100%;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  background-color: #fff;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
 }
+
+/* KỆ ĐANG ACTIVE -> MÀU TÍM */
+.shelf-card.active {
+  border: 2px solid var(--primary-purple) !important;
+  box-shadow: 0 0 15px rgba(100, 55, 195, 0.3);
+  z-index: 5;
+  transform: scale(1.01);
+}
+.shelf-card.active .shelf-header {
+  background-color: var(--primary-purple) !important;
+  color: white !important;
+}
+
 .shelf-header {
+  padding: 0.5rem;
   background-color: #f8f9fa;
-  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
   font-weight: 700;
   text-align: center;
-  border-bottom: 1px solid #dee2e6;
 }
 .shelf-body {
-  padding: 0.5rem;
-  max-height: 75vh;
+  padding: 0.75rem;
+  max-height: 80vh;
   overflow-y: auto;
   flex-grow: 1;
-  padding-right: 5px;
 }
 
-/* --- Ô TRẠNG THÁI --- */
-.tray-item {
-  cursor: default;
-  border: 1px dashed #ccc;
-  border-radius: 0.25rem;
+/* =======================================================
+        4. CẤU TRÚC Ô CHỨA HÀNG (WRAPPER MỚI)
+======================================================= */
 
-  /* CHIỀU CAO CỐ ĐỊNH - GIỐNG BÊN PRODUCTS */
-  height: 140px;
-  margin-bottom: 0.75rem;
+/* Wrapper bao quanh cả Card và Nút */
+.tray-wrapper {
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+}
+
+/* --- Phần 1: Thẻ hiển thị thông tin --- */
+.tray-card {
+  position: relative;
+  height: 140px; /* Chiều cao cố định của phần hiển thị */
   padding: 0.75rem;
+
+  background-color: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 0.5rem;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background-color: #fff;
+  cursor: pointer;
   overflow: hidden;
+  transition: all 0.2s;
 }
 
-.tray-filled {
-  border: 1px solid #0d6efd;
+.tray-card:hover {
   background-color: #f8f9fa;
+  border-color: var(--primary-purple);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+/* Khi có hàng */
+.tray-filled .tray-card {
+  border: 1px solid var(--primary-purple);
+  background-color: #fdfdfd;
+}
+
+/* Nội dung bên trong */
 .tray-header-row {
   display: flex;
   justify-content: space-between;
@@ -94,41 +139,149 @@
 }
 .tray-level {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 .tray-percent {
   font-size: 0.8rem;
-  font-weight: bold;
-  color: #0d6efd;
+  font-weight: 700;
+  color: var(--primary-purple);
 }
 
 .tray-product {
-  font-weight: bold;
-  color: #333;
   margin-top: 4px;
   font-size: 0.95rem;
+  font-weight: 700;
+  color: #212529;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: normal;
-  line-height: 1.3;
 }
-
 .tray-batch {
-  font-size: 0.8rem;
+  margin-bottom: 2px;
+  font-size: 0.75rem;
   color: #6c757d;
   font-style: italic;
-  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .tray-qty {
-  font-size: 0.85rem;
-  color: #000;
-  font-weight: 500;
   margin-bottom: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000;
+}
+.progress-bar {
+  background-color: var(--primary-purple);
+} /* Thanh bar màu tím */
+
+/* --- Phần 2: Nút bấm tách rời (Action Buttons) --- */
+.tray-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px; /* Cách card một chút */
+}
+
+.btn-action {
+  flex: 1; /* Chia đều 2 nút */
+  border: none;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Nút Cấu hình (Màu xám nhạt) */
+.btn-config {
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+.btn-config:hover {
+  background-color: #dee2e6;
+  color: #000;
+}
+
+/* Nút Lấy hàng (Màu tím) */
+.btn-fetch {
+  background-color: var(--primary-purple);
+  color: white;
+  box-shadow: 0 2px 4px rgba(100, 55, 195, 0.2);
+}
+.btn-fetch:hover {
+  background-color: var(--hover-purple);
+  box-shadow: 0 4px 8px rgba(100, 55, 195, 0.3);
+  transform: translateY(-1px);
+}
+
+/* =======================================================
+        TRẠNG THÁI OUT (KHI KHAY ĐƯỢC LẤY RA)
+        (Áp dụng lên wrapper cha để điều khiển con)
+======================================================= */
+
+.tray-wrapper.is-out {
+  background-color: #e9ecef !important;
+  opacity: 0.6 !important;
+  pointer-events: auto !important; /* Vẫn cho phép click để config nếu cần */
+  position: relative;
+  border-radius: 0.5rem; /* Bo góc cho đẹp khi bị mờ */
+}
+
+/* Làm mờ nội dung bên trong */
+.tray-wrapper.is-out .tray-content-wrapper {
+  opacity: 0.5;
+  filter: grayscale(100%);
+}
+
+/* Badge "ĐANG Ở CỬA" */
+.tray-wrapper.is-out::after {
+  content: "OUT"; /* Hoặc "ĐANG Ở CỬA" */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(220, 53, 69, 0.9); /* Màu đỏ cho nổi bật */
+  color: white;
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  z-index: 100;
+  pointer-events: none;
+  letter-spacing: 1px;
+}
+
+/* --- XỬ LÝ NÚT KHI OUT --- */
+
+/* Nút Fetch: Ẩn hoặc làm mờ không cho bấm */
+.tray-wrapper.is-out .btn-fetch {
+  opacity: 0; /* Ẩn luôn cho gọn, hoặc để 0.3 nếu muốn hiện mờ */
+  pointer-events: none;
+}
+
+/* Nút Config: Vẫn cho bấm để xem thông tin, nổi lên trên lớp mờ */
+.tray-wrapper.is-out .btn-config {
+  position: relative;
+  z-index: 101; /* Cao hơn lớp phủ */
+  opacity: 1 !important;
+  background-color: #fff;
+  border-color: var(--primary-purple);
+  color: var(--primary-purple);
+}
+/* =======================================================
+        UTILITIES
+======================================================= */
+.select2-container,
+.select2-dropdown {
+  z-index: 9999 !important;
 }

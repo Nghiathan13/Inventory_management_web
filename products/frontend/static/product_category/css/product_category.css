@@ -1,16 +1,42 @@
-/* Kích thước các cột trong bảng Nhóm Sản phẩm */
-.table {
-  min-width: 900px;
+/* =======================================================
+   CẤU HÌNH BẢNG (TABLE LAYOUT)
+======================================================= */
+.table-container {
+  overflow-x: auto;
 }
+
+.table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 1000px;
+}
+
+/* =======================================================
+   KÍCH THƯỚC CỘT (COLUMN WIDTHS)
+======================================================= */
 .col-category-name {
-  width: 300px;
+  width: 25%;
 }
 .col-category-parent {
-  width: 300px;
+  width: 25%;
 }
+
 .col-description {
-  width: 350px;
+  width: 35%;
 }
+
 .col-actions {
-  width: 170px;
+  width: 15%;
+  min-width: 150px;
+}
+
+/* =======================================================
+   NÚT HÀNH ĐỘNG (ACTION BUTTONS)
+======================================================= */
+.action-buttons {
+  white-space: nowrap;
+}
+
+.action-buttons .btn {
+  margin: 0 2px;
 }

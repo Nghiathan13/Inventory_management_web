@@ -1,11 +1,9 @@
-# inventory/models.py
-
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
 
 # =======================================================
-#               MODEL GIAO DỊCH: ORDER
+#           GIAO DỊCH XUẤT (ORDER)
 # =======================================================
 class Order(models.Model):
     prescription = models.ForeignKey(
@@ -41,31 +39,31 @@ class Order(models.Model):
     def __str__(self):
         staff_name = self.staff.username if self.staff else "N/A"
         product_name = self.product.name if self.product else "Deleted Product"
-        return f'{product_name} - SL: {self.order_quantity or "N/A"} bởi {staff_name}'
+        return f'{product_name} - Qty: {self.order_quantity or "N/A"} by {staff_name}'
 
 # =======================================================
-#               MODEL ĐẶT HÀNG: PURCHASEORDER
+#           ĐƠN ĐẶT HÀNG (PO)
 # =======================================================
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = (
-        ('To Confirm', 'Chờ Nhà Cung Cấp Xác Nhận'),
-        ('Confirmed', 'Đã Xác Nhận (Chờ Giao)'),
-        ('Received', 'Đã Nhận Hàng'),
-        ('Cancelled', 'Đã Hủy'),
+        ('To Confirm', 'Pending Supplier Confirmation'),
+        ('Confirmed', 'Confirmed (Awaiting Delivery)'),
+        ('Received', 'Received'),
+        ('Cancelled', 'Cancelled'),
     )
     supplier = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
         null=True, 
         limit_choices_to={'groups__name': "Supplier"}, 
-        verbose_name="Nhà Cung Cấp"
+        verbose_name="Supplier"
     )
     created_by = models.ForeignKey(
         User, 
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='created_purchase_orders', 
-        verbose_name="Người Tạo Đơn"
+        verbose_name="Created By"
     )
     status = models.CharField(
         max_length=20, 
@@ -96,7 +94,7 @@ class PurchaseOrder(models.Model):
     expiry_date = models.DateField(
         null=True, 
         blank=True, 
-        verbose_name="Hạn Sử Dụng (Supplier nhập)"
+        verbose_name="Expiry Date (Supplier Input)"
     )
 
     class Meta:
@@ -106,7 +104,7 @@ class PurchaseOrder(models.Model):
         return f"PO #{self.id} - {self.supplier.username if self.supplier else 'N/A'}"
 
 # =======================================================
-#               MODEL CHI TIẾT: PURCHASEORDERDETAIL
+#           CHI TIẾT ĐƠN HÀNG (PO DETAIL)
 # =======================================================
 class PurchaseOrderDetail(models.Model):
     purchase_order = models.ForeignKey(
@@ -127,7 +125,7 @@ class PurchaseOrderDetail(models.Model):
     expiry_date = models.DateField(
         null=True, 
         blank=True, 
-        verbose_name="Hạn Sử Dụng (Supplier nhập)"
+        verbose_name="Expiry Date (Supplier Input)"
     )
    
     class Meta:
@@ -137,7 +135,7 @@ class PurchaseOrderDetail(models.Model):
         return f"{self.product.name} - Qty: {self.quantity}"
 
 # =======================================================
-#               MODEL NHẬP KHO: STOCKRECEIPT
+#           BIÊN LAI NHẬP KHO (RECEIPT)
 # =======================================================
 class StockReceipt(models.Model):
     product = models.ForeignKey(

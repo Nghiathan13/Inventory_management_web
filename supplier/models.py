@@ -1,10 +1,8 @@
-# supplier/models.py
-
 from django.db import models
 from django.contrib.auth.models import User
 
 # =======================================================
-#               MODEL: SUPPLIERPROFILE
+#              SUPPLIERPROFILE
 # =======================================================
 class SupplierProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='supplier_profile')

@@ -104,18 +104,17 @@
             </div>
           </template>
 
-          <!-- Template cho một <option> sản phẩm (blueprint) -->
-          <!-- Sử dụng placeholder an toàn như __NAME__ để Django không render -->
+          <!-- PRODUCT OPTION -->
           <template id="product-option-template">
-            <option value="__ID__">__NAME__ (Còn: __QUANTITY__)</option>
+            <option value="__ID__">__NAME__</option>
           </template>
 
-          <!-- Template cho một <option> đơn vị tính (blueprint) -->
+          <!-- UOM OPTION -->
           <template id="uom-option-template">
             <option value="__ID__">__NAME__</option>
           </template>
 
-          <!-- Template cho option "chọn sản phẩm trước" -->
+          <!-- UOM PLACEHOLDER -->
           <template id="uom-placeholder-template">
             <option value="">Choose product first.</option>
           </template>
@@ -138,7 +137,7 @@
         <p><i class="fa-solid fa-clock-rotate-left"></i> History</p>
       </div>
       <div class="card-body">
-        <div class="table-responsive">
+        <div class="table-responsive history-table-container">
           <table class="table table-bordered table-hover">
             <thead class="thead-light">
               <tr>

@@ -2,90 +2,129 @@
 <!--  -->
 {% load static %}
 <!--  -->
+{% block title %} Smart Warehouse Control {% endblock %}
+<!--  -->
 {% block extracss %}
 <link rel="stylesheet" href="{% static 'carousel/css/control_panel.css' %}" />
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+/>
 {% endblock %}
-<!--  -->
-{% block title %} Horizontal Carousel Control Panel {% endblock %}
 <!--  -->
 {% block content %}
 <div class="container-fluid mt-4 mb-5">
   <div class="row">
-    <!-- CỘT TRÁI: ĐIỀU KHIỂN -->
+    <!-- ========================================================= -->
+    <!-- CỘT TRÁI: ĐIỀU KHIỂN & TRẠNG THÁI -->
+    <!-- ========================================================= -->
     <div class="col-lg-3 mb-4">
+      <!-- Card Status -->
       <div class="card shadow-sm mb-3 sticky-top" style="top: 20px; z-index: 100">
-        <div class="card-header bg-primary text-white">
-          <h5 class="mb-0"><i class="fas fa-satellite-dish me-2"></i>Current State</h5>
+        <div class="card-header">
+          <h4><i class="fas fa-satellite-dish me-2"></i>Status</h4>
         </div>
         <div class="card-body text-center">
-          <p class="text-muted mb-1">Shelves at the entrance:</p>
-          <h1 class="display-1 fw-bold text-primary" id="current-shelf-display">A</h1>
-          <div id="status-indicator" class="status-ready mt-2">
-            <span id="status-text" class="badge bg-success fs-6">Ready</span>
+          <h1 class="display-3 fw-bold text-primary mb-0" id="current-shelf-display">--</h1>
+          <div id="system-state-badge" class="mt-2"><span class="badge bg-secondary">Checking...</span></div>
+          <div class="d-flex justify-content-between mt-3 border-top pt-2">
+            <small class="text-muted"
+              >Connection: <span id="connection-status" class="text-danger fw-bold">Offline</span></small
+            >
+            <button class="btn btn-link btn-sm text-danger p-0 text-decoration-none" onclick="sendReset()">
+              Reset
+            </button>
           </div>
         </div>
-        <div class="card-header border-top bg-light mt-2">
-          <h5 class="mb-0"><i class="fas fa-gamepad me-2"></i>Control Panel</h5>
+      </div>
+
+      <!-- Card Dropoff -->
+      <div class="card shadow-sm mb-3" style="border: 2px solid #ffc107">
+        <div class="card-header" style="background-color: #ffc107">
+          <h4 style="color: #000"><i class="fas fa-dolly me-2"></i>Dropoff</h4>
         </div>
         <div class="card-body">
-          <div class="d-grid gap-2 mb-3">
-            <button class="btn btn-info text-white" id="homing-btn"><i class="fas fa-home me-1"></i> Homing</button>
+          <div class="d-flex justify-content-center">
+            <div style="width: 100%; max-width: 180px">
+              <div id="dropoff-1" class="dropoff-box">
+                <i class="fas fa-box-open fa-2x mb-2 text-muted icon-state"></i>
+                <div class="fw-bold small content-text">TRỐNG</div>
+                <small class="text-muted" style="font-size: 0.7rem">Cửa Trả</small>
+              </div>
+            </div>
           </div>
-          <hr />
-          <p class="text-center small text-muted mb-2">Move to shelf:</p>
-          <div class="d-flex flex-wrap justify-content-center gap-2" id="move-buttons">
-            {% for name in all_shelf_names %}
-            <button class="btn btn-outline-secondary move-btn" data-shelf="{{ name }}">{{ name }}</button>
-            {% endfor %}
+          <div class="alert alert-info py-2 px-2 mt-3 mb-0 small text-center border-0 bg-light">
+            <i class="fas fa-info-circle text-primary"></i> Click ô trên để cất hàng.
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ========================================================= -->
     <!-- CỘT PHẢI: SƠ ĐỒ KỆ -->
+    <!-- ========================================================= -->
     <div class="col-lg-9">
-      <div class="card shadow-sm">
-        <div class="card-header bg-white">
-          <h5 class="mb-0 text-primary"><i class="fas fa-th-large me-2"></i>Shelf Layout Visualization</h5>
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4><i class="fas fa-th me-2"></i>Shelf Management</h4>
+          <span class="badge bg-light text-dark border fw-normal"
+            ><i class="fas fa-mouse-pointer"></i> Click to Edit</span
+          >
         </div>
-        <div class="card-body bg-light">
+
+        <div class="card-body bg-light overflow-auto" style="max-height: 85vh">
           <div class="row g-3 carousel-layout">
             {% for shelf in shelf_data %}
-            <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="col-xxl-3 col-xl-4 col-lg-6 col-md-6 col-sm-12">
               <div class="shelf-card h-100" id="shelf-card-{{ shelf.name }}">
-                <div class="shelf-header text-center fw-bold bg-white border-bottom">Kệ {{ shelf.name }}</div>
-                <div class="shelf-body p-2">
-                  <!-- Vòng lặp ngược -->
+                <div class="shelf-header">Kệ {{ shelf.name }}</div>
+                <div class="shelf-body">
                   {% for tray in shelf.trays reversed %}
+                  <!-- WRAPPER CHÍNH -->
                   <div
-                    class="tray-item mb-2 rounded p-2 position-relative {% if tray.is_filled %}tray-filled{% endif %}"
+                    class="tray-wrapper {% if tray.is_filled %}tray-filled{% endif %}"
+                    id="tray-{{ shelf.name }}-{{ tray.level }}"
+                    data-tray-id="{{ tray.id }}"
+                    data-tray-name="Kệ {{ shelf.name }} - Tầng {{ tray.level }}"
                   >
-                    <div class="tray-header-row">
-                      <span class="badge bg-secondary">Tầng {{ tray.level }}</span>
-                      <!-- Hiển thị % chính xác từ server -->
-                      <span class="tray-percent fw-bold small text-primary">
-                        {% if tray.percentage > 0 %}{{ tray.percentage }}%{% endif %}
-                      </span>
+                    <!-- 1. CARD HIỂN THỊ -->
+                    <!-- Bỏ onclick ở đây để tránh xung đột, ta xử lý trong JS hoặc chỉ nút Config -->
+                    <div class="tray-card tray-content-wrapper">
+                      <!-- ... (Nội dung thông tin giữ nguyên) ... -->
+                      <div class="tray-header-row">
+                        <span class="badge bg-secondary">Tầng {{ tray.level }}</span>
+                        <span class="tray-percent">
+                          {% if tray.percentage > 0 %}{{ tray.percentage }}%{% endif %}
+                        </span>
+                      </div>
+                      <div class="tray-product" title="{{ tray.product.name }}">
+                        {{ tray.product.name|default:"-- Trống --" }}
+                      </div>
+                      <div class="tray-batch">{% if tray.batch_number %}Lô: {{ tray.batch_number }}{% endif %}</div>
+                      <div class="tray-qty">{{ tray.quantity_str }}</div>
+                      <div class="progress" style="height: 4px; margin-top: auto">
+                        <div class="progress-bar" role="progressbar" style="width: {{ tray.percentage }}%"></div>
+                      </div>
                     </div>
 
-                    <div class="tray-product fw-bold text-truncate mt-1" title="{{ tray.product.name }}">
-                      {{ tray.product.name|default:"-- Trống --" }}
-                    </div>
+                    <!-- 2. CÁC NÚT ĐIỀU KHIỂN -->
+                    <div class="tray-actions">
+                      <!-- Nút Config: Thêm event.stopPropagation() -->
+                      <button
+                        class="btn-action btn-config"
+                        onclick="event.stopPropagation(); openSettingsModalByBtn(this)"
+                      >
+                        <i class="fas fa-cog"></i> Config
+                      </button>
 
-                    <div class="tray-batch small text-muted fst-italic">
-                      {% if tray.batch_number %}Lô: {{ tray.batch_number }}{% endif %}
-                    </div>
-
-                    <!-- Hiển thị chuỗi số lượng đã format (VD: 100 Viên / 50 Vỉ) -->
-                    <div class="tray-qty small text-dark mt-1">{{ tray.quantity_str }}</div>
-
-                    <!-- Progress Bar -->
-                    <div class="progress mt-2" style="height: 5px">
-                      <div
-                        class="progress-bar {% if tray.percentage > 90 %}bg-danger {% elif tray.percentage > 50 %}bg-warning {% else %}bg-success{% endif %}"
-                        role="progressbar"
-                        style="width: {{ tray.percentage }}%"
-                      ></div>
+                      <!-- Nút Lấy Hàng -->
+                      <button
+                        class="btn-action btn-fetch"
+                        onclick="event.stopPropagation(); sendFetch('{{ shelf.name }}', {{ tray.level }})"
+                      >
+                        <i class="fas fa-download"></i> Lấy
+                      </button>
                     </div>
                   </div>
                   {% endfor %}
@@ -97,18 +136,107 @@
         </div>
       </div>
     </div>
+    <!-- Đóng col-lg-9 -->
+  </div>
+  <!-- Đóng row -->
+</div>
+<!-- Đóng container-fluid -->
+
+<!-- ========================================================= -->
+<!-- MODAL THIẾT LẬP -->
+<!-- ========================================================= -->
+<div class="modal fade" id="locationSettingsModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="locationModalLabel">Thiết Lập Vị Trí</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold">1. Chọn Sản Phẩm</label>
+          <select class="form-select" id="modal-product" style="width: 100%"></select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-bold">2. Chọn Lô (Batch)</label>
+          <select class="form-select" id="modal-batch" disabled>
+            <option value="">-- Chọn sản phẩm trước --</option>
+          </select>
+        </div>
+
+        <div id="batch-info-panel" class="alert alert-warning d-none p-2 small">
+          <div class="d-flex justify-content-between fw-bold">
+            <span id="lblBatchName"></span> <span id="lblBatchExpiry" class="text-danger"></span>
+          </div>
+          <hr class="my-1" />
+          <div class="row text-center">
+            <div class="col-4 border-end">
+              Total: <strong id="lblBatchTotal">0</strong> <span class="batch-uom text-muted"></span>
+            </div>
+            <div class="col-4 border-end">
+              On Shelf: <strong id="lblBatchAllocated">0</strong> <span class="batch-uom text-muted"></span>
+            </div>
+            <div class="col-4 text-success">
+              Remaining: <strong id="lblBatchUnallocated">0</strong> <span class="batch-uom text-muted"></span>
+            </div>
+          </div>
+        </div>
+
+        <div id="input-section" style="opacity: 0.5; pointer-events: none">
+          <hr />
+          <div class="row mb-3">
+            <label class="form-label fw-bold text-danger">3. Sức Chứa Tối Đa (Capacity)</label>
+            <div class="col-7">
+              <input type="number" class="form-control" id="modal-capacity" min="1" value="50" />
+            </div>
+            <div class="col-5"><select class="form-select" id="modal-capacity-uom"></select></div>
+          </div>
+          <div class="row mb-2">
+            <label class="form-label fw-bold text-primary">4. Số Lượng Hiện Tại</label>
+            <div class="col-7">
+              <input type="number" class="form-control" id="modal-quantity" min="0" value="0" />
+            </div>
+            <div class="col-5"><select class="form-select" id="modal-quantity-uom"></select></div>
+          </div>
+          <div id="capacity-warning" class="alert alert-danger d-none mt-2 py-1 small">
+            <i class="fas fa-exclamation-triangle me-1"></i> <span id="convert-msg"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-danger me-auto" id="modal-remove-btn">Làm Trống</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" id="modal-save-btn">Lưu Thiết Lập</button>
+      </div>
+    </div>
   </div>
 </div>
+
 {% endblock %}
+
 <!--  -->
 {% block javascript %}
+<!-- 1. NẠP THƯ VIỆN JS CẦN THIẾT (ĐẢM BẢO THỨ TỰ) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- Truyền dữ liệu JSON -->
+{{ all_products_data|json_script:"all-products-data" }}
+<!--  -->
+{{ uoms_by_category_data|json_script:"uoms-by-category-data" }}
+<!--  -->
+{{ all_locations_data|json_script:"all-locations-data" }}
+<!--  -->
+{{ all_boms_data|json_script:"all-boms-data" }}
+
 <script>
   const URLS = {
     getStatus: "{% url 'carousel:api_get_status' %}",
     homing: "{% url 'carousel:api_homing' %}",
-    moveToShelf: "{% url 'carousel:api_move_to_shelf' %}",
+    moveManual: "{% url 'carousel:api_move_to_shelf' %}",
+    getBatches: "{% url 'products:api_get_product_batches_details' %}",
+    saveLocation: "{% url 'products:api_save_location' %}",
   };
-  const csrfToken = "{{ csrf_token }}";
+  const CSRF_TOKEN = "{{ csrf_token }}";
 </script>
 <script src="{% static 'carousel/js/control_panel.js' %}"></script>
 {% endblock %}

@@ -39,15 +39,22 @@ document.addEventListener("DOMContentLoaded", function () {
   // Hàm Sắp xếp lại index của các form.
   function reindexForms() {
     let currentIndex = 0;
-    container.querySelectorAll(".detail-form").forEach((form) => {
+    const forms = container.querySelectorAll(".detail-form");
+
+    forms.forEach((form) => {
+      // Cập nhật data-index
+      form.setAttribute("data-index", currentIndex);
+
+      // Cập nhật ID và Name cho inputs/selects
       form.querySelectorAll("input, select").forEach((input) => {
         const name = input.getAttribute("name");
-        if (name) {
-          input.setAttribute("name", name.replace(/details-\d+-/, `details-${currentIndex}-`));
-        }
         const id = input.getAttribute("id");
+
+        if (name) {
+          input.setAttribute("name", name.replace(/details-(?:\d+|__PREFIX__)-/, `details-${currentIndex}-`));
+        }
         if (id) {
-          input.setAttribute("id", id.replace(/details-\d+-/, `details-${currentIndex}-`));
+          input.setAttribute("id", id.replace(/details_(?:\d+|__PREFIX__)_/, `details_${currentIndex}_`));
         }
       });
       currentIndex++;
@@ -102,26 +109,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Hàm thêm một dòng form chi tiết mới
   function addDetailForm() {
-    const templateHtml = detailFormTemplate.innerHTML.replace(/__prefix__/g, formIndexCounter);
-    const newForm = document.createElement("div");
-    newForm.innerHTML = templateHtml;
-    const newFormElement = newForm.firstElementChild;
+    // --- SỬA LỖI QUAN TRỌNG TẠI ĐÂY ---
+    // Template HTML dùng __PREFIX__ (hoa), nên regex phải match hoa
+    // Sử dụng formIndexCounter hiện tại
 
-    // Điền các sản phẩm vào dropdown
+    let templateHtml = detailFormTemplate.innerHTML;
+
+    // Thay thế __PREFIX__ thành số index
+    templateHtml = templateHtml.replace(/__PREFIX__/g, formIndexCounter);
+
+    const newFormWrapper = document.createElement("div");
+    newFormWrapper.innerHTML = templateHtml;
+    const newFormElement = newFormWrapper.firstElementChild;
+
+    // Điền dữ liệu vào dropdown Sản phẩm
     const productSelect = newFormElement.querySelector(".product-select");
     if (productSelect) {
       productSelect.add(new Option("---------", ""));
       productsData.forEach((p) => {
+        // Thay thế __ID__, __NAME__, __QUANTITY__
         const optionHtml = productOptionTemplate.innerHTML
-          .replace("__ID__", p.id)
-          .replace("__NAME__", p.name)
-          .replace("__QUANTITY__", p.quantity);
+          .replace(/__ID__/g, p.id)
+          .replace(/__NAME__/g, p.name)
+          .replace(/__QUANTITY__/g, p.quantity); // Hiển thị tồn kho gợi ý
         productSelect.insertAdjacentHTML("beforeend", optionHtml);
       });
     }
 
     container.appendChild(newFormElement);
     formIndexCounter++;
+
+    // Gọi update để disable các món đã chọn
     updateProductDropdowns();
   }
 

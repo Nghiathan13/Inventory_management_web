@@ -1,43 +1,41 @@
-/* === FORM CHUNG === */
+/* =======================================================
+        BỐ CỤC CHUNG
+======================================================= */
 .row {
   margin-bottom: 2rem;
 }
-
-/* === ALERT === */
 .col {
   padding: 0;
 }
 
-/* === FORM KÊ ĐƠN === */
+/* =======================================================
+        KHUNG FORM (CARD)
+======================================================= */
 .card {
   padding: 0;
 }
-/* --- header --- */
+
+/* --- TIÊU ĐỀ --- */
+.card-header {
+  background-color: rgb(100, 55, 195);
+  color: rgb(255, 255, 255);
+}
 .card-header p {
   margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
 }
-.btn {
-  font-size: 1rem;
-  font-weight: bold;
-}
-.card-header {
-  background-color: rgb(100, 55, 195);
-  color: rgb(255, 255, 255);
-}
 
-/* --- body --- */
+/* --- NỘI DUNG --- */
 .card-body p {
   margin-bottom: 0.5rem;
   font-size: 1.25rem;
   font-weight: bold;
 }
-.required {
-  margin-left: 2px;
-  color: rgb(200, 0, 0);
-}
-/* patient */
+
+/* =======================================================
+        Ô NHẬP LIỆU & NHÃN
+======================================================= */
 .form-label {
   font-size: 1rem;
   font-style: italic;
@@ -45,13 +43,25 @@
 .asteriskField {
   display: none;
 }
-/* medicine detail */
+.required {
+  margin-left: 2px;
+  color: rgb(200, 0, 0);
+}
 .detail-form label {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
   font-style: italic;
 }
-/* button */
+
+/* =======================================================
+        NÚT BẤM (BUTTONS)
+======================================================= */
+.btn {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+/* Nút Thêm Thuốc */
 .btn-add {
   background-color: rgb(225, 225, 225);
   color: rgb(0, 0, 0);
@@ -59,6 +69,8 @@
 .btn-add:hover {
   background-color: rgb(205, 205, 205);
 }
+
+/* Nút Hoàn Tất */
 .btn-complete {
   background-color: rgb(100, 55, 195);
   color: rgb(255, 255, 255);
@@ -68,13 +80,9 @@
   color: rgb(255, 255, 255);
 }
 
-/* Giảm padding của các label để tiết kiệm không gian */
-.detail-form label {
-  margin-bottom: 0.25rem;
-  font-size: 0.9rem;
-}
-
-/* --- Cột Nút Xóa --- */
+/* =======================================================
+        RESPONSIVE (MOBILE)
+======================================================= */
 .col-action .btn {
   height: 38px;
   width: 100px;
@@ -82,21 +90,35 @@
   align-items: center;
 }
 
-/* Ẩn chữ "Xóa" trên màn hình nhỏ hơn 768px để tiết kiệm không gian */
 @media (max-width: 760px) {
   .col-action .btn {
-    /* Khi chỉ còn icon, thu hẹp nút lại thành hình vuông */
     width: 38px;
     justify-content: center;
   }
   .col-action .btn .fa-trash {
-    margin-right: 0 !important; /* Bỏ margin của icon khi chữ bị ẩn */
+    margin-right: 0 !important;
   }
-  .col-action .btn::after {
-    /* Ẩn nội dung text "Xóa" bằng CSS */
-    content: "";
-  }
+  /* Ẩn chữ 'Xóa', chỉ hiện icon */
   .col-action .btn > *:not(.fa-trash) {
     display: none;
   }
+}
+
+/* =======================================================
+        BẢNG LỊCH SỬ (SCROLLABLE HISTORY)
+======================================================= */
+.history-table-container {
+  max-height: 400px; /* Giới hạn chiều cao khoảng 5-6 dòng */
+  overflow-y: auto; /* Hiện thanh cuộn dọc khi nội dung dài */
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+
+/* Đóng băng tiêu đề bảng khi cuộn (Sticky Header) */
+.history-table-container thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa; /* Màu nền header */
+  z-index: 1; /* Nổi lên trên nội dung */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }

@@ -25,22 +25,16 @@
             <hr />
             <div class="row">
               <div class="col-md-6">{{ form.full_name|as_crispy_field }}</div>
-              <div class="col-md-6">
-                {{ form.date_of_birth|as_crispy_field }}
-              </div>
+              <div class="col-md-6">{{ form.date_of_birth|as_crispy_field }}</div>
               <div class="col-md-6">{{ form.gender|as_crispy_field }}</div>
-              <div class="col-md-6">
-                {{ form.phone_number|as_crispy_field }}
-              </div>
+              <div class="col-md-6">{{ form.phone_number|as_crispy_field }}</div>
               <div class="col-md-12">{{ form.address|as_crispy_field }}</div>
             </div>
             <h5 class="mt-4">Identification & Medical Information</h5>
             <hr />
             <div class="row">
               <div class="col-md-6">{{ form.citizen_id|as_crispy_field }}</div>
-              <div class="col-md-6">
-                {{ form.health_insurance_id|as_crispy_field }}
-              </div>
+              <div class="col-md-6">{{ form.health_insurance_id|as_crispy_field }}</div>
               <div class="col-md-6">{{ form.ethnicity|as_crispy_field }}</div>
               <div class="col-md-6">{{ form.blood_type|as_crispy_field }}</div>
             </div>
@@ -77,9 +71,7 @@
         </div>
         <div class="mt-4 text-end">
           <a href="{% url 'patients:list' %}" class="btn btn-secondary">BACK</a>
-          <button class="btn btn-success" type="submit">
-            <i class="fa-solid fa-save me-1"></i> SAVE
-          </button>
+          <button class="btn btn-success" type="submit"><i class="fa-solid fa-save me-1"></i> SAVE</button>
         </div>
       </form>
     </div>

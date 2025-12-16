@@ -10,8 +10,8 @@ class TrayInline(admin.TabularInline):
     Cho phép thêm/sửa/xóa Tầng (Tray) ngay trong trang chi tiết Kệ (Shelf).
     """
     model = Tray
-    extra = 1  # Số lượng dòng trống hiển thị sẵn để thêm mới nhanh
-    ordering = ('level',) # Sắp xếp theo tầng từ thấp lên cao
+    extra = 1  
+    ordering = ('level',) 
 
 class ShelfInline(admin.TabularInline):
     """
@@ -28,16 +28,15 @@ class ShelfInline(admin.TabularInline):
 @admin.register(Carousel)
 class CarouselAdmin(admin.ModelAdmin):
     list_display = ('name', 'current_shelf_at_gate', 'is_moving')
-    inlines = [ShelfInline] # Nhúng form quản lý Kệ vào đây
+    inlines = [ShelfInline]
 
 @admin.register(Shelf)
 class ShelfAdmin(admin.ModelAdmin):
     list_display = ('name', 'carousel', 'count_trays')
     list_filter = ('carousel',)
     search_fields = ('name',)
-    inlines = [TrayInline] # Nhúng form quản lý Tầng vào đây
+    inlines = [TrayInline]
 
-    # Hiển thị số lượng tầng hiện có trong danh sách
     def count_trays(self, obj):
         return obj.trays.count()
     count_trays.short_description = "Số lượng tầng"
@@ -56,6 +55,4 @@ class StockLocationAdmin(admin.ModelAdmin):
     list_display = ('tray', 'product', 'batch', 'quantity', 'capacity')
     list_filter = ('product', 'batch')
     search_fields = ('product__name', 'tray__shelf__name')
-    
-    # Giúp chọn tray dễ hơn bằng dropdown
     autocomplete_fields = ['product', 'batch']

@@ -1,0 +1,62 @@
+/* =======================================================
+   HEADER KHUNG (CARD HEADER)
+======================================================= */
+.form-card .card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #000;
+}
+
+.form-card .card-header h4 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+}
+
+/* =======================================================
+   NÚT BẤM (HEADER BUTTONS)
+======================================================= */
+.form-card .card-header .btn {
+  background-color: rgb(100, 55, 195);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+}
+
+.form-card .card-header .btn:hover {
+  background-color: rgb(80, 35, 175);
+  color: #ebebeb;
+}
+
+.form-card .card-header .btn-secondary {
+  background-color: #6c757d;
+  border: 1px solid #6c757d;
+}
+
+.form-card .card-header .btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* =======================================================
+   THÂN KHUNG & NỘI DUNG (CARD BODY)
+======================================================= */
+.form-card .card-body {
+  padding: 1.5rem;
+}
+
+/* Tiêu đề phụ (Sub-heading) */
+.form-card h5 {
+  margin: 1.5rem 0 0.5rem 0;
+  padding-bottom: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid #e9ecef;
+}
+
+/* Chiều cao tối thiểu (Chống co form) */
+.form-card-body-fixed-height {
+  min-height: 60vh;
+}

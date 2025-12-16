@@ -23,10 +23,7 @@
         <div class="row justify-content-center">
           <!-- Module Staff -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'main:staff_list' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'main:staff_list' %}">
               <div class="card my-card-custom card-staff h-100 text-center p-4">
                 <i class="fa-solid fa-users fa-2x mb-2"></i>
                 <h4>Staff</h4>
@@ -37,14 +34,11 @@
 
           <!-- Module Products -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'products:list' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'products:list' %}">
               <div class="card my-card-custom card-products h-100 text-center p-4">
                 <i class="fa-solid fa-box fa-2x mb-2"></i>
                 <h4>Product</h4>
-                <!-- <h5>{{ products_count }}</h5> -->
+
                 <small class="text-muted">Product, unit, BOM management</small>
               </div>
             </a>
@@ -52,10 +46,7 @@
 
           <!-- Module Carousel Control -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'carousel:control_panel' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'carousel:control_panel' %}">
               <div class="card my-card-custom card-carousel h-100 text-center p-4">
                 <i class="fas fa-robot fa-2x mb-2"></i>
                 <h4>Control Panel</h4>
@@ -66,10 +57,7 @@
 
           <!-- Module Inventory -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'inventory:dispense_list' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'inventory:dispense_list' %}">
               <div class="card my-card-custom card-dispense h-100 text-center p-4">
                 <i class="fa-solid fa-warehouse fa-2x mb-2"></i>
                 <h4>Inventory</h4>
@@ -80,10 +68,7 @@
 
           <!-- Module Reports -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'reports:overview' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'reports:overview' %}">
               <div class="card my-card-custom card-report h-100 text-center p-4">
                 <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
                 <h4>Reports</h4>
@@ -94,10 +79,7 @@
 
           <!-- Module Patients -->
           <div class="col-lg-4 col-md-6 mb-4">
-            <a
-              class="text-decoration-none text-dark"
-              href="{% url 'patients:list' %}"
-            >
+            <a class="text-decoration-none text-dark" href="{% url 'patients:list' %}">
               <div class="card my-card-custom card-patient h-100 text-center p-4">
                 <i class="fa-solid fa-id-card fa-2x mb-2"></i>
                 <h4>Patient</h4>
@@ -112,4 +94,8 @@
 </div>
 {% endif %}
 <!--  -->
+{% endblock %}
+<!--  -->
+{% block extrajs %}
+<script src="{% static 'main/js/main.js' %}"></script>
 {% endblock %}

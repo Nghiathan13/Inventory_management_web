@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let isDeleting = false;
 
     function type() {
-      // Kiểm tra lại một lần nữa để an toàn
       if (!brandText) return;
 
       const currentText = text.substring(0, index);
@@ -20,10 +19,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (index > text.length) {
         isDeleting = true;
-        setTimeout(type, 2000); // Tạm dừng trước khi xóa
+        setTimeout(type, 2000);
       } else if (index === 0) {
         isDeleting = false;
-        setTimeout(type, 500); // Tạm dừng trước khi gõ lại
+        setTimeout(type, 500);
       } else {
         const typingSpeed = isDeleting ? 100 : 200;
         setTimeout(type, typingSpeed);
@@ -33,9 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Bắt đầu hiệu ứng
     type();
   }
-  const tooltipTriggerList = [].slice.call(
-    document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  );
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });

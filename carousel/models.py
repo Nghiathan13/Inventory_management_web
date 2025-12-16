@@ -2,13 +2,12 @@ from django.db import models
 from products.models import Product, UnitOfMeasure, ProductBatch
 
 # =======================================================
-#               MODEL: CAROUSEL
+#               HỆ THỐNG KỆ XOAY
 # =======================================================
 class Carousel(models.Model):
-    """Đại diện cho toàn bộ hệ thống kệ xoay."""
     name = models.CharField(
         max_length=100, 
-        default="Hệ Thống Kệ Xoay"
+        default="Carousel System"
     )
     current_shelf_at_gate = models.CharField(
         max_length=1, 
@@ -24,14 +23,13 @@ class Carousel(models.Model):
     )
 
     def __str__(self):
-        status = "Di chuyển" if self.is_moving else "Sẵn sàng"
-        return f"{self.name} (Tại cửa: {self.current_shelf_at_gate}, Trạng thái: {status})"
+        status = "Moving" if self.is_moving else "Ready"
+        return f"{self.name} (Gate: {self.current_shelf_at_gate}, Status: {status})"
 
 # =======================================================
-#               MODEL: SHELF
+#               CỘT KỆ ĐƠN
 # =======================================================
 class Shelf(models.Model):
-    """Đại diện cho một cột kệ đơn (ví dụ: Kệ A, Kệ B)."""
     carousel = models.ForeignKey(
         Carousel, 
         on_delete=models.CASCADE, 
@@ -47,13 +45,12 @@ class Shelf(models.Model):
         verbose_name_plural = 'Shelves'
 
     def __str__(self):
-        return f"Kệ {self.name}"
+        return f"Shelf {self.name}"
 
 # =======================================================
-#               MODEL: TRAY
+#               KHAY CHỨA (TẦNG)
 # =======================================================
 class Tray(models.Model):
-    """Đại diện cho một khay (tầng) trên một kệ cụ thể."""
     shelf = models.ForeignKey(
         Shelf, 
         on_delete=models.CASCADE, 
@@ -66,14 +63,12 @@ class Tray(models.Model):
         ordering = ['shelf__name', 'level']
 
     def __str__(self):
-        return f"Kệ {self.shelf.name}, Tầng {self.level}"
-
+        return f"Shelf {self.shelf.name}, Level {self.level}"
 
 # =======================================================
-#               MODEL: STOCK LOCATION
+#               VỊ TRÍ KHO & TỒN KHO
 # =======================================================
 class StockLocation(models.Model):
-    """Model trung gian, gán một Sản phẩm vào một Khay và định nghĩa sức chứa."""
     tray = models.OneToOneField(
         Tray, 
         on_delete=models.CASCADE, 
@@ -83,7 +78,7 @@ class StockLocation(models.Model):
         Product, 
         on_delete=models.CASCADE, 
         related_name='locations',
-        verbose_name="Sản Phẩm"
+        verbose_name="Product"
     )
     batch = models.ForeignKey(
         ProductBatch, 
@@ -91,11 +86,11 @@ class StockLocation(models.Model):
         null=True, 
         blank=True,
         related_name='batch_locations',
-        verbose_name="Lô Hàng"
+        verbose_name="Batch"
     )
     quantity = models.PositiveIntegerField(
         default=0,
-        verbose_name="Số Lượng"
+        verbose_name="Quantity"
     )
     quantity_uom = models.ForeignKey(
         UnitOfMeasure, 
@@ -103,11 +98,11 @@ class StockLocation(models.Model):
         null=True, 
         blank=True, 
         related_name='stock_locations_qty',
-        verbose_name="Đơn Vị (SL)"
+        verbose_name="Unit (Qty)"
     )
     capacity = models.PositiveIntegerField(
         default=51,
-        verbose_name="Sức Chứa Max"
+        verbose_name="Max Capacity"
     )
     capacity_uom = models.ForeignKey(
         UnitOfMeasure, 
@@ -115,15 +110,13 @@ class StockLocation(models.Model):
         null=True, 
         blank=True, 
         related_name='stock_locations_cap',
-        verbose_name="Đơn Vị (Max)"
+        verbose_name="Unit (Cap)"
     )
     
     class Meta:
-        verbose_name = "Vị Trí Kho"
-        verbose_name_plural = "Vị Trí Kho"
-
+        verbose_name = "Stock Location"
+        verbose_name_plural = "Stock Locations"
 
     def __str__(self):
-        product_name = self.product.name if self.product else "Sản phẩm trống"
-        batch_info = f" | Lô: {self.batch.batch_number}" if self.batch else ""
+        batch_info = f" | Batch: {self.batch.batch_number}" if self.batch else ""
         return f"{self.product.name}{batch_info} @ {self.tray}"

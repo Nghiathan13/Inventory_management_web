@@ -5,23 +5,23 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 # =======================================================
-#               CÁC HẰNG SỐ LỰA CHỌN (CHOICES)
+#        CÁC LỰA CHỌN (CHOICES)
 # =======================================================
 UOM_TYPE_CHOICES = (
-    ('reference', 'Reference Unit for this category'),
-    ('bigger', 'Bigger than the reference Unit of Measure'),
-    ('smaller', 'Smaller than the reference Unit of Measure'),
+    ('reference', 'Reference Unit for this Category'),
+    ('bigger', 'Bigger than the Reference Unit'),
+    ('smaller', 'Smaller than the Reference Unit'),
 )
 
 # =======================================================
-#               MODEL: UNITOFMEASURE (UoM)
+#           NHÓM ĐƠN VỊ TÍNH (UOM CATEGORY)
 # =======================================================
 class UomCategory(models.Model):
     name = models.CharField(
         max_length=100, 
         unique=True, 
         verbose_name="Category Name"
-        )
+    )
     description = models.TextField(
         null=True, 
         blank=True, 
@@ -38,12 +38,12 @@ class UomCategory(models.Model):
 
 
 # =======================================================
-#      MODEL: UNIT OF MEASURE CATEGORY (UOM CATEGORY)
+#           ĐƠN VỊ TÍNH (UNIT OF MEASURE)
 # =======================================================
 class UnitOfMeasure(models.Model):
     name = models.CharField(
         max_length=100, 
-        verbose_name="Unit of Measure"
+        verbose_name="Unit Name"
     )
     category = models.ForeignKey(
         UomCategory, 
@@ -62,7 +62,8 @@ class UnitOfMeasure(models.Model):
     )
     rounding_precision = models.FloatField(
         default=0.01, 
-        verbose_name="Rounding Precision")
+        verbose_name="Rounding Precision"
+    )
     
     class Meta:
         db_table = 'dashboard_unitofmeasure'
@@ -72,8 +73,9 @@ class UnitOfMeasure(models.Model):
     def __str__(self):
         return self.name
 
+
 # =======================================================
-#               MODEL: PRODUCTCATEGORY
+#            DANH MỤC SẢN PHẨM (PRODUCT CATEGORY)
 # =======================================================
 class ProductCategory(models.Model):
     name = models.CharField(
@@ -88,7 +90,11 @@ class ProductCategory(models.Model):
         related_name='children', 
         verbose_name="Parent Category"
     )
-    description = models.TextField(null=True, blank=True, verbose_name="Description")
+    description = models.TextField(
+        null=True, 
+        blank=True, 
+        verbose_name="Description"
+    )
 
     class Meta:
         db_table = 'dashboard_productcategory'
@@ -98,8 +104,9 @@ class ProductCategory(models.Model):
     def __str__(self):
         return self.name
 
+
 # =======================================================
-#               MODEL: PRODUCT
+#               SẢN PHẨM (PRODUCT)
 # =======================================================
 class Product(models.Model):
     code = models.CharField(
@@ -116,7 +123,7 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField(
         null=True, 
         blank=True, 
-        verbose_name="Tổng Tồn Kho"
+        verbose_name="Total Stock"
     )
     category = models.ForeignKey(
         ProductCategory, 
@@ -135,19 +142,19 @@ class Product(models.Model):
         UnitOfMeasure, 
         on_delete=models.SET_NULL, 
         null=True, 
-        verbose_name="Base Unit of Measure"
+        verbose_name="Base Unit"
     )
     import_price = models.DecimalField(
         max_digits=15, 
         decimal_places=2, 
         null=True, 
-        verbose_name="Import Price"
+        verbose_name="Cost Price"
     )
     sale_price = models.DecimalField(
         max_digits=15, 
         decimal_places=2, 
         null=True, 
-        verbose_name="Sale Price"
+        verbose_name="Selling Price"
     )
     reorder_point = models.PositiveIntegerField(
         default=10, 
@@ -157,7 +164,7 @@ class Product(models.Model):
         max_length=100, 
         null=True, 
         blank=True, 
-        verbose_name="Default Supplier"
+        verbose_name="Supplier"
     )
     description = models.TextField(
         null=True, 
@@ -168,23 +175,19 @@ class Product(models.Model):
         upload_to='product_images/', 
         null=True, 
         blank=True, 
-        verbose_name="Product Image"
+        verbose_name="Image"
     )
 
     @property
     def total_quantity(self):
-        """Tổng số lượng của tất cả các lô cộng lại."""
         return self.batches.aggregate(total=Sum('quantity'))['total'] or 0
     
     @property
     def allocated_quantity(self):
-        """Tính tổng số lượng đã phân bổ lên kệ."""
         total_base_quantity = 0
         for batch in self.batches.all():
-            # SỬA LẠI: Dùng batch_locations cho đúng related_name
             for loc in batch.batch_locations.all():
                 if loc.quantity > 0:
-                    # Logic quy đổi BOM
                     if loc.quantity_uom and loc.quantity_uom_id != self.base_uom_id:
                         bom_rule = self.boms.filter(
                             uom_from_id=loc.quantity_uom_id, 
@@ -200,7 +203,6 @@ class Product(models.Model):
 
     @property
     def unallocated_quantity(self):
-        """Tính số lượng chưa phân bổ."""
         return self.quantity - self.allocated_quantity
     
     class Meta:
@@ -210,27 +212,28 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.code})'
-    
+
+
 # =======================================================
-#               MODEL: PRODUCT BATCH (LÔ SẢN PHẨM)
+#               LÔ SẢN PHẨM (BATCH)
 # =======================================================
 class ProductBatch(models.Model):
     product = models.ForeignKey(
         Product, 
         on_delete=models.CASCADE, 
         related_name='batches', 
-        verbose_name="Sản Phẩm"
+        verbose_name="Product"
     )
     batch_number = models.CharField(
         max_length=50, 
-        verbose_name="Mã Lô"
+        verbose_name="Batch Number"
     )
     expiry_date = models.DateField(
-        verbose_name="Hạn Sử Dụng"
+        verbose_name="Expiry Date"
     )
     quantity = models.PositiveIntegerField(
         default=0, 
-        verbose_name="Số Lượng"
+        verbose_name="Quantity"
     )
     created_at = models.DateTimeField(
         auto_now_add=True
@@ -241,11 +244,11 @@ class ProductBatch(models.Model):
         ordering = ['expiry_date']
 
     def __str__(self):
-        return f"{self.product.name} - Lô: {self.batch_number}"
-    
+        return f"{self.product.name} - Batch: {self.batch_number}"
+
 
 # =======================================================
-#               MODEL: BILLOFMATERIALS (BOM)
+#            QUY TẮC QUY ĐỔI (BOM)
 # =======================================================
 class BillOfMaterials(models.Model):
     product = models.ForeignKey(
@@ -280,23 +283,16 @@ class BillOfMaterials(models.Model):
 
     def clean(self):
         if self.conversion_factor <= 0:
-            raise ValidationError({'conversion_factor': 'Conversion factor must be a positive number.'})
-        
+            raise ValidationError({'conversion_factor': 'Conversion factor must be positive.'})
+
 
 # =======================================================
-#               SIGNALS (TỰ ĐỘNG CẬP NHẬT TỒN KHO)
+#        SIGNAL: CẬP NHẬT TỒN KHO TỰ ĐỘNG
 # =======================================================
 @receiver(post_save, sender=ProductBatch)
 @receiver(post_delete, sender=ProductBatch)
 def update_product_total_stock(sender, instance, **kwargs):
-    """
-    Bất cứ khi nào Lô (Batch) được tạo, sửa, hoặc xóa:
-    Hàm này sẽ tính tổng quantity của tất cả các lô thuộc sản phẩm đó
-    và cập nhật vào trường Product.quantity.
-    """
     product = instance.product
-    # Tính tổng
     total = product.batches.aggregate(total=Sum('quantity'))['total'] or 0
-    # Cập nhật và lưu (chỉ update trường quantity để tối ưu)
     product.quantity = total
     product.save(update_fields=['quantity'])

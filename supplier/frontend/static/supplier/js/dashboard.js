@@ -1,73 +1,79 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Lấy CSRF token từ một thẻ meta trong HTML (chúng ta sẽ thêm thẻ này sau)
-  const csrfToken = document
-    .querySelector('meta[name="csrf-token"]')
-    .getAttribute("content");
+  const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+  const csrfToken = csrfMeta ? csrfMeta.getAttribute("content") : "";
+
+  // =======================================================
+  //        HÀM HỖ TRỢ (HELPERS)
+  // =======================================================
+
+  // Chuyển đổi trạng thái nút (Loading/Normal)
+  function toggleButtonState(button, isLoading) {
+    const btnText = button.querySelector(".btn-text");
+    const btnLoading = button.querySelector(".btn-loading");
+
+    button.disabled = isLoading;
+
+    if (isLoading) {
+      if (btnText) btnText.classList.add("d-none");
+      if (btnLoading) btnLoading.classList.remove("d-none");
+    } else {
+      if (btnText) btnText.classList.remove("d-none");
+      if (btnLoading) btnLoading.classList.add("d-none");
+    }
+  }
+
+  // Tải file xuống trình duyệt
+  function downloadFile(url, filename) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // =======================================================
+  //        XỬ LÝ SỰ KIỆN (EVENT HANDLERS)
+  // =======================================================
 
   const confirmButtons = document.querySelectorAll(".confirm-order-btn");
 
   confirmButtons.forEach((button) => {
     button.addEventListener("click", function () {
-      const orderId = this.dataset.orderId;
-      const url = this.dataset.url;
+      const { orderId, url } = this.dataset;
 
-      if (confirm(`Bạn có chắc muốn xác nhận đơn hàng #${orderId} không?`)) {
-        // Hiển thị spinner hoặc vô hiệu hóa nút để người dùng biết đang xử lý
-        this.disabled = true;
-        this.innerHTML =
-          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+      if (!confirm(`Are you sure you want to confirm Order #${orderId}?`)) return;
 
-        fetch(url, {
-          method: "POST",
-          headers: {
-            "X-CSRFToken": csrfToken,
-            "Content-Type": "application/json",
-          },
+      toggleButtonState(this, true);
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error(`Server Error: ${response.status}`);
+          return response.json();
         })
-          .then((response) => {
-            if (!response.ok) {
-              // Ném lỗi nếu server trả về status không phải 2xx
-              throw new Error(`Lỗi Server: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then((data) => {
-            if (data.status === "success") {
-              // Hiển thị pop-up hỏi người dùng có muốn tải file không
-              if (
-                confirm(
-                  data.message +
-                    "\n\nBạn có muốn tải về phiếu tem nhãn sản phẩm ngay bây giờ không?"
-                )
-              ) {
-                // Nếu có, tạo một link ẩn và click vào nó để tải file
-                const downloadLink = document.createElement("a");
-                downloadLink.href = data.download_url;
-                downloadLink.download = `tem_nhan_san_pham_${orderId}.pdf`; // Tên file mặc định
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
+        .then((data) => {
+          if (data.status === "success") {
+            if (data.download_url) {
+              if (confirm(`${data.message}\n\nDo you want to download the shipping label now?`)) {
+                downloadFile(data.download_url, `label_order_${orderId}.pdf`);
               }
-              // Tải lại trang để cập nhật danh sách
-              window.location.reload();
-            } else {
-              // Hiển thị thông báo lỗi từ server
-              alert("Lỗi: " + data.message);
-              // Kích hoạt lại nút
-              this.disabled = false;
-              this.innerHTML =
-                '<i class="fas fa-check-circle me-1"></i> Xác Nhận';
             }
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-            alert("Đã có lỗi kết nối hoặc xử lý xảy ra. Vui lòng thử lại.");
-            // Kích hoạt lại nút
-            this.disabled = false;
-            this.innerHTML =
-              '<i class="fas fa-check-circle me-1"></i> Xác Nhận';
-          });
-      }
+            window.location.reload();
+          } else {
+            throw new Error(data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert(`Error: ${error.message}`);
+          toggleButtonState(this, false);
+        });
     });
   });
 });

@@ -1,13 +1,12 @@
-/* ===============================================
-   TÙY CHỈNH KÍCH THƯỚC CÁC CỘT TRONG BẢNG SẢN PHẨM
-================================================ */
-
+/* =======================================================
+   CẤU HÌNH BẢNG DỮ LIỆU
+======================================================= */
 .table {
   table-layout: fixed;
   min-width: 1500px;
 }
 
-/* --- Bảng Danh sách Sản phẩm --- */
+/* Kích thước cột */
 .col-code {
   width: 120px;
 }
@@ -42,41 +41,10 @@
   width: 170px;
 }
 
-/* ===============================================
-GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
-================================================ */
-.product-nav-tabs {
-  border-bottom: 1px solid #dee2e6;
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: flex-start;
-}
-.product-nav-tabs .nav-link {
-  border: none;
-  color: #6c757d;
-  font-weight: 500;
-  padding: 0.75rem 1.25rem;
-  transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
-  border-bottom: 2px solid transparent;
-  background-color: transparent;
-  margin-bottom: -1px;
-}
-.product-nav-tabs .nav-link:hover {
-  color: #0d6efd;
-  border-bottom-color: #e9ecef;
-}
-.product-nav-tabs .nav-link.active {
-  color: #0d6efd;
-  background-color: transparent;
-  font-weight: 500;
-  border-bottom: 2px solid #0d6efd;
-}
-
-/* ===============================================
-   TÙY CHỈNH KÍCH THƯỚC ẢNH SẢN PHẨM
-================================================ */
-
-/* --- Ảnh trên trang Chi tiết sản phẩm (product_detail) --- */
+/* =======================================================
+   HÌNH ẢNH SẢN PHẨM
+======================================================= */
+/* Ảnh trang chi tiết */
 .product-detail-image {
   max-width: 200px;
   max-height: 200px;
@@ -85,90 +53,103 @@ GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
   object-fit: contain;
 }
 
-/* --- Khung xem trước ảnh trên trang Form (product_form) --- */
+/* Khung xem trước ảnh (Form) */
 .image-preview-container {
   max-width: 200px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto; /* Căn giữa */
 }
 
 #image-preview {
-  max-height: 150px;
   width: 100%;
+  max-height: 150px;
   object-fit: contain;
 }
 
-/* ===============================================
-   GIAO DIỆN CHO FORM SẢN PHẨM (FORM.HTML)
-================================================ */
-
-/* --- Giao diện chung cho card form --- */
+/* =======================================================
+   GIAO DIỆN FORM NHẬP LIỆU
+======================================================= */
+/* Header Form */
 .form-card .card-header {
   background-color: #f8f9fa;
   font-weight: 600;
 }
+
 .form-card .btn-sm {
   font-weight: 600;
   letter-spacing: 0.5px;
 }
+
+/* Cuộn nội dung form */
 .form-card-body-fixed-height {
+  max-height: 70vh;
   overflow-y: auto;
-  max-height: 70vh; /* Giới hạn chiều cao và cho phép cuộn */
 }
 
-/* --- Giao diện cho việc chọn khay --- */
+/* =======================================================
+   GIAO DIỆN CHỌN KHAY & KỆ (CAROUSEL)
+======================================================= */
+/* Dropdown chọn khay */
 .tray-selection-container .selected-tray-row {
   padding: 0.5rem;
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
 }
+
 .dropdown-menu {
   max-height: 250px;
   overflow-y: auto;
 }
 
-/* Thêm vào cuối file products/frontend/static/products/css/product.css */
+/* Khung kệ (Shelf Card) */
 .carousel-layout .shelf-card {
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
-}
-.carousel-layout .shelf-header {
-  background-color: #f8f9fa;
-  padding: 0.5rem 0.75rem;
-  font-weight: 600;
-}
-.carousel-layout .shelf-body {
-  padding: 0.75rem;
-}
-.tray-selection-item {
-  padding: 0.5rem;
-  border-bottom: 1px solid #f0f0f0;
-}
-.tray-selection-item:last-child {
-  border-bottom: none;
-}
-.tray-selection-item.occupied {
-  background-color: #f8d7da; /* Màu đỏ nhạt cho khay đã bị chiếm */
-  opacity: 0.7;
-}
-#allocation-feedback {
-  margin-bottom: 0;
-}
-.carousel-layout .shelf-card,
-.carousel-layout .tray-selection-item {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
 }
+
+.carousel-layout .shelf-header {
+  padding: 0.5rem 0.75rem;
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.carousel-layout .shelf-body {
+  padding: 0.75rem;
+}
+
+/* Ô khay (Tray Item) */
+.tray-selection-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.tray-selection-item:last-child {
+  border-bottom: none;
+}
+
+/* Hiệu ứng Hover */
 .carousel-layout .tray-selection-item:hover {
   background-color: #e9ecef;
 }
-.carousel-layout .tray-selection-item.occupied {
+
+/* Trạng thái: Đã có hàng (Occupied) */
+.tray-selection-item.occupied {
   background-color: #f8d7da;
-  cursor: not-allowed;
   opacity: 0.6;
+  cursor: not-allowed;
 }
+
+/* Trạng thái: Đang chọn (Selected) */
 .carousel-layout .tray-selection-item.selected {
-  border: 2px solid #0d6efd;
   background-color: #e7f1ff;
+  border: 2px solid #0d6efd;
+}
+
+/* Thông báo phản hồi */
+#allocation-feedback {
+  margin-bottom: 0;
 }

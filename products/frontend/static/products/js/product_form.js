@@ -1,94 +1,82 @@
 document.addEventListener("DOMContentLoaded", function () {
   // =======================================================
-  //   MODULE 1: LOGIC LỌC ĐƠN VỊ TÍNH (UOM)
+  //           LỌC ĐƠN VỊ TÍNH (UOM FILTERING)
   // =======================================================
-  function setupUomFiltering() {
-    const uomsByCatData = document.getElementById("uoms-by-category");
-    const uomCategorySelect = document.getElementById("id_uom_category");
-    const baseUomSelect = document.getElementById("id_base_uom");
+  function initUomFilter() {
+    const elData = document.getElementById("uoms-by-category");
+    const selCategory = document.getElementById("id_uom_category");
+    const selBaseUom = document.getElementById("id_base_uom");
 
-    // Kiểm tra các element bắt buộc
-    if (!uomsByCatData || !uomCategorySelect || !baseUomSelect) {
-      console.warn("Thiếu dữ liệu UoM hoặc Dropdown. Bỏ qua logic lọc.");
+    // Kiểm tra phần tử DOM
+    if (!elData || !selCategory || !selBaseUom) {
+      console.warn("Warning: Missing UoM data elements.");
       return;
     }
 
-    const uomsByCat = JSON.parse(uomsByCatData.textContent || "{}");
+    const uomData = JSON.parse(elData.textContent || "{}");
 
-    const filterAllUomOptions = () => {
-      const selectedCategoryId = uomCategorySelect.value;
-      const currentBaseUomValue = baseUomSelect.value;
+    // Hàm cập nhật Dropdown
+    const updateOptions = () => {
+      const catId = selCategory.value;
+      const currentVal = selBaseUom.value;
 
-      // Reset Dropdown
-      baseUomSelect.innerHTML = "<option value=''>---------</option>";
+      // Xóa danh sách cũ
+      selBaseUom.innerHTML = "<option value=''>---------</option>";
 
-      if (selectedCategoryId && uomsByCat[selectedCategoryId]) {
-        uomsByCat[selectedCategoryId].forEach((uom) => {
-          const option = new Option(uom.name, uom.id);
-          if (uom.id == currentBaseUomValue) option.selected = true;
-          baseUomSelect.add(option);
+      if (catId && uomData[catId]) {
+        // Thêm option mới
+        uomData[catId].forEach((uom) => {
+          const opt = new Option(uom.name, uom.id);
+          if (uom.id == currentVal) opt.selected = true;
+          selBaseUom.add(opt);
         });
-        baseUomSelect.disabled = false;
+        selBaseUom.disabled = false;
       } else {
-        baseUomSelect.disabled = true;
+        selBaseUom.disabled = true;
       }
     };
 
-    uomCategorySelect.addEventListener("change", filterAllUomOptions);
+    // Sự kiện thay đổi danh mục
+    selCategory.addEventListener("change", updateOptions);
 
-    // Chạy ngay lần đầu để lọc khi Edit
-    if (uomCategorySelect.value) {
-      filterAllUomOptions();
-    } else {
-      baseUomSelect.disabled = true;
-    }
+    // Chạy lần đầu (Chế độ Edit)
+    if (selCategory.value) updateOptions();
+    else selBaseUom.disabled = true;
   }
 
   // =======================================================
-  //   MODULE 2: ĐỊNH DẠNG Ô NHẬP GIÁ
+  //          ĐỊNH DẠNG TIỀN TỆ (CURRENCY FORMAT)
   // =======================================================
-  function setupPriceFormatting() {
+  function initPriceFormat() {
     const inputs = document.querySelectorAll('input[name="import_price"], input[name="sale_price"]');
+    const form = document.querySelector("form");
+
+    if (!inputs.length) return;
+
+    // Hàm định dạng số (1000 -> 1,000)
+    const formatNum = (val) => {
+      if (!val) return "";
+      return parseInt(val, 10).toLocaleString("en-US");
+    };
 
     inputs.forEach((input) => {
-      // 1. KHI LOAD: Format giá trị từ DB
+      // 1. Format khi tải trang (Load)
       if (input.value) {
-        // Loại bỏ ký tự không phải số (nếu có)
-        const rawValue = input.value.replace(/[^0-9.]/g, "");
-        const floatVal = parseFloat(rawValue);
-
+        const cleanVal = input.value.replace(/[^0-9.]/g, "");
+        const floatVal = parseFloat(cleanVal);
         if (!isNaN(floatVal)) {
-          // Format thành tiền tệ (tự động bỏ .00 nếu là số chẵn)
-          input.value = floatVal.toLocaleString("en-US", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          });
+          input.value = floatVal.toLocaleString("en-US", { maximumFractionDigits: 0 });
         }
       }
 
-      // 2. KHI NHẬP LIỆU (INPUT): Format realtime
+      // 2. Format khi nhập liệu (Input)
       input.addEventListener("input", function () {
-        // Lấy vị trí con trỏ
-        let cursorPosition = this.selectionStart;
-
-        // Xóa hết ký tự không phải số
-        let rawValue = this.value.replace(/[^0-9]/g, "");
-
-        if (rawValue) {
-          const number = parseInt(rawValue, 10);
-          // Format lại có dấu phẩy
-          const formattedValue = number.toLocaleString("en-US");
-
-          // Cập nhật giá trị
-          this.value = formattedValue;
-        } else {
-          this.value = "";
-        }
+        const raw = this.value.replace(/[^0-9]/g, "");
+        this.value = raw ? formatNum(raw) : "";
       });
     });
 
-    // Trước khi submit: Xóa dấu phẩy để gửi số nguyên lên server
-    const form = document.querySelector("form");
+    // 3. Xử lý trước khi Submit (Xóa dấu phẩy)
     if (form) {
       form.addEventListener("submit", function () {
         inputs.forEach((input) => {
@@ -97,19 +85,24 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
   }
+
   // =======================================================
-  //   MODULE 3: XEM TRƯỚC HÌNH ẢNH SẢN PHẨM
+  //         XEM TRƯỚC ẢNH (IMAGE PREVIEW)
   // =======================================================
-  function setupImagePreview() {
-    const imageInput = document.getElementById("id_image");
-    const imagePreview = document.getElementById("image-preview");
-    if (!imageInput || !imagePreview) return;
-    imageInput.addEventListener("change", (event) => {
-      const file = event.target.files[0];
+  function initImagePreview() {
+    const inpFile = document.getElementById("id_image");
+    const imgPreview = document.getElementById("image-preview");
+
+    if (!inpFile || !imgPreview) return;
+
+    // Sự kiện chọn file
+    inpFile.addEventListener("change", (e) => {
+      const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => {
-          imagePreview.src = e.target.result;
+        reader.onload = (ev) => {
+          imgPreview.src = ev.target.result;
+          imgPreview.style.display = "block";
         };
         reader.readAsDataURL(file);
       }
@@ -117,9 +110,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // =======================================================
-  //   KHỞI CHẠY TẤT CẢ CÁC MODULE JAVASCRIPT
+  //        KHỞI CHẠY (INIT)
   // =======================================================
-  setupUomFiltering();
-  setupPriceFormatting();
-  setupImagePreview();
+  initUomFilter();
+  initPriceFormat();
+  initImagePreview();
 });

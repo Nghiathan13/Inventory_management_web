@@ -1,0 +1,29 @@
+/* ===============================================
+GIAO DIỆN THANH ĐIỀU HƯỚNG TRANG SẢN PHẨM (DẠNG TAB)
+================================================ */
+.product-nav-tabs {
+  border-bottom: 1px solid #dee2e6;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: flex-start;
+}
+.product-nav-tabs .nav-link {
+  border: none;
+  color: #6c757d;
+  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  transition: color 0.2s ease-in-out, border-bottom-color 0.2s ease-in-out;
+  border-bottom: 2px solid transparent;
+  background-color: transparent;
+  margin-bottom: -1px;
+}
+.product-nav-tabs .nav-link:hover {
+  color: #0d6efd;
+  border-bottom-color: #e9ecef;
+}
+.product-nav-tabs .nav-link.active {
+  color: #0d6efd;
+  background-color: transparent;
+  font-weight: 500;
+  border-bottom: 2px solid #0d6efd;
+}

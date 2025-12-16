@@ -1,148 +1,134 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // =======================================================
+  //        KHAI BÁO DOM & BIẾN (DOM ELEMENTS)
+  // =======================================================
   const form = document.getElementById("confirm-form");
   if (!form) return;
 
-  const submitBtn = document.getElementById("submit-btn");
-  const errorDiv = document.getElementById("form-error");
-
-  // Modal instance (Bootstrap 5)
-  let expiryModalObj = null;
+  const btnSubmit = document.getElementById("submit-btn");
+  const txtNormal = btnSubmit.querySelector(".btn-text-normal");
+  const txtLoading = btnSubmit.querySelector(".btn-text-loading");
+  const boxError = document.getElementById("form-error");
   const modalEl = document.getElementById("expiryModal");
-  if (modalEl) {
-    expiryModalObj = new bootstrap.Modal(modalEl);
-  }
+  let modalInstance = modalEl ? new bootstrap.Modal(modalEl) : null;
 
-  // =========================================================
-  // 1. CÁC HÀM XỬ LÝ MODAL & GIAO DIỆN
-  // =========================================================
+  // =======================================================
+  //        XỬ LÝ MODAL (MODAL HANDLERS)
+  // =======================================================
 
-  // Hàm được gọi khi user click nút "Nhập HSD" (Global function để HTML gọi được)
+  /** Mở Modal nhập liệu */
   window.openExpiryModal = function (detailId, productName) {
     document.getElementById("modal-detail-id").value = detailId;
     document.getElementById("modal-product-name").value = productName;
 
-    // Lấy giá trị cũ nếu đã nhập trước đó
-    const existingDate = document.getElementById(`input-expiry-${detailId}`).value;
-    document.getElementById("modal-date-input").value = existingDate;
+    // Lấy giá trị cũ nếu có
+    const currentVal = document.getElementById(`input-expiry-${detailId}`).value;
+    document.getElementById("modal-date-input").value = currentVal;
 
-    // Mở modal
-    expiryModalObj.show();
+    if (modalInstance) modalInstance.show();
   };
 
-  // Hàm được gọi khi user click "Lưu & Xác Nhận" trong Modal
+  /** Lưu ngày & Cập nhật giao diện */
   window.saveExpiryDate = function () {
-    const detailId = document.getElementById("modal-detail-id").value;
-    const dateValue = document.getElementById("modal-date-input").value;
+    const id = document.getElementById("modal-detail-id").value;
+    const dateVal = document.getElementById("modal-date-input").value;
 
-    if (!dateValue) {
-      alert("Vui lòng chọn ngày hết hạn!");
+    if (!dateVal) {
+      alert("Please select an expiry date.");
       return;
     }
 
-    // 1. Cập nhật vào Input Ẩn của Form
-    document.getElementById(`input-expiry-${detailId}`).value = dateValue;
+    // 1. Cập nhật Input ẩn
+    document.getElementById(`input-expiry-${id}`).value = dateVal;
 
-    // 2. Cập nhật giao diện dòng (Text hiển thị)
-    // Format ngày dd/mm/yyyy
-    const dateObj = new Date(dateValue);
-    const formattedDate = dateObj.toLocaleDateString("vi-VN"); // Hoặc 'en-GB'
+    // 2. Cập nhật hiển thị (Format: DD/MM/YYYY)
+    const dateObj = new Date(dateVal);
+    const displayStr = dateObj.toLocaleDateString("en-GB");
 
-    const displaySpan = document.getElementById(`display-expiry-${detailId}`);
-    displaySpan.textContent = formattedDate;
-    displaySpan.classList.remove("text-muted", "fst-italic");
-    displaySpan.classList.add("fw-bold", "text-success");
+    const spanDisplay = document.getElementById(`display-expiry-${id}`);
+    spanDisplay.textContent = displayStr;
+    spanDisplay.classList.remove("text-muted", "fst-italic");
+    spanDisplay.classList.add("fw-bold", "text-success");
 
-    // 3. Tự động Tick Checkbox
-    const checkbox = document.querySelector(`input[name="details"][value="${detailId}"]`);
+    // 3. Đánh dấu Checkbox & Row
+    const checkbox = document.querySelector(`input[name="details"][value="${id}"]`);
     if (checkbox) checkbox.checked = true;
 
-    // 4. Đổi màu dòng (Row) để báo hiệu thành công
-    const row = document.getElementById(`row-${detailId}`);
-    row.classList.add("table-success"); // Class xanh lá của Bootstrap
+    document.getElementById(`row-${id}`).classList.add("table-success");
 
-    // 5. Đóng Modal
-    expiryModalObj.hide();
-
-    // 6. Kiểm tra xem đã nhập hết chưa để mở khóa nút Submit
-    checkCompletion();
+    // 4. Đóng Modal & Kiểm tra nút Submit
+    if (modalInstance) modalInstance.hide();
+    checkAllCompleted();
   };
 
-  // Hàm kiểm tra xem user đã nhập đủ tất cả các dòng chưa
-  function checkCompletion() {
-    const allCheckboxes = document.querySelectorAll(".item-checkbox");
-    let allChecked = true;
+  /** Kiểm tra hoàn tất toàn bộ */
+  function checkAllCompleted() {
+    const checkboxes = document.querySelectorAll(".item-checkbox");
+    const isAllChecked = Array.from(checkboxes).every((cb) => cb.checked);
 
-    allCheckboxes.forEach((cb) => {
-      if (!cb.checked) allChecked = false;
-    });
-
-    if (allChecked) {
-      submitBtn.disabled = false;
-      submitBtn.classList.remove("btn-secondary"); // Nếu muốn đổi màu
-    } else {
-      submitBtn.disabled = true;
+    btnSubmit.disabled = !isAllChecked;
+    if (isAllChecked) {
+      btnSubmit.classList.remove("btn-secondary");
+      btnSubmit.classList.add("btn-success");
     }
   }
 
-  // =========================================================
-  // 2. XỬ LÝ SUBMIT FORM (Gửi Ajax & Tải PDF)
-  // =========================================================
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
+  // =======================================================
+  //        XỬ LÝ SUBMIT (FORM SUBMISSION)
+  // =======================================================
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-    // UI Loading
-    submitBtn.disabled = true;
-    submitBtn.innerHTML =
-      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
-    errorDiv.classList.add("d-none");
+    btnSubmit.disabled = true;
+    txtNormal.classList.add("d-none");
+    txtLoading.classList.remove("d-none");
+    boxError.classList.add("d-none");
 
     const formData = new FormData(form);
-    // const csrfToken = formData.get("csrfmiddlewaretoken"); // FormData tự xử lý, hoặc lấy từ cookie nếu cần
 
     fetch(form.action, {
       method: "POST",
       headers: {
-        "X-Requested-With": "XMLHttpRequest", // Báo hiệu cho Django đây là Ajax
+        "X-Requested-With": "XMLHttpRequest",
         "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
       },
       body: formData,
     })
-      .then((response) => {
-        if (!response.ok) {
-          return response.json().then((err) => {
-            throw new Error(err.message || "Lỗi máy chủ.");
+      .then((res) => {
+        if (!res.ok)
+          return res.json().then((err) => {
+            throw new Error(err.message || "Server Error");
           });
-        }
-        return response.json();
+        return res.json();
       })
       .then((data) => {
         if (data.status === "success") {
-          // Bước 1: Tự động tải file PDF
+          // Tự động tải PDF
           if (data.download_url) {
             const link = document.createElement("a");
             link.href = data.download_url;
-            link.download = ""; // Browser tự đặt tên theo Header server
+            link.download = "";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
           }
 
-          // Bước 2: Chờ 1 chút rồi chuyển hướng về Dashboard
           setTimeout(() => {
             window.location.href = form.dataset.redirectUrl;
-          }, 1500); // Delay 1.5s để user kịp thấy file tải xuống
+          }, 1500);
         } else {
-          throw new Error(data.message || "Có lỗi xảy ra.");
+          throw new Error(data.message || "Unknown Error");
         }
       })
-      .catch((error) => {
-        console.error("Error:", error);
-        errorDiv.textContent = "Lỗi: " + error.message;
-        errorDiv.classList.remove("d-none");
+      .catch((err) => {
+        console.error("Submit Error:", err);
+        boxError.textContent = `Error: ${err.message}`;
+        boxError.classList.remove("d-none");
 
-        // Reset nút
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-print me-1"></i> Hoàn Thành & In Phiếu';
+        // Reset UI
+        btnSubmit.disabled = false;
+        txtNormal.classList.remove("d-none");
+        txtLoading.classList.add("d-none");
       });
   });
 });

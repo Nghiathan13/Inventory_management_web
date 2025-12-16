@@ -1,7 +1,6 @@
 /* ===============================================
    GIAO DIỆN CHUNG CHO TRANG BÁO CÁO
 ================================================ */
-
 .chart-card .card-body {
   padding: 1.5rem;
 }
@@ -9,7 +8,6 @@
 /* ===============================================
    NÂNG CẤP THANH ĐIỀU HƯỚNG BÁO CÁO (DẠNG TAB)
 ================================================ */
-
 .report-nav-card {
   background-color: transparent;
 }

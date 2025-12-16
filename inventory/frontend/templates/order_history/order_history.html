@@ -33,13 +33,12 @@
             {% for order in orders %}
             <tr>
               <td>{{ order.date|date:"d/m/Y H:i" }}</td>
-              <td class="product-name">{{ order.product.name|default:"Sản phẩm đã xóa" }}</td>
+              <td class="product-name">{{ order.product.name|default:"Product is deleted" }}</td>
               <td class="text-center">
                 <span class="badge bg-secondary">{{ order.order_quantity }}</span>
               </td>
               <td>{{ order.staff.username|default:"N/A" }}</td>
               <td>
-                <!-- Nếu đơn hàng có prescription, hiển thị tên bệnh nhân -->
                 {% if order.prescription %}
                 <!--  -->
                 {{ order.prescription.patient.full_name|default:"N/A" }}

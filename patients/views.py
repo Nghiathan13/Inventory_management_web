@@ -14,11 +14,11 @@ from .forms import PatientForm
 from main.decorators import admin_or_doctor_required
 
 # =======================================================
-#               QUẢN LÝ BỆNH NHÂN (PATIENT CRUD)
+#               QUẢN LÝ BỆNH NHÂN
 # =======================================================
 
 # -------------------------------------------------------
-#   VIEW: DANH SÁCH BỆNH NHÂN (READ)
+#   DANH SÁCH BỆNH NHÂN
 # -------------------------------------------------------
 @login_required
 @admin_or_doctor_required
@@ -36,7 +36,7 @@ def patient_list(request):
     return render(request, 'patients/list.html', context)
 
 # -------------------------------------------------------
-#   VIEW: THÊM BỆNH NHÂN (CREATE)
+#   THÊM BỆNH NHÂN
 # -------------------------------------------------------
 @login_required
 @admin_or_doctor_required
@@ -45,49 +45,51 @@ def patient_add(request):
         form = PatientForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Đã thêm hồ sơ bệnh nhân mới thành công.')
+            messages.success(request, 'Patient record added successfully.')
             return redirect('patients:list')
     else:
         form = PatientForm()
 
     context = {
         'form': form, 
-        'title': 'Thêm Hồ Sơ Bệnh Nhân'
+        'title': 'Add Patient Record'
     }
     return render(request, 'patients/form.html', context)
 
 # -------------------------------------------------------
-#   VIEW: CẬP NHẬT BỆNH NHÂN (UPDATE)
+#   CẬP NHẬT BỆNH NHÂN
 # -------------------------------------------------------
 @login_required
 @admin_or_doctor_required
 def patient_update(request, pk):
-    patient = Patient.objects.get(id=pk)
+    patient = get_object_or_404(Patient, id=pk)
+    
     if request.method == 'POST':
         form = PatientForm(request.POST, request.FILES, instance=patient)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Đã cập nhật hồ sơ cho bệnh nhân {patient.full_name}.')
+            messages.success(request, f'Updated record for patient {patient.full_name}.')
             return redirect('patients:list')
     else:
         form = PatientForm(instance=patient)
 
     context = {
         'form': form, 
-        'title': 'Cập Nhật Hồ Sơ Bệnh Nhân'
+        'title': 'Update Patient Record'
     }
     return render(request, 'patients/form.html', context)
 
 # -------------------------------------------------------
-#   VIEW: XÓA BỆNH NHÂN (DELETE)
+#   XÓA BỆNH NHÂN
 # -------------------------------------------------------
 @login_required
 @admin_or_doctor_required
 def patient_delete(request, pk):
-    patient = Patient.objects.get(id=pk)
+    patient = get_object_or_404(Patient, id=pk)
+    
     if request.method == 'POST':
         patient.delete()
-        messages.success(request, f'Đã xóa hồ sơ của bệnh nhân {patient.full_name}.')
+        messages.success(request, f'Deleted record of patient {patient.full_name}.')
         return redirect('patients:list')
     
     context = {
@@ -96,20 +98,16 @@ def patient_delete(request, pk):
     return render(request, 'patients/confirm_delete.html', context)
 
 # -------------------------------------------------------
-#   VIEW: CHI TIẾT HỒ SƠ BỆNH NHÂN (READ DETAIL)
+#   CHI TIẾT HỒ SƠ
 # -------------------------------------------------------
 @login_required
 @admin_or_doctor_required
 def patient_detail(request, pk):
-    try:
-        patient = Patient.objects.get(id=pk)
-        prescriptions = Prescription.objects.filter(patient=patient).order_by('-created_at')
-        context = {
-            'patient': patient,
-            'prescriptions': prescriptions,
-        }
-        return render(request, 'patients/detail.html', context)
-    except Patient.DoesNotExist:
-        messages.error(request, 'Hồ sơ bệnh nhân không tồn tại.')
-        return redirect('patients:list')
+    patient = get_object_or_404(Patient, id=pk)
+    prescriptions = Prescription.objects.filter(patient=patient).order_by('-created_at')
     
+    context = {
+        'patient': patient,
+        'prescriptions': prescriptions,
+    }
+    return render(request, 'patients/detail.html', context)
